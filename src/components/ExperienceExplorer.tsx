@@ -54,7 +54,17 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
               <div className="pt-1 font-serif text-sm text-ink-faint">{item.dateLabel}</div>
               <div>
                 <h3 className="mb-1 font-serif text-base">{item.org}</h3>
-                <p className="text-sm text-ink-soft">{item.summary}</p>
+                <p className="mb-3 text-sm text-ink-soft">{item.summary}</p>
+                <div className="flex flex-wrap gap-2">
+                  {item.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           </RevealFade>

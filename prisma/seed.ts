@@ -67,48 +67,73 @@ async function main() {
     skipDuplicates: true,
   });
 
+  // Experienceは「その他の活動」を統合し、カテゴリタグを付け直すため、
+  // 再実行のたびに古いデータを消してから入れ直す（重複防止）
+  await prisma.experience.deleteMany();
   await prisma.experience.createMany({
     data: [
+      {
+        org: "「戦後史を後世に伝えるプロジェクト」",
+        dateLabel: "2022.10 – 2023.7",
+        summary:
+          "世田谷区立平和資料館にて「世田谷区民が送った兵営生活〜栗林一路さんを例に〜」を展示した。",
+        tags: ["史学", "地域活動"],
+        order: 1,
+      },
+      {
+        org: "NPO法人「Cafe de 寺子屋」",
+        dateLabel: "2023.3 – 10",
+        summary: "カフェのスペースを借りて小中学生の自主学習をサポートした。",
+        tags: ["教育", "地域活動"],
+        order: 2,
+      },
       {
         org: "NPO法人「Waffle College」",
         dateLabel: "2024.5 – 2025.1",
         summary:
           "エントリー＆テックキャリアコースに参加。開発方面にてPythonを学び、卒業ハッカソンにてアプリ開発（RIBBON×RIBBON）を行った。",
-        tags: ["Waffle", "Python", "ハッカソン"],
-        order: 1,
+        tags: ["チーム開発", "ハッカソン"],
+        order: 3,
       },
       {
         org: "「Waffle Camp」講師・メンター",
         dateLabel: "2024.8 / 2025.8",
         summary:
           "女子・ノンバイナリーの高校生によるプログラミング体験をサポートした。",
-        tags: ["Waffle", "講師"],
-        order: 2,
+        tags: ["教育", "チーム開発"],
+        order: 4,
       },
       {
         org: "ビジネスコンテスト「CAREER ROOKIES」",
         dateLabel: "2024.10.14",
         summary:
           "学内予選を通過し、準決勝出場。3人チームで参加し、発案・サービス詳細・ビジネスモデルを担当。就活用マッチングサービス「Scout Bridge」を提案した。",
-        tags: ["ビジネスコンテスト"],
-        order: 3,
+        tags: ["ビジネス"],
+        order: 5,
       },
       {
         org: "奈良先端科学技術大学院大学 スプリングセミナー",
         dateLabel: "2025.2.25 – 27",
         summary: "AR技術を用いたアプリ「AR初音ミク」を制作した。",
-        tags: ["AR", "Unity"],
-        order: 4,
+        tags: ["個人開発"],
+        order: 6,
       },
       {
         org: "JAIST Techサークル ハッカソン",
         dateLabel: "2026.6.11 – 14",
         summary: "3人チームで「JAIST GO」を開発し、優勝を受賞した。",
-        tags: ["ハッカソン", "優勝"],
-        order: 5,
+        tags: ["ハッカソン", "チーム開発"],
+        order: 7,
+      },
+      {
+        org: "マイナビ「Service Growth Camp」",
+        dateLabel: "2026.9.2 – 8",
+        summary:
+          "5日間のハッカソン型インターンシップに参加。既存サービスを題材に、アイデア立案・要件定義・設計・実装をチームで行い、最終日にはサービス開発責任者へ向けてプレゼンテーションを実施した。",
+        tags: ["インターン", "ハッカソン", "ビジネス", "チーム開発"],
+        order: 8,
       },
     ],
-    skipDuplicates: true,
   });
 
   await prisma.researchItem.createMany({
@@ -131,25 +156,6 @@ async function main() {
         caption: "図1：システム全体図",
         imageUrl: null,
         tags: ["AR", "美術鑑賞"],
-        order: 2,
-      },
-    ],
-    skipDuplicates: true,
-  });
-
-  await prisma.otherActivity.createMany({
-    data: [
-      {
-        title: "「戦後史を後世に伝えるプロジェクト」",
-        dateLabel: "2022.10 – 2023.7",
-        summary:
-          "世田谷区立平和資料館にて「世田谷区民が送った兵営生活〜栗林一路さんを例に〜」を展示した。",
-        order: 1,
-      },
-      {
-        title: "NPO法人「Cafe de 寺子屋」",
-        dateLabel: "2023.3 – 10",
-        summary: "カフェのスペースを借りて小中学生の自主学習をサポートした。",
         order: 2,
       },
     ],

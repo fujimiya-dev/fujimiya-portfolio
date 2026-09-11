@@ -55,15 +55,6 @@ model ResearchItem {
   updatedAt DateTime @updatedAt
 }
 
-model OtherActivity {
-  id        String   @id @default(cuid())
-  title     String
-  dateLabel String
-  summary   String
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-}
-
 model Hobby {
   id    String @id @default(cuid())
   title String
