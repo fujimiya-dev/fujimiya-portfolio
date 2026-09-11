@@ -2,6 +2,7 @@ import type { Dictionary } from "./types";
 
 export const en: Dictionary = {
   nav: {
+    top: "Top",
     aboutMe: "About me",
     works: "Works",
     experience: "Experience",

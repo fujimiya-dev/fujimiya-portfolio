@@ -10,6 +10,7 @@ export const DEFAULT_LOCALE: Locale = "ja";
  */
 export type Dictionary = {
   nav: {
+    top: string;
     aboutMe: string;
     works: string;
     experience: string;

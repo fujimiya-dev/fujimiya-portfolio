@@ -7,11 +7,12 @@ export default async function TopNav() {
   const [dict, locale] = await Promise.all([getDictionary(), getLocale()]);
 
   const links = [
-    { href: "/#about", label: dict.nav.aboutMe, n: "01" },
-    { href: "/works", label: dict.nav.works, n: "02" },
-    { href: "/experience", label: dict.nav.experience, n: "03" },
-    { href: "/research", label: dict.nav.research, n: "04" },
-    { href: "/#other", label: dict.nav.other, n: "05" },
+    { href: "/", label: dict.nav.top },
+    { href: "/#about", label: dict.nav.aboutMe },
+    { href: "/works", label: dict.nav.works },
+    { href: "/experience", label: dict.nav.experience },
+    { href: "/research", label: dict.nav.research },
+    { href: "/#other", label: dict.nav.other },
   ];
 
   return (
@@ -26,9 +27,8 @@ export default async function TopNav() {
             <Link
               key={link.href}
               href={link.href}
-              className="flex items-baseline gap-2 text-sm text-ink-soft transition-colors hover:text-accent-teal"
+              className="text-sm text-ink-soft transition-colors hover:text-accent-teal"
             >
-              <span className="font-serif text-[11px] text-ink-faint">{link.n}</span>
               {link.label}
             </Link>
           ))}

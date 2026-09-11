@@ -7,8 +7,7 @@ import { getDictionary } from "@/i18n/server";
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const [others, hobbies, dict] = await Promise.all([
-    prisma.otherActivity.findMany({ orderBy: { order: "asc" } }),
+  const [hobbies, dict] = await Promise.all([
     prisma.hobby.findMany({ orderBy: { order: "asc" } }),
     getDictionary(),
   ]);
@@ -25,7 +24,6 @@ export default async function HomePage() {
       <section id="about" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-24 pt-16">
         <RevealGlow className="mb-16 border-b border-white/10 pb-16 text-center">
           <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
-            <span className="font-serif text-base text-accent-moon">01</span>
             {dict.nav.aboutMe}
           </span>
           <h1 className="mb-3 font-serif text-6xl font-bold">藤田 都</h1>
@@ -84,30 +82,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 注: 「その他の活動」はフェーズ2でExperienceにタグ付き統合予定のため、
-          ナビの番号付けからは一旦外し、id を other-experience-legacy に変更しています。 */}
-      <section id="other-experience-legacy" className="mx-auto max-w-4xl px-6 pb-24">
-        <RevealGlow>
-          <span className="mb-4 block text-xs tracking-widest text-ink-faint">
-            Other Experience（Experienceへ統合予定）
-          </span>
-        </RevealGlow>
-        <h2 className="mb-10 font-serif text-4xl font-bold">その他の活動</h2>
-        {others.map((item) => (
-          <RevealFade key={item.id} className="glass-panel mb-4 grid grid-cols-[140px_1fr] gap-6 rounded-sm p-6">
-            <div className="font-serif text-sm text-ink-faint">{item.dateLabel}</div>
-            <div>
-              <h3 className="mb-1 font-serif text-base">{item.title}</h3>
-              <p className="text-sm text-ink-soft">{item.summary}</p>
-            </div>
-          </RevealFade>
-        ))}
-      </section>
-
       <section id="other" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-32">
         <RevealGlow>
           <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal">
-            <span className="font-serif text-base text-accent-moon">05</span>
             {dict.nav.other}
           </span>
         </RevealGlow>

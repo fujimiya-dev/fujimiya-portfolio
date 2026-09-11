@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 export default function MobileMenu({
   links,
 }: {
-  links: { href: string; label: string; n: string }[];
+  links: { href: string; label: string }[];
 }) {
   const [open, setOpen] = useState(false);
 
@@ -48,11 +48,8 @@ export default function MobileMenu({
                   <Link
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className="flex items-baseline gap-4 px-5 py-2 font-serif text-3xl text-ink-soft transition-colors hover:text-accent-teal"
+                    className="px-5 py-2 font-serif text-3xl text-ink-soft transition-colors hover:text-accent-teal"
                   >
-                    <span className="font-sans text-xs tracking-widest text-ink-faint">
-                      {link.n}
-                    </span>
                     {link.label}
                   </Link>
                 </li>
