@@ -18,6 +18,8 @@ async function main() {
     console.warn("ADMIN_EMAIL / ADMIN_PASSWORD not set — skipping admin seed");
   }
 
+  // Workも再実行のたびに古いデータを消してから入れ直す（重複防止）
+  await prisma.work.deleteMany();
   await prisma.work.createMany({
     data: [
       {
@@ -31,7 +33,8 @@ async function main() {
         demoUrl:
           "https://drive.google.com/file/d/1ZJjISRzDjwLuFuAbIdA6e7tVvkA1I8Fy/view?usp=drive_link",
         imageUrl: null,
-        tags: ["Python", "Django", "SQLite", "ハッカソン", "Waffle College"],
+        category: ["チーム開発", "ハッカソン"],
+        techStack: ["Python", "Django", "SQLite"],
         order: 1,
       },
       {
@@ -45,8 +48,23 @@ async function main() {
         demoUrl:
           "https://drive.google.com/file/d/13trF3FZ1fhXVxWNgtIecHPAVjkuiisH7/view?usp=drive_link",
         imageUrl: null,
-        tags: ["C#", "Unity", "AR"],
+        category: ["個人開発"],
+        techStack: ["C#", "Unity", "AR"],
         order: 2,
+      },
+      {
+        slug: "mynavi-service-growth-camp",
+        numberLabel: "制作物 四",
+        title: "Service Growth Camp",
+        dateLabel: "2026.9.2 – 8",
+        summary: "マイナビ主催のハッカソン型インターンでの制作物。",
+        description:
+          "マイナビ主催の5日間のハッカソン型インターンシップ「Service Growth Camp」に参加して制作。マイナビの技術スタックに倣った既存サービスを題材に、アイデア立案・要件定義・設計・実装をチームで行い、最終日にはサービス開発責任者へ向けてプレゼンテーションを実施した。\n※具体的な開発内容は守秘義務のため非公開です。ここに記載の情報は公開されているプログラム概要に基づいています。",
+        demoUrl: null,
+        imageUrl: null,
+        category: ["チーム開発", "ハッカソン", "ビジネス", "インターン"],
+        techStack: ["Next.js", "TypeScript", "Express.js", "Prisma"],
+        order: 4,
       },
       {
         slug: "jaist-go",
@@ -60,11 +78,11 @@ async function main() {
         demoUrl:
           "https://drive.google.com/file/d/1iSNOiuo2X7fRO0yxZhOtWKeomiKYHGmZ/view?usp=drive_link",
         imageUrl: null,
-        tags: ["Python", "Flask", "SQLite", "Google Maps API", "優勝", "ハッカソン"],
+        category: ["チーム開発", "ハッカソン"],
+        techStack: ["Python", "Flask", "SQLite", "Google Maps API"],
         order: 3,
       },
     ],
-    skipDuplicates: true,
   });
 
   // Experienceは「その他の活動」を統合し、カテゴリタグを付け直すため、

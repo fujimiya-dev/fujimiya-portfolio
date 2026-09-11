@@ -25,7 +25,8 @@ model Work {
   description String
   demoUrl     String?
   imageUrl    String?
-  tags        String[]
+  category    String[] // 例: チーム開発, ハッカソン, ビジネス
+  techStack   String[] // 例: Python, Django, Unity
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

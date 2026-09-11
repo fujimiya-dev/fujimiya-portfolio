@@ -14,7 +14,8 @@ type Experience = {
 export default function ExperienceExplorer({ items }: { items: Experience[] }) {
   const { query, setQuery, activeTag, toggleTag, allTags, filtered } = useTagFilter(
     items,
-    (e) => `${e.org} ${e.summary} ${e.tags.join(" ")}`
+    (e) => `${e.org} ${e.summary} ${e.tags.join(" ")}`,
+    (e) => e.tags
   );
 
   return (

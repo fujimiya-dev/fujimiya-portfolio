@@ -31,7 +31,8 @@ export async function createWork(formData: FormData) {
       description: String(formData.get("description")),
       demoUrl: (formData.get("demoUrl") as string) || null,
       imageUrl: (formData.get("imageUrl") as string) || null,
-      tags: parseTags(String(formData.get("tags") ?? "")),
+      category: parseTags(String(formData.get("category") ?? "")),
+      techStack: parseTags(String(formData.get("techStack") ?? "")),
       order: Number(formData.get("order") ?? 0),
     },
   });
@@ -56,7 +57,8 @@ export async function updateWork(id: string, formData: FormData) {
       description: String(formData.get("description")),
       demoUrl: (formData.get("demoUrl") as string) || null,
       imageUrl: (formData.get("imageUrl") as string) || null,
-      tags: parseTags(String(formData.get("tags") ?? "")),
+      category: parseTags(String(formData.get("category") ?? "")),
+      techStack: parseTags(String(formData.get("techStack") ?? "")),
       order: Number(formData.get("order") ?? 0),
     },
   });

@@ -8,7 +8,8 @@ type WorkFormValues = {
   description?: string;
   demoUrl?: string | null;
   imageUrl?: string | null;
-  tags?: string[];
+  category?: string[];
+  techStack?: string[];
   order?: number;
 };
 
@@ -68,8 +69,12 @@ export default function WorkForm({
         <input name="imageUrl" defaultValue={defaultValues?.imageUrl ?? ""} className={fieldClass} />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">タグ（カンマ区切り。例：Python, Django, ハッカソン）</label>
-        <input name="tags" defaultValue={defaultValues?.tags?.join(", ")} className={fieldClass} />
+        <label className="mb-1 block text-xs text-ink-faint">カテゴリ（カンマ区切り。例：チーム開発, ハッカソン）</label>
+        <input name="category" defaultValue={defaultValues?.category?.join(", ")} className={fieldClass} />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">使用技術（カンマ区切り。例：Python, Django）</label>
+        <input name="techStack" defaultValue={defaultValues?.techStack?.join(", ")} className={fieldClass} />
       </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">並び順（数字が小さいほど先に表示）</label>

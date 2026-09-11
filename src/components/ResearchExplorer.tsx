@@ -17,7 +17,8 @@ type ResearchItem = {
 export default function ResearchExplorer({ items }: { items: ResearchItem[] }) {
   const { query, setQuery, activeTag, toggleTag, allTags, filtered } = useTagFilter(
     items,
-    (r) => `${r.title} ${r.summary} ${r.tags.join(" ")}`
+    (r) => `${r.title} ${r.summary} ${r.tags.join(" ")}`,
+    (r) => r.tags
   );
 
   return (
