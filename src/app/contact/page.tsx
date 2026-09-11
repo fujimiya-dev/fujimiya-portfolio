@@ -1,0 +1,23 @@
+import { RevealGlow, RevealFade } from "@/components/RevealSection";
+import { getDictionary } from "@/i18n/server";
+import ContactForm from "@/components/ContactForm";
+
+export const revalidate = 0;
+
+export default async function ContactPage() {
+  const dict = await getDictionary();
+
+  return (
+    <section className="mx-auto max-w-xl px-6 pb-24 pt-28">
+      <RevealGlow className="mb-10 text-center">
+        <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
+          {dict.home.contactLabel}
+        </span>
+        <h2 className="font-serif text-4xl font-bold">{dict.home.contactHeading}</h2>
+      </RevealGlow>
+      <RevealFade>
+        <ContactForm />
+      </RevealFade>
+    </section>
+  );
+}

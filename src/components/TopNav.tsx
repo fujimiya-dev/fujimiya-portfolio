@@ -13,7 +13,7 @@ export default async function TopNav() {
     { href: "/experience", label: dict.nav.experience },
     { href: "/research", label: dict.nav.research },
     { href: "/other", label: dict.nav.other },
-    { href: "/#contact", label: dict.nav.contact },
+    { href: "/contact", label: dict.nav.contact },
   ];
 
   return (
