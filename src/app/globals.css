@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #050b14;
+  color: #eef4f1;
+}
+
+.sky-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 800px at 78% -8%, rgba(180, 240, 210, 0.14), transparent 60%),
+    radial-gradient(900px 700px at 12% 108%, rgba(94, 160, 255, 0.12), transparent 55%),
+    linear-gradient(200deg, #050b14 0%, #0b2129 46%, #123138 78%, #0e2a2c 100%);
+}
+
+.glass-panel {
+  background: rgba(11, 22, 30, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(14px);
+}
+
+.search-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *{
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

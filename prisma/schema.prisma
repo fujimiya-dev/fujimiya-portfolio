@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model Admin {
+  id           String @id @default(cuid())
+  email        String @unique
+  passwordHash String
+}
+
+model Work {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  numberLabel String // e.g. "制作物 一"
+  title       String
+  dateLabel   String // e.g. "2024.12.20 – 2025.1.17"
+  award       String? // e.g. "優勝"
+  summary     String
+  description String
+  demoUrl     String?
+  imageUrl    String?
+  tags        String[]
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Experience {
+  id        String   @id @default(cuid())
+  org       String
+  dateLabel String
+  summary   String
+  tags      String[]
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ResearchItem {
+  id        String   @id @default(cuid())
+  stage     String // "学部での研究" / "大学院での研究"
+  title     String
+  summary   String
+  imageUrl  String?
+  caption   String?
+  tags      String[]
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OtherActivity {
+  id        String   @id @default(cuid())
+  title     String
+  dateLabel String
+  summary   String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Hobby {
+  id    String @id @default(cuid())
+  title String
+  body  String
+  order Int    @default(0)
+}
