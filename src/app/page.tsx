@@ -66,6 +66,18 @@ export default async function HomePage() {
           </div>
         </RevealFade>
 
+        <RevealFade delay={0.1} className="mx-auto mt-10 max-w-xl text-center">
+          <p className="text-sm leading-relaxed text-ink-soft">
+            はじめまして、藤田都と申します。
+            <br />
+            技術と美術、二つの領域を行き来しながら制作と研究を続けています。
+            <br />
+            ハッカソンでのアプリ開発から、絵画鑑賞を支援するAR研究まで、手を動かしながら考えることが好きです。
+            <br />
+            日々の学びや制作の記録を、このサイトに残していきます。
+          </p>
+        </RevealFade>
+
         <div className="mt-12 flex justify-center">
           <Link
             href="/works"
@@ -79,7 +91,7 @@ export default async function HomePage() {
       <section id="contact" className="mx-auto max-w-xl scroll-mt-24 px-6 pb-32">
         <RevealGlow className="mb-10 text-center">
           <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
-            {dict.home.contactHeading}
+            {dict.home.contactLabel}
           </span>
           <h2 className="font-serif text-3xl font-bold">{dict.home.contactHeading}</h2>
         </RevealGlow>

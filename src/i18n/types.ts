@@ -16,12 +16,14 @@ export type Dictionary = {
     experience: string;
     research: string;
     other: string;
+    contact: string;
     langToggleLabel: string;
   };
   home: {
     scrollCue: string;
     aboutHeading: string;
     goToWorks: string;
+    contactLabel: string;
     contactHeading: string;
   };
 };

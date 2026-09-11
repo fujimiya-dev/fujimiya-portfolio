@@ -8,12 +8,14 @@ export const en: Dictionary = {
     experience: "Experience",
     research: "Research",
     other: "Other",
+    contact: "Contact",
     langToggleLabel: "Language",
   },
   home: {
     scrollCue: "SCROLL",
     aboutHeading: "About me",
     goToWorks: "See Works",
+    contactLabel: "Contact",
     contactHeading: "Contact",
   },
 };
