@@ -1,18 +1,22 @@
 import { prisma } from "@/lib/prisma";
 import WorksExplorer from "@/components/WorksExplorer";
 import { RevealGlow } from "@/components/RevealSection";
+import { getDictionary } from "@/i18n/server";
 
 export const revalidate = 0;
 
 export default async function WorksPage() {
-  const works = await prisma.work.findMany({ orderBy: { order: "asc" } });
+  const [works, dict] = await Promise.all([
+    prisma.work.findMany({ orderBy: { order: "asc" } }),
+    getDictionary(),
+  ]);
 
   return (
     <section className="mx-auto max-w-4xl px-6 pb-24 pt-28">
       <RevealGlow>
         <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal">
           <span className="font-serif text-base text-accent-moon">02</span>
-          Works
+          {dict.nav.works}
         </span>
       </RevealGlow>
       <h2 className="mb-10 font-serif text-4xl font-bold">制作物</h2>

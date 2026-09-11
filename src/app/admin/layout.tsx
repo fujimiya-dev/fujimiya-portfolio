@@ -7,7 +7,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto max-w-4xl px-6 pb-24 pt-16">
+    <div className="mx-auto max-w-4xl px-6 pb-24 pt-24">
       <div className="mb-10 flex items-center justify-between border-b border-white/10 pb-6">
         <Link href="/admin" className="font-serif text-xl">
           管理画面

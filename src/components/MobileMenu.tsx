@@ -4,25 +4,20 @@ import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 
-const links = [
-  { href: "/#about", label: "About", n: "01" },
-  { href: "/works", label: "Works", n: "02" },
-  { href: "/experience", label: "Experience", n: "03" },
-  { href: "/research", label: "Research", n: "04" },
-  { href: "/#other", label: "Other", n: "05" },
-  { href: "/#hobby", label: "Hobby", n: "06" },
-];
-
-export default function SiteNav() {
+export default function MobileMenu({
+  links,
+}: {
+  links: { href: string; label: string; n: string }[];
+}) {
   const [open, setOpen] = useState(false);
 
   return (
-    <>
+    <div className="md:hidden">
       <button
         aria-label={open ? "メニューを閉じる" : "メニューを開く"}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="fixed right-7 top-6 z-[60] flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-md transition-colors hover:border-accent-teal"
+        className="flex h-10 w-10 items-center justify-center"
       >
         <span className="relative block h-px w-4 bg-ink">
           <span
@@ -44,8 +39,8 @@ export default function SiteNav() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="fixed inset-0 z-[55] flex items-center justify-center bg-sky-deep/90 backdrop-blur-xl"
+            transition={{ duration: 0.35 }}
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-sky-deep/90 backdrop-blur-xl"
           >
             <ul className="flex flex-col items-center gap-2">
               {links.map((link) => (
@@ -66,6 +61,6 @@ export default function SiteNav() {
           </motion.nav>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

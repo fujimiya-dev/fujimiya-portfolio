@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Shippori_Mincho, Zen_Kaku_Gothic_New } from "next/font/google";
 import "./globals.css";
-import SiteNav from "@/components/SiteNav";
+import TopNav from "@/components/TopNav";
 
 const shippori = Shippori_Mincho({
   subsets: ["latin"],
@@ -29,7 +29,7 @@ export default function RootLayout({
     <html lang="ja" className={`${shippori.variable} ${zenKaku.variable}`}>
       <body className="font-sans">
         <div className="sky-fixed" aria-hidden="true" />
-        <SiteNav />
+        <TopNav />
         <main className="relative z-[2]">{children}</main>
       </body>
     </html>

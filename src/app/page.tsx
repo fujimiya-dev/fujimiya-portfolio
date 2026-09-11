@@ -2,32 +2,31 @@ import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { RevealGlow, RevealFade } from "@/components/RevealSection";
+import { getDictionary } from "@/i18n/server";
 
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const [others, hobbies] = await Promise.all([
+  const [others, hobbies, dict] = await Promise.all([
     prisma.otherActivity.findMany({ orderBy: { order: "asc" } }),
     prisma.hobby.findMany({ orderBy: { order: "asc" } }),
+    getDictionary(),
   ]);
 
   return (
     <>
       <section className="flex min-h-screen flex-col items-center justify-end px-5 pb-20 text-center">
-        <span className="absolute bottom-7 left-7 font-serif text-sm text-ink-faint">
-          portfolio
-        </span>
         <div className="flex flex-col items-center gap-3 text-[11px] tracking-[0.3em] text-ink-faint">
-          <span>SCROLL</span>
+          <span>{dict.home.scrollCue}</span>
           <span className="h-14 w-px bg-gradient-to-b from-ink-faint to-transparent" />
         </div>
       </section>
 
-      <section id="about" className="mx-auto max-w-4xl px-6 pb-24 pt-16">
+      <section id="about" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-24 pt-16">
         <RevealGlow className="mb-16 border-b border-white/10 pb-16 text-center">
           <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
             <span className="font-serif text-base text-accent-moon">01</span>
-            About
+            {dict.nav.aboutMe}
           </span>
           <h1 className="mb-3 font-serif text-6xl font-bold">藤田 都</h1>
           <p className="text-sm text-ink-soft">北陸先端科学技術大学院大学　修士1年</p>
@@ -85,11 +84,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="other" className="mx-auto max-w-4xl px-6 pb-24">
+      {/* 注: 「その他の活動」はフェーズ2でExperienceにタグ付き統合予定のため、
+          ナビの番号付けからは一旦外し、id を other-experience-legacy に変更しています。 */}
+      <section id="other-experience-legacy" className="mx-auto max-w-4xl px-6 pb-24">
         <RevealGlow>
-          <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal">
-            <span className="font-serif text-base text-accent-moon">05</span>
-            Other Experience
+          <span className="mb-4 block text-xs tracking-widest text-ink-faint">
+            Other Experience（Experienceへ統合予定）
           </span>
         </RevealGlow>
         <h2 className="mb-10 font-serif text-4xl font-bold">その他の活動</h2>
@@ -104,11 +104,11 @@ export default async function HomePage() {
         ))}
       </section>
 
-      <section id="hobby" className="mx-auto max-w-4xl px-6 pb-32">
+      <section id="other" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-32">
         <RevealGlow>
           <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal">
-            <span className="font-serif text-base text-accent-moon">06</span>
-            Hobby
+            <span className="font-serif text-base text-accent-moon">05</span>
+            {dict.nav.other}
           </span>
         </RevealGlow>
         <h2 className="mb-10 font-serif text-4xl font-bold">趣味</h2>
