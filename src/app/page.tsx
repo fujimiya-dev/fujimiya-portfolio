@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 import { RevealGlow, RevealFade } from "@/components/RevealSection";
 import { getDictionary } from "@/i18n/server";
 import ContactForm from "@/components/ContactForm";
@@ -8,10 +7,7 @@ import ContactForm from "@/components/ContactForm";
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const [hobbies, dict] = await Promise.all([
-    prisma.hobby.findMany({ orderBy: { order: "asc" } }),
-    getDictionary(),
-  ]);
+  const dict = await getDictionary();
 
   return (
     <>
@@ -80,7 +76,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="contact" className="mx-auto max-w-xl scroll-mt-24 px-6 pb-24">
+      <section id="contact" className="mx-auto max-w-xl scroll-mt-24 px-6 pb-32">
         <RevealGlow className="mb-10 text-center">
           <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
             {dict.home.contactHeading}
@@ -90,23 +86,6 @@ export default async function HomePage() {
         <RevealFade>
           <ContactForm />
         </RevealFade>
-      </section>
-
-      <section id="other" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-32">
-        <RevealGlow>
-          <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal">
-            {dict.nav.other}
-          </span>
-        </RevealGlow>
-        <h2 className="mb-10 font-serif text-4xl font-bold">趣味</h2>
-        <div className="grid grid-cols-1 gap-px border border-white/10 bg-white/10 md:grid-cols-2">
-          {hobbies.map((hobby) => (
-            <div key={hobby.id} className="glass-panel p-7">
-              <h3 className="mb-2 font-serif text-base">{hobby.title}</h3>
-              <p className="text-sm text-ink-soft">{hobby.body}</p>
-            </div>
-          ))}
-        </div>
       </section>
     </>
   );

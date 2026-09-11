@@ -180,14 +180,156 @@ async function main() {
     skipDuplicates: true,
   });
 
+  await prisma.hobby.deleteMany();
   await prisma.hobby.createMany({
     data: [
-      { title: "ピアノ", body: "4歳の頃から今まで続けています。", order: 1 },
-      { title: "茶道", body: "大学時代に部活動にて活動していました。", order: 2 },
-      { title: "美術館巡り", body: "上野から各地の個展まで幅広く訪れています。", order: 3 },
-      { title: "ゲーム", body: "音楽ゲーム、ノベルゲーム、TRPGなど。", order: 4 },
+      {
+        title: "茶道",
+        body: "昭和女子大学 裏千家茶道部に所属。\n各年度の文化祭・卒業茶会に出演し、薄茶点前・濃茶点前のほか、小習・茶箱点前などを習得。\n2026年、裏千家茶道「中級」の許状を拝受（発行：一般財団法人今日庵）。",
+        order: 1,
+      },
     ],
-    skipDuplicates: true,
+  });
+
+  await prisma.pianoHistory.deleteMany();
+  await prisma.pianoHistory.createMany({
+    data: [
+      { period: "2008 – 2012", description: "ヤマハ音楽教室でエレクトーンを学ぶ", order: 1 },
+      { period: "2012 – 2020", description: "中村尚美氏に師事", order: 2 },
+      {
+        period: "2020 – 現在",
+        description:
+          "有馬由希子氏に師事\n高校2年生までは定期的にレッスンを受け、卒業後も発表会出演の際などにご指導いただいている。",
+        order: 3,
+      },
+    ],
+  });
+
+  await prisma.pianoVideo.deleteMany();
+  await prisma.pianoVideo.createMany({
+    data: [
+      {
+        dateLabel: "2024.3.24",
+        venue: "有馬由希子氏 門下発表会（つくばノバホール）",
+        piece: "クロード・ドビュッシー「ベルガマスク組曲 より 前奏曲」",
+        note: null,
+        videoUrl: "https://drive.google.com/file/d/1_UdYsYbays7O2UUOFE5Vc4Wc76-BxpC1/view?usp=drive_link",
+        order: 1,
+      },
+      {
+        dateLabel: "2026.2.23",
+        venue: "有馬由希子氏 門下発表会（牛久エスカードホール）",
+        piece: "フェリックス・メンデルスゾーン「3つの幻想曲、またはカプリス 作品16 第1番 イ短調」",
+        note: null,
+        videoUrl: "https://drive.google.com/file/d/1nnRRONYXqm-dC3sJeU81qv7kYeCly1WI/view?usp=drive_link",
+        order: 2,
+      },
+      {
+        dateLabel: "2026.2.23",
+        venue: "有馬由希子氏 門下発表会（牛久エスカードホール）",
+        piece: "ジョージ・ガーシュウィン「ラプソディー・イン・ブルー」",
+        note: "有馬由希子氏と連弾",
+        videoUrl: "https://drive.google.com/file/d/1SuyORmFlASJrzjzXvqpJ6X2b16yELRq3/view?usp=drive_link",
+        order: 3,
+      },
+    ],
+  });
+
+  await prisma.artFavorite.deleteMany();
+  await prisma.artFavorite.createMany({
+    data: [
+      {
+        kind: "painting",
+        name: "Jean-Honoré Fragonard《ぶらんこ》1767年、ウォレス・コレクション",
+        url: "https://www.wallacecollection.org/explore/explore-in-depth/fragonards-the-swing/",
+        imageUrl: "https://www.wallacecollection.org/media/images/Swing.84ecace2.fill-720x720.jpg",
+        order: 1,
+      },
+      {
+        kind: "painting",
+        name: "John Everett Millais《オフィーリア》1851–52年、テート・ブリテン",
+        url: "https://www.tate.org.uk/art/artworks/millais-ophelia-n01506",
+        imageUrl: "https://media.tate.org.uk/aztate-prd-ew-dg-wgtail-st1-ctr-data/images/.width-600_GC9dhUI.jpg",
+        order: 2,
+      },
+      {
+        kind: "painting",
+        name: "Jackson Pollock《White Light》1954年、ニューヨーク近代美術館（MoMA）",
+        url: "https://www.moma.org/collection/works/79481",
+        imageUrl:
+          "https://www.moma.org/media/W1siZiIsIjI5ODczNCJdLFsicCIsImNvbnZlcnQiLCItcXVhbGl0eSA5MCAtcmVzaXplIDUxMng1MTJcdTAwM2UiXV0.jpg?sha=e8889035110f44f8",
+        order: 3,
+      },
+      {
+        kind: "museum",
+        name: "下瀬美術館",
+        url: "https://simose-museum.jp/",
+        imageUrl: null,
+        order: 1,
+      },
+      {
+        kind: "museum",
+        name: "富山市ガラス美術館",
+        url: "https://toyama-glass-art-museum.jp/",
+        imageUrl: null,
+        order: 2,
+      },
+      {
+        kind: "museum",
+        name: "三菱一号館美術館",
+        url: "https://mimt.jp/",
+        imageUrl: null,
+        order: 3,
+      },
+    ],
+  });
+
+  await prisma.gameFavorite.deleteMany();
+  await prisma.gameFavorite.createMany({
+    data: [
+      {
+        group: "音楽ゲーム",
+        title: "CHUNITHM（チュウニズム）",
+        url: "https://chunithm.sega.jp/",
+        imageUrl: "https://chunithm.sega.jp/$site/images/ogimage.jpg",
+        order: 1,
+      },
+      {
+        group: "音楽ゲーム",
+        title: "DanceDanceRevolution（DDR）",
+        url: "https://p.eagate.573.jp/game/ddr/ddrworld/",
+        imageUrl: null,
+        order: 2,
+      },
+      {
+        group: "音楽ゲーム",
+        title: "プロジェクトセカイ（プロセカ）",
+        url: "https://pjsekai.sega.jp/",
+        imageUrl: "https://pjsekai.sega.jp/assets/img/ogp.png",
+        order: 3,
+      },
+      {
+        group: "ノベル・推理ゲーム",
+        title: "ダンガンロンパ",
+        url: "https://www.danganronpa.com/",
+        imageUrl: null,
+        order: 1,
+      },
+      {
+        group: "ノベル・推理ゲーム",
+        title: "グノーシア",
+        url: "https://playism.com/game/gnosia/",
+        imageUrl: null,
+        order: 2,
+      },
+      {
+        group: "ノベル・推理ゲーム",
+        title: "四ツ目神 -再会-",
+        url: "https://se-ec.co.jp/appgames/yotsumegami/",
+        imageUrl: "https://se-ec.co.jp/appgames/yotsumegami/img/og_image.jpg",
+        order: 3,
+      },
+    ],
   });
 
   console.log("seed complete");
