@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { RevealGlow, RevealFade } from "@/components/RevealSection";
 import { getDictionary } from "@/i18n/server";
+import ContactForm from "@/components/ContactForm";
 
 export const revalidate = 0;
 
@@ -69,17 +70,26 @@ export default async function HomePage() {
           </div>
         </RevealFade>
 
-        <div className="mt-12 flex flex-wrap gap-4 text-sm">
-          <Link href="/works" className="text-accent-blue hover:text-accent-teal">
-            Works を見る ↗
-          </Link>
-          <Link href="/experience" className="text-accent-blue hover:text-accent-teal">
-            Experience を見る ↗
-          </Link>
-          <Link href="/research" className="text-accent-blue hover:text-accent-teal">
-            Research を見る ↗
+        <div className="mt-12 flex justify-center">
+          <Link
+            href="/works"
+            className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-colors hover:bg-accent-teal hover:text-sky-deep"
+          >
+            {dict.home.goToWorks}
           </Link>
         </div>
+      </section>
+
+      <section id="contact" className="mx-auto max-w-xl scroll-mt-24 px-6 pb-24">
+        <RevealGlow className="mb-10 text-center">
+          <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
+            {dict.home.contactHeading}
+          </span>
+          <h2 className="font-serif text-3xl font-bold">{dict.home.contactHeading}</h2>
+        </RevealGlow>
+        <RevealFade>
+          <ContactForm />
+        </RevealFade>
       </section>
 
       <section id="other" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-32">
