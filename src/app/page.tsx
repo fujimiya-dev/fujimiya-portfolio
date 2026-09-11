@@ -2,7 +2,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { RevealGlow, RevealFade } from "@/components/RevealSection";
 import { getDictionary } from "@/i18n/server";
-import ContactForm from "@/components/ContactForm";
+import { TbBrandPython, TbBrandTypescript, TbBrandCSharp, TbBrandCpp, TbBrandUnity } from "react-icons/tb";
+import { FaJava } from "react-icons/fa";
+import { SiUnrealengine } from "react-icons/si";
+
+const techStack = [
+  { label: "Python", Icon: TbBrandPython },
+  { label: "TypeScript", Icon: TbBrandTypescript },
+  { label: "Java", Icon: FaJava },
+  { label: "C#", Icon: TbBrandCSharp },
+  { label: "C++", Icon: TbBrandCpp },
+  { label: "Unity", Icon: TbBrandUnity },
+  { label: "UE", Icon: SiUnrealengine },
+];
+
+const interests = ["Webアプリ開発", "ゲーム開発", "空間演出", "XR"];
 
 export const revalidate = 0;
 
@@ -23,18 +37,17 @@ export default async function HomePage() {
           <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
             {dict.nav.aboutMe}
           </span>
-          <h1 className="mb-3 font-serif text-6xl font-bold">藤田 都</h1>
-          <p className="text-sm text-ink-soft">北陸先端科学技術大学院大学　修士1年</p>
+          <h2 className="font-serif text-4xl font-bold">自己紹介</h2>
         </RevealGlow>
 
-        <RevealFade className="grid grid-cols-1 gap-10 md:grid-cols-[230px_1fr]">
-          <div className="glass-panel p-2">
+        <RevealFade className="grid grid-cols-1 gap-10 md:grid-cols-[230px_1fr] md:items-start">
+          <div className="glass-panel w-full p-2">
             <Image
-              src="/profile.jpg"
+              src="/profile.png"
               alt="藤田都"
-              width={460}
-              height={614}
-              className="h-auto w-full"
+              width={2160}
+              height={2160}
+              className="block h-auto w-full"
             />
           </div>
           <div>
@@ -49,34 +62,64 @@ export default async function HomePage() {
                   <td className="py-3">北陸先端科学技術大学院大学</td>
                 </tr>
                 <tr className="border-b border-white/10">
+                  <td className="w-24 py-3 font-serif text-ink-faint">専攻</td>
+                  <td className="py-3">先端科学技術研究科 先端科学技術専攻</td>
+                </tr>
+                <tr className="border-b border-white/10">
                   <td className="w-24 py-3 font-serif text-ink-faint">学年</td>
                   <td className="py-3">修士1年</td>
                 </tr>
+                <tr className="border-b border-white/10">
+                  <td className="w-24 py-3 font-serif text-ink-faint">出身大学</td>
+                  <td className="py-3">昭和女子大学</td>
+                </tr>
+                <tr className="border-b border-white/10">
+                  <td className="w-24 py-3 font-serif text-ink-faint">学部・学科</td>
+                  <td className="py-3">人間文化学部 歴史文化学科</td>
+                </tr>
+                <tr className="border-b border-white/10">
+                  <td className="w-24 py-3 font-serif text-ink-faint">資格</td>
+                  <td className="py-3">中学校・高校教諭一種免許状(社会)、温泉ソムリエ</td>
+                </tr>
               </tbody>
             </table>
+
+            <p className="mb-3 font-serif text-xs tracking-widest text-ink-faint">勉強している技術</p>
+            <div className="mb-6 grid grid-cols-4 gap-x-2 gap-y-4 sm:grid-cols-7">
+              {techStack.map(({ label, Icon }) => (
+                <div key={label} className="flex flex-col items-center gap-2">
+                  <Icon className="h-6 w-6 text-ink-soft" />
+                  <span className="text-[11px] text-ink-faint">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <p className="mb-3 font-serif text-xs tracking-widest text-ink-faint">興味分野</p>
             <div className="flex flex-wrap gap-2">
-              {["Python", "C#", "Unity", "UE", "プロジェクションマッピング", "絵画鑑賞支援", "史学", "教育"].map(
-                (tag) => (
-                  <span key={tag} className="rounded-full border border-white/20 px-3 py-1 text-xs text-ink-soft">
-                    {tag}
-                  </span>
-                )
-              )}
+              {interests.map((tag) => (
+                <span key={tag} className="rounded-full border border-white/20 px-3 py-1 text-xs text-ink-soft">
+                  {tag}
+                </span>
+              ))}
             </div>
           </div>
         </RevealFade>
 
-        <RevealFade delay={0.1} className="mx-auto mt-10 max-w-xl text-center">
+        <div className="mx-auto mt-16 max-w-xl border-t border-white/10" />
+
+        <RevealFade delay={0.1} className="mx-auto mt-16 max-w-xl text-center">
           <p className="text-sm leading-relaxed text-ink-soft">
-            はじめまして、藤田都と申します。
+            学部では西洋美術史を専攻。
             <br />
-            技術と美術、二つの領域を行き来しながら制作と研究を続けています。
+            大学3年でのハッカソン初参加をきっかけに、「アイデアを形にする」楽しさに目覚める。
             <br />
-            ハッカソンでのアプリ開発から、絵画鑑賞を支援するAR研究まで、手を動かしながら考えることが好きです。
+            自分の世界をより広げたいと思い、情報系大学院へ分野転向。
             <br />
-            日々の学びや制作の記録を、このサイトに残していきます。
+            フロントからバックまで幅広く手がけつつ、特にUIデザインへのこだわりがあります。
           </p>
         </RevealFade>
+
+        <div className="mx-auto mt-16 max-w-xl border-t border-white/10" />
 
         <div className="mt-12 flex justify-center">
           <Link
@@ -86,18 +129,6 @@ export default async function HomePage() {
             {dict.home.goToWorks}
           </Link>
         </div>
-      </section>
-
-      <section id="contact" className="mx-auto max-w-xl scroll-mt-24 px-6 pb-32">
-        <RevealGlow className="mb-10 text-center">
-          <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
-            {dict.home.contactLabel}
-          </span>
-          <h2 className="font-serif text-3xl font-bold">{dict.home.contactHeading}</h2>
-        </RevealGlow>
-        <RevealFade>
-          <ContactForm />
-        </RevealFade>
       </section>
     </>
   );
