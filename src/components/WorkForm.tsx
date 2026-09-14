@@ -6,6 +6,9 @@ type WorkFormValues = {
   award?: string | null;
   summary?: string;
   description?: string;
+  comment?: string;
+  teamSize?: number;
+  role?: string;
   demoUrl?: string | null;
   imageUrl?: string | null;
   category?: string[];
@@ -57,6 +60,34 @@ export default function WorkForm({
           name="description"
           defaultValue={defaultValues?.description}
           rows={5}
+          className={fieldClass}
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">製作者コメント</label>
+        <textarea
+          name="comment"
+          defaultValue={defaultValues?.comment ?? "準備中"}
+          rows={3}
+          className={fieldClass}
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">担当人数</label>
+        <input
+          name="teamSize"
+          type="number"
+          min={1}
+          defaultValue={defaultValues?.teamSize ?? 1}
+          className={fieldClass}
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">担当部分</label>
+        <textarea
+          name="role"
+          defaultValue={defaultValues?.role ?? "準備中"}
+          rows={3}
           className={fieldClass}
         />
       </div>

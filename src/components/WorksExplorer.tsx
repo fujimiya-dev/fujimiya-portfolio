@@ -1,8 +1,8 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTagFilter } from "@/lib/useTagFilter";
 import { RevealFade } from "@/components/RevealSection";
 
 type Work = {
@@ -20,30 +20,143 @@ type Work = {
   techStack: string[];
 };
 
-export default function WorksExplorer({ works }: { works: Work[] }) {
-  const { query, setQuery, activeTag, toggleTag, allTags, filtered } = useTagFilter(
-    works,
-    (w) => `${w.title} ${w.description} ${w.category.join(" ")} ${w.techStack.join(" ")}`,
-    (w) => [...w.category, ...w.techStack]
+const CATEGORY_FILTERS = ["個人開発", "チーム開発", "ハッカソン", "インターン", "ビジネス"];
+
+function NoImage() {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-ink-faint">
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <path d="M21 15l-5-5L5 21" />
+      </svg>
+      <span className="text-[10px] tracking-wide">No Image</span>
+    </div>
   );
+}
+
+export default function WorksExplorer({ works }: { works: Work[] }) {
+  const [chips, setChips] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    works.forEach((w) => [...w.category, ...w.techStack].forEach((tag) => set.add(tag)));
+    return Array.from(set);
+  }, [works]);
+
+  const suggestions = useMemo(() => {
+    const q = inputValue.trim().toLowerCase();
+    if (!q) return [];
+    return allTags
+      .filter((tag) => !chips.includes(tag) && tag.toLowerCase().includes(q))
+      .slice(0, 8);
+  }, [allTags, chips, inputValue]);
+
+  const filtered = useMemo(() => {
+    if (chips.length === 0) return works;
+    return works.filter((w) => {
+      const text = `${w.title} ${w.description} ${w.category.join(" ")} ${w.techStack.join(" ")}`.toLowerCase();
+      return chips.every((chip) => text.includes(chip.toLowerCase()));
+    });
+  }, [works, chips]);
+
+  function addChip(tag: string) {
+    const t = tag.trim();
+    if (!t) return;
+    setChips((prev) => (prev.includes(t) ? prev : [...prev, t]));
+    setInputValue("");
+    setShowSuggestions(false);
+  }
+
+  function removeChip(tag: string) {
+    setChips((prev) => prev.filter((t) => t !== tag));
+  }
+
+  function toggleCategoryChip(tag: string) {
+    setChips((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]));
+  }
+
+  function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addChip(inputValue);
+    }
+  }
 
   return (
     <div>
-      <div className="search-sticky glass-panel mb-8 rounded-sm p-5">
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="使用技術やキーワードで検索（例：Python、Unity、ハッカソン）"
-          className="w-full border-b border-white/20 bg-transparent pb-3 text-sm outline-none placeholder:text-ink-faint focus:border-accent-teal"
-        />
-        <div className="mt-3 flex flex-wrap gap-2">
-          {allTags.map((tag) => (
+      <div className="glass-panel mb-8 rounded-sm p-5">
+        <div className="relative">
+          <div className="flex flex-wrap items-center gap-2 border-b border-white/20 pb-3 focus-within:border-accent-teal">
+            {chips.map((chip) => (
+              <span
+                key={chip}
+                className="flex items-center gap-1.5 rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
+              >
+                {chip}
+                <button
+                  type="button"
+                  onClick={() => removeChip(chip)}
+                  aria-label={`${chip}を削除`}
+                  className="text-accent-teal/70 hover:text-accent-teal"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+            <input
+              type="search"
+              value={inputValue}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onKeyDown={onInputKeyDown}
+              placeholder={chips.length === 0 ? "使用技術やキーワードで検索（例：Python、Unity、ハッカソン）" : ""}
+              className="min-w-[140px] flex-1 bg-transparent text-sm outline-none placeholder:text-ink-faint"
+            />
+          </div>
+
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className="absolute inset-x-0 top-full z-20 mt-1 max-h-52 overflow-auto rounded-sm border border-white/10 bg-sky-deep/95 text-sm shadow-lg backdrop-blur-md">
+              {suggestions.map((tag) => (
+                <li key={tag}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      addChip(tag);
+                    }}
+                    className="block w-full px-4 py-2 text-left text-ink-soft transition-colors hover:bg-white/5 hover:text-accent-teal"
+                  >
+                    {tag}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <p className="mb-3 mt-5 text-xs tracking-widest text-ink-faint">カテゴリー別に絞り込み</p>
+        <div className="flex flex-wrap gap-2">
+          {CATEGORY_FILTERS.map((tag) => (
             <button
               key={tag}
-              onClick={() => toggleTag(tag)}
+              onClick={() => toggleCategoryChip(tag)}
               className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                activeTag === tag
+                chips.includes(tag)
                   ? "border-accent-teal bg-accent-teal text-sky-deep"
                   : "border-white/20 text-ink-soft hover:border-accent-teal"
               }`}
@@ -52,6 +165,7 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
             </button>
           ))}
         </div>
+
         {filtered.length === 0 && (
           <p className="mt-4 text-sm text-ink-faint">該当する制作物が見つかりませんでした。</p>
         )}
@@ -62,25 +176,20 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
           <RevealFade key={work.id}>
             <Link href={`/works/${work.slug}`} className="group block h-full">
               <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition-colors group-hover:border-accent-teal/50">
-                <div className="border-b border-white/10 bg-white/[0.02] p-2">
+                <div className="relative aspect-video border-b border-white/10 bg-white/[0.02]">
                   {work.imageUrl ? (
                     <Image
                       src={work.imageUrl}
                       alt={work.title}
-                      width={640}
-                      height={400}
-                      className="h-auto w-full"
+                      fill
+                      sizes="(min-width: 640px) 50vw, 100vw"
+                      className="object-contain px-6 py-2"
                     />
                   ) : (
-                    <div className="flex aspect-video items-center justify-center text-xs text-ink-faint">
-                      画像未設定
-                    </div>
+                    <NoImage />
                   )}
                 </div>
                 <div className="flex flex-1 flex-col p-6">
-                  <span className="mb-1 block font-serif text-sm text-accent-moon">
-                    {work.numberLabel}
-                  </span>
                   <h3 className="font-serif text-xl font-bold transition-colors group-hover:text-accent-teal">
                     {work.title}
                   </h3>

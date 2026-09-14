@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import WorksExplorer from "@/components/WorksExplorer";
 import { RevealGlow } from "@/components/RevealSection";
@@ -20,6 +21,15 @@ export default async function WorksPage() {
       </RevealGlow>
       <h2 className="mb-10 font-serif text-4xl font-bold">制作物</h2>
       <WorksExplorer works={works} />
+
+      <div className="mt-12 flex justify-center">
+        <Link
+          href="/experience"
+          className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-colors hover:bg-accent-teal hover:text-sky-deep"
+        >
+          Experienceへ
+        </Link>
+      </div>
     </section>
   );
 }
