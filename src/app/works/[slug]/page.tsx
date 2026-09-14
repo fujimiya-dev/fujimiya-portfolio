@@ -22,58 +22,93 @@ export default async function WorkDetailPage({
       </Link>
 
       <RevealFade>
-        <span className="mb-1 block font-serif text-sm text-accent-moon">{work.numberLabel}</span>
         <h1 className="mb-2 font-serif text-4xl font-bold">{work.title}</h1>
-        <span className="mb-8 block text-xs text-ink-faint">
-          {work.dateLabel}
-          {work.award ? `　${work.award}` : ""}
-        </span>
+        <span className="mb-8 block text-xs text-ink-faint">{work.dateLabel}</span>
 
-        <div className="glass-panel mb-8 border border-white/15 bg-white/[0.02] p-2">
+        <div className="glass-panel relative mb-8 aspect-video border border-white/15 bg-white/[0.02]">
           {work.imageUrl ? (
             <Image
               src={work.imageUrl}
               alt={work.title}
-              width={960}
-              height={600}
-              className="h-auto w-full"
+              fill
+              sizes="(min-width: 768px) 768px, 100vw"
+              className="object-contain px-8 py-2"
             />
           ) : (
-            <div className="flex aspect-video items-center justify-center text-xs text-ink-faint">
-              画像未設定
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-ink-faint">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <path d="M21 15l-5-5L5 21" />
+              </svg>
+              <span className="text-[10px] tracking-wide">No Image</span>
             </div>
           )}
         </div>
 
-        <p className="mb-6 whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
-          {work.description}
-        </p>
+        <div className="mb-8 space-y-4">
+          <div className="glass-panel rounded-sm p-6">
+            <h2 className="mb-3 font-serif text-sm tracking-wide text-accent-teal">作品詳細</h2>
+            <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
+              {work.description}
+            </p>
+          </div>
 
-        <div className="mb-8 space-y-3">
-          <div>
-            <p className="mb-2 text-xs tracking-wide text-ink-faint">カテゴリ</p>
-            <div className="flex flex-wrap gap-2">
-              {work.category.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
-                >
-                  {tag}
-                </span>
-              ))}
+          <div className="glass-panel rounded-sm p-6">
+            <h2 className="mb-3 font-serif text-sm tracking-wide text-accent-teal">製作者コメント</h2>
+            <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
+              {work.comment}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="glass-panel rounded-sm p-6">
+              <h2 className="mb-3 font-serif text-sm tracking-wide text-accent-teal">担当人数</h2>
+              <p className="text-[15px] text-ink-soft">{work.teamSize}人</p>
+            </div>
+            <div className="glass-panel rounded-sm p-6">
+              <h2 className="mb-3 font-serif text-sm tracking-wide text-accent-teal">担当部分</h2>
+              <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
+                {work.role}
+              </p>
             </div>
           </div>
-          <div>
-            <p className="mb-2 text-xs tracking-wide text-ink-faint">使用技術</p>
-            <div className="flex flex-wrap gap-2">
-              {work.techStack.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-white/20 px-3 py-1 text-xs text-ink-soft"
-                >
-                  {tag}
-                </span>
-              ))}
+
+          <div className="glass-panel space-y-4 rounded-sm p-6">
+            <div>
+              <h2 className="mb-2 font-serif text-sm tracking-wide text-accent-teal">カテゴリ</h2>
+              <div className="flex flex-wrap gap-2">
+                {work.category.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h2 className="mb-2 font-serif text-sm tracking-wide text-accent-teal">使用技術</h2>
+              <div className="flex flex-wrap gap-2">
+                {work.techStack.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full border border-white/20 px-3 py-1 text-xs text-ink-soft"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -88,6 +123,15 @@ export default async function WorkDetailPage({
             デモ動画を見る ↗
           </a>
         )}
+
+        <div className="mt-12 flex justify-center">
+          <Link
+            href="/works"
+            className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-colors hover:bg-accent-teal hover:text-sky-deep"
+          >
+            ほかの作品もみる
+          </Link>
+        </div>
       </RevealFade>
     </section>
   );

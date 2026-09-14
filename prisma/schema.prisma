@@ -23,6 +23,9 @@ model Work {
   award       String? // e.g. "優勝"
   summary     String
   description String
+  comment     String   @default("準備中") // 製作者コメント
+  teamSize    Int      @default(1) // 担当人数
+  role        String   @default("準備中") // 担当部分
   demoUrl     String?
   imageUrl    String?
   category    String[] // 例: チーム開発, ハッカソン, ビジネス
