@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import ResearchExplorer from "@/components/ResearchExplorer";
 import { RevealGlow } from "@/components/RevealSection";
@@ -20,6 +21,15 @@ export default async function ResearchPage() {
       </RevealGlow>
       <h2 className="mb-10 font-serif text-4xl font-bold">研究</h2>
       <ResearchExplorer items={items} />
+
+      <div className="mt-12 flex justify-center">
+        <Link
+          href="/other"
+          className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-colors hover:bg-accent-teal hover:text-sky-deep"
+        >
+          Otherへ
+        </Link>
+      </div>
     </section>
   );
 }

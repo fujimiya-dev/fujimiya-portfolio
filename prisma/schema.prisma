@@ -47,16 +47,21 @@ model Experience {
 }
 
 model ResearchItem {
-  id        String   @id @default(cuid())
-  stage     String // "学部での研究" / "大学院での研究"
-  title     String
-  summary   String
-  imageUrl  String?
-  caption   String?
-  tags      String[]
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  stage        String // "学部での研究" / "大学院での研究"
+  title        String
+  summary      String
+  imageUrl     String?
+  caption      String?
+  tags         String[]
+  techStack    String[] // 使用技術
+  references   String[] // 主な参考文献
+  achievements String[] // 実績
+  paperUrl     String? // 論文URL
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Hobby {
