@@ -198,30 +198,51 @@ async function main() {
     ],
   });
 
+  // Researchも再実行のたびに古いデータを消してから入れ直す（重複防止）
+  await prisma.researchItem.deleteMany();
   await prisma.researchItem.createMany({
     data: [
       {
+        slug: "pollock-1-31",
         stage: "学部での研究",
         title: "ジャクソン・ポロックの ≪1・第31番≫ における偶然と意図",
         summary:
           "ジャクソン・ポロックの《1・第31番》を研究対象とした。本作品は無意識的な描き方である「オートマティスム」と結びつけて評価されてきたが、詳細に分析すると線の流れ・色彩の配置・明暗のバランスなどに画面全体を意識的に構成する工夫が見られる。偶然性を取り込みながらも、意図的な構成によって成立した作品として捉え直した。",
         caption: "ジャクソン・ポロック ≪1・第31番≫　1950年、ニューヨーク近代美術館",
-        imageUrl: null,
-        tags: ["ポロック", "美術史"],
+        imageUrl: "/research/pollock-1-31.png",
+        tags: ["史学", "美術", "現代アート"],
+        techStack: [],
+        references: [
+          "沢山遼『絵画の力学』書肆侃侃房、2020年。",
+          "藤枝晃雄『Jackson Pollock』スカイドア、1994年。",
+          "Clement Greenberg『グリーンバーグ批評選集』勁草書房、2022年。",
+          "Sandra Zalman, \"Janet Sobel: Primitive Modern and the Origins of Abstract Expressionism,\" Woman's Art Journal, vol. 36, no. 2, 2015, pp. 20-29.",
+        ],
+        achievements: [],
+        paperUrl: null,
         order: 1,
       },
       {
+        slug: "ar-art-appreciation",
         stage: "大学院での研究",
         title: "「ARを用いた美術鑑賞支援システム」の開発",
         summary:
           "美術の専門家が絵画を見るときの視線データを分析し、一般の鑑賞者が作品の重要な部分に自然に注目できるようにする（矢印や補助線、明度変化などのAR演出）。美術に詳しくない人でも絵画をより深く楽しめる体験を目指す。",
         caption: "図1：システム全体図",
-        imageUrl: null,
-        tags: ["AR", "美術鑑賞"],
+        imageUrl: "/research/ar-art-appreciation.png",
+        tags: ["情報", "プロジェクションマッピング", "XR", "視線計測", "美術"],
+        techStack: ["Unity"],
+        references: [
+          "[1] S. Vogt and S. Magnussen, \"Expertise in Pictorial Perception: Eye-Movement Patterns and Visual Memory in Artists and Laymen,\" Perception, vol. 36, pp. 91-100, 2007.",
+          "[2] C. F. Nodine, P. J. Locher, and E. A. Krupinski, \"The Role of Formal Art Training on Perception and Aesthetic Judgment of Art Compositions,\" Leonardo, vol. 26, no. 3, pp. 219-227, 1993.",
+          "[3] N. Techasarntikul, P. Ratsamee, J. Orlosky, T. Mashita, Y. Uranishi, K. Kiyokawa, and H. Takemura, \"Evaluation of Embodied Agent Positioning and Moving Interfaces for an AR Virtual Guide,\" ICAT-EGVE, pp. 25-32, 2019.",
+          "[4] H. Guo, D. Zhao, L. Zhang, Y. Lin, and H. Xin, \"The Effectiveness of The Attention Guidance Mechanisms in VR Museum,\" Ergonomics in Design, vol. 77, Francisco Rebelo and Zihao Wang, Eds., AHFE International, 2023. [Online]. Available: http://doi.org/10.54941/ahfe1003378",
+        ],
+        achievements: [],
+        paperUrl: null,
         order: 2,
       },
     ],
-    skipDuplicates: true,
   });
 
   await prisma.hobby.deleteMany();
