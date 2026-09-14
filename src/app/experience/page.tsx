@@ -18,7 +18,7 @@ export default async function ExperiencePage() {
           {dict.nav.experience}
         </span>
       </RevealGlow>
-      <h2 className="mb-10 font-serif text-4xl font-bold">ハッカソン・インターン経験</h2>
+      <h2 className="mb-10 font-serif text-4xl font-bold">経験</h2>
       <ExperienceExplorer items={items} />
     </section>
   );
