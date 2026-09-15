@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Shippori_Mincho, Zen_Kaku_Gothic_New } from "next/font/google";
+import { Zen_Old_Mincho, Zen_Kaku_Gothic_New } from "next/font/google";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
+import AmbientGlimmer from "@/components/AmbientGlimmer";
 
-const shippori = Shippori_Mincho({
+const zenOldMincho = Zen_Old_Mincho({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-shippori",
+  weight: ["400", "500", "600", "700", "900"],
+  variable: "--font-heading",
 });
 
 const zenKaku = Zen_Kaku_Gothic_New({
@@ -26,9 +27,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja" className={`${shippori.variable} ${zenKaku.variable}`}>
+    <html lang="ja" className={`${zenOldMincho.variable} ${zenKaku.variable}`}>
       <body className="font-sans">
         <div className="sky-fixed" aria-hidden="true" />
+        <div className="moon-glow" aria-hidden="true" />
+        <AmbientGlimmer />
         <TopNav />
         <main className="relative z-[2]">{children}</main>
       </body>
