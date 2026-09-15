@@ -23,7 +23,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["var(--font-shippori)", "serif"],
+        serif: ["var(--font-heading)", "serif"],
         sans: ["var(--font-zen-kaku)", "sans-serif"],
       },
     },
