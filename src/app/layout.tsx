@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Zen_Old_Mincho, Zen_Kaku_Gothic_New } from "next/font/google";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
-import AmbientGlimmer from "@/components/AmbientGlimmer";
+import NightSky from "@/components/night-sky/NightSky";
 
 const zenOldMincho = Zen_Old_Mincho({
   subsets: ["latin"],
@@ -29,9 +29,7 @@ export default function RootLayout({
   return (
     <html lang="ja" className={`${zenOldMincho.variable} ${zenKaku.variable}`}>
       <body className="font-sans">
-        <div className="sky-fixed" aria-hidden="true" />
-        <div className="moon-glow" aria-hidden="true" />
-        <AmbientGlimmer />
+        <NightSky />
         <TopNav />
         <main className="relative z-[2]">{children}</main>
       </body>
