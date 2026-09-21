@@ -211,20 +211,17 @@ const FRAGMENT_SHADER = /* glsl */ `
     // STEP 1 — flat-disc lighting, replacing ordinary Lambert shading.
     // Real lunar photometry (Helfenstein & Veverka 1987) shows almost no
     // limb darkening near full phase: the whole lit face reads as close to
-    // one uniform brightness, not a smooth cos-falloff sphere gradient, and
-    // the day/night line itself is comparatively crisp rather than a soft
-    // gradient band. litMask does the actual day/night gating — widened
-    // 3x from the first pass (±0.02 read as an unnaturally hard/aliased
-    // edge) to a soft-but-local blur right at the line, not the wide
-    // gradient sweeping across most of the disc that caused the original
-    // "looks like a lit sphere" complaint. subtleShade is kept deliberately
-    // shallow (a 12% range, not full NdotL contrast) so the lit and shadow
-    // faces both stay flat on their own — only the boundary between them
-    // softens.
+    // one uniform brightness, not a smooth cos-falloff sphere gradient. A
+    // previous pass still kept a shallow NdotL-driven subtleShade (88-100%)
+    // that, however small, was enough to read as "a lit sphere" from a
+    // distance — real full-moon photos show essentially no visible
+    // brightness gradient at all. Shading is now dropped entirely in favor
+    // of a single wide litMask gate: fully lit right up to near the
+    // terminator, texture/contrast coming only from albedo (craters, maria)
+    // below, never from NdotL.
     float NdotL = dot(N, L);
-    float litMask = smoothstep(-0.06, 0.06, NdotL);
-    float subtleShade = 0.88 + 0.12 * clamp(NdotL, 0.0, 1.0);
-    float diffuse = litMask * subtleShade;
+    float litMask = smoothstep(-0.35, -0.15, NdotL);
+    float diffuse = litMask; // NdotLに応じたシェーディングを行わない
 
     // Craters rendered as visible albedo features (dark floor, bright rim)
     // rather than a faint AO tint — the reference photo shows individual

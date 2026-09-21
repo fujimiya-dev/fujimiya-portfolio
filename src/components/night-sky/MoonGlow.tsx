@@ -26,7 +26,17 @@ const FRAGMENT_SHADER = /* glsl */ `
   void main() {
     vec2 uv = (vUv - 0.5) * 2.0;
     float d = length(uv);
-    float falloff = pow(clamp(1.0 - d, 0.0, 1.0), 2.2);
+    // Steepened from 2.2 — at that value the glow's own alpha right at the
+    // Moon's edge (d ≈ moonRadius / glowHalfWidth) was still substantial,
+    // and once Moon.tsx's own lighting became genuinely flat (no more
+    // NdotL-driven shading), that leftover brightness read as an obvious
+    // bright rim around an otherwise uniform disc — worse than before,
+    // when the disc's own shading variation had hidden it. A much steeper
+    // falloff (plus the smaller glowSize below) pushes the glow's value at
+    // the Moon's edge down close to zero, so it doesn't visibly ring the
+    // disc; the visible bloom now comes almost entirely from inside the
+    // Moon's own silhouette outward into the sky, not wrapping its edge.
+    float falloff = pow(clamp(1.0 - d, 0.0, 1.0), 10.0);
     gl_FragColor = vec4(uColor, falloff);
   }
 `;
@@ -37,12 +47,11 @@ const MoonGlow = forwardRef<THREE.Mesh>(function MoonGlow(_props, ref) {
   const uniforms = useMemo(() => ({ uColor: { value: new THREE.Color("#8fe0ab") } }), []);
   // Sized in world units, so it must shrink on the much narrower mobile
   // frustum or it overruns the whole screen instead of staying corner-confined.
-  // Scaled ~1.3x to match Moon.tsx's own radius increase (3.4 → 5.44, see
-  // commit 561da14) — a first pass at 1.6x fixed the crisp/unblended edge
-  // but spread too far, washing out the Milky Way and grass colors nearby;
-  // this smaller size plus the steeper falloff below keeps the blend right
-  // at the edge without flooding the surrounding sky.
-  const glowSize = tier === "low" ? 34 : tier === "mid" ? 49 : 65;
+  // Shrunk further (from a ~1.3x-of-original pass) alongside the steeper
+  // falloff above — see that comment. The tradeoff is a noticeably more
+  // contained glow (less ambient sky tint spreading away from the Moon)
+  // than the earlier, larger sizing.
+  const glowSize = tier === "low" ? 24 : tier === "mid" ? 34 : 45;
 
   return (
     <Billboard position={position}>
