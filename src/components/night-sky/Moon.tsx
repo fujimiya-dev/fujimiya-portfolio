@@ -305,7 +305,7 @@ export default function Moon() {
     <mesh position={position}>
       {/* 1.6x the previous 3.4 radius, per explicit request */}
       <sphereGeometry args={[5.44, 64, 64]} />
-      <shaderMaterial vertexShader={VERTEX_SHADER} fragmentShader={FRAGMENT_SHADER} uniforms={uniforms} toneMapped={false} />
+      <shaderMaterial vertexShader={VERTEX_SHADER} fragmentShader={FRAGMENT_SHADER} uniforms={uniforms} toneMapped={true} />
     </mesh>
   );
 }
