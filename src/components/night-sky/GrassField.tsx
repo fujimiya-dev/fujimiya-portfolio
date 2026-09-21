@@ -384,8 +384,8 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
     // reading was restart/warmup noise, not a density-driven cost.) Low
     // tier still gets a smaller raise, as a plain margin of safety on
     // weaker devices rather than a measured need.
-    const nearRatio = lowTier ? 0.55 : 0.65;
-    const midRatio = lowTier ? 0.42 : 0.48;
+    const nearRatio = lowTier ? 0.55 : 0.62;
+    const midRatio = lowTier ? 0.44 : 0.52;
 
     return [
       // Near — large, thick, dense, the layer whose individual blade shape
