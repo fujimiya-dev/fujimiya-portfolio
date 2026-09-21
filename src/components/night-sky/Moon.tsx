@@ -273,15 +273,14 @@ export default function Moon() {
       // exactly on it (~99% lit, no visible shadow at all), so backed off
       // partway for a thin, clearly-visible dark sliver instead of none.
       uSunDir: { value: new THREE.Vector3(0.06, 0.15, 0.99).normalize() },
-      // Highlands nudged a touch warm (real lunar highlands read faintly
-      // beige next to the maria) — subtle, still reads as the site's mint
-      // green from any normal viewing distance.
-      uMoonColor: { value: new THREE.Color("#b6d5a3") },
-      // Maria nudged a touch cool/blue for the same real-Moon reason,
-      // beyond just being darker.
-      uMareColor: { value: new THREE.Color("#547d8c") },
-      uShadowColor: { value: new THREE.Color("#22374f") },
-      uEarthshineColor: { value: new THREE.Color("#4a6a8a") },
+      // Rough first pass toward a reference image's vivid emerald/teal
+      // moon (sampled directly from it: lit highlands ~#88d7b6-#b5eede,
+      // maria ~#308284-#348f88) — a straight color swap over the existing
+      // shading/crater/mare logic, not a shader rework.
+      uMoonColor: { value: new THREE.Color("#8ddcc0") },
+      uMareColor: { value: new THREE.Color("#2f8c82") },
+      uShadowColor: { value: new THREE.Color("#123028") },
+      uEarthshineColor: { value: new THREE.Color("#2f6d63") },
       uCraterScale: { value: 2.6 },
       uCraterDepth: { value: 0.55 },
       // Lowered again (was 0.5) — even at 0.5 the maria still read as
