@@ -104,6 +104,26 @@ type LayerConfig = {
   // preserve. Used for the near/mid layers, where gaps are the concern;
   // the far layer keeps plain random scatter, where sparseness is fine.
   stratified?: boolean;
+  // X軸バイアス（左近・右遠の非対称構図）— 左端(x=-widthRange/2)ほど手前・
+  // 大きく、右端(x=+widthRange/2)ほど奥・小さく（ほぼ消失まで）なるカーブ。
+  // 全フィールドをoptionalにしているのは、xBiasEnabledを付けないレイヤー
+  // （mid/far/フィラー等）を一切変更せずに済ませるため — 実際に使うのは
+  // xBiasEnabled:true のレイヤーだけで、そこでは必ず併せて指定する想定。
+  xBiasEnabled?: boolean;
+  // e(t) = 1 - (1-t)^power の指数。大きいほど「左側で長くアップを維持して
+  // から急降下する」形になる。
+  xBiasCurvePower?: number;
+  xBiasPush?: number; // 右端で追加的にZ方向へ押し出す量（ワールド単位）
+  xBiasScaleRange?: [number, number]; // [左端でのスケール倍率, 右端でのスケール倍率]
+  // 列(x位置)ごとに、その列が取りうる奥行き(z)のばらつき幅を狭める度合い。
+  // 0〜1、1に近いほど右側でzをほぼ一点（手前側の境界）に揃える。
+  xBiasDepthNarrowing?: number;
+  // z を奥へ押し出すと、カメラ(Y=cameraY・正面視)から見て「同じ高さでも
+  // 奥にあるほど画面上では中央寄り=上に見える」という透視図法の効果で、
+  // 押し出した分だけ根元が浮いて見える。この上昇を打ち消すため、押し出し
+  // 前後の深度(cameraZ - z)比で根元のYを補正する — その計算に必要。
+  cameraY?: number;
+  cameraZ?: number;
 };
 
 function scatterInstances(cfg: LayerConfig) {
@@ -119,32 +139,74 @@ function scatterInstances(cfg: LayerConfig) {
   const gridZ = cfg.stratified ? Math.max(1, Math.round(Math.sqrt((count * depthRange) / widthRange))) : 1;
   const gridX = cfg.stratified ? Math.max(1, Math.ceil(count / gridZ)) : 1;
   const cellW = widthRange / gridX;
-  const cellD = depthRange / gridZ;
 
   for (let i = 0; i < count; i++) {
-    let x: number, z: number;
+    // x first, and z only as a *fractional position* (0..1) within the
+    // grid/random span for now — the actual z value is resolved after
+    // xBias narrows that span for this particular column, below.
+    let x: number;
+    let zFrac: number;
     if (cfg.stratified) {
       const gx = i % gridX;
       const gz = Math.floor(i / gridX) % gridZ;
       x = -widthRange / 2 + (gx + Math.random()) * cellW;
-      z = zStart + (gz + Math.random()) * cellD;
+      zFrac = (gz + Math.random()) / gridZ;
     } else {
       x = (Math.random() - 0.5) * widthRange;
-      z = zStart + Math.random() * depthRange;
+      zFrac = Math.random();
     }
-    // Plant the root directly on the actual hill surface at this (x, z) —
-    // the same height function Terrain.tsx built its mesh from — instead of
-    // a flat reference height, so blades never float above or sink into
-    // the ground the terrain step introduced.
-    const y = terrainHeightAt(x, z);
+
+    // e: 0(左端)〜1(右端)。1-(1-t)^power 型で、左は緩やか、右へ行くほど
+    // 加速して1へ収束する。
+    let e = 0;
+    if (cfg.xBiasEnabled) {
+      const tForRange = THREE.MathUtils.clamp((x + widthRange / 2) / widthRange, 0, 1);
+      e = 1 - Math.pow(1 - tForRange, cfg.xBiasCurvePower ?? 1);
+    }
+
+    // 奥行きの散らばりを、右へ行くほど手前の境界(zEnd)寄りに狭める。
+    // 手前側の境界は常に固定し、奥側だけを狭める非対称圧縮。
+    let effectiveDepthRange = depthRange;
+    if (cfg.xBiasEnabled) {
+      effectiveDepthRange = depthRange * (1 - (cfg.xBiasDepthNarrowing ?? 0) * e);
+    }
+    let z = zEnd - effectiveDepthRange * (1 - zFrac);
+
+    const zBeforeBias = z;
+    let xBiasScaleMul = 1;
+    let depthRatio = 1;
+    if (cfg.xBiasEnabled) {
+      const xBiasPush = cfg.xBiasPush ?? 0;
+      z -= xBiasPush * e; // 右にいくほどカメラから遠ざける（Zはカメラ方向がマイナス側）
+      const [scaleNear, scaleFar] = cfg.xBiasScaleRange ?? [1, 1];
+      xBiasScaleMul = THREE.MathUtils.lerp(scaleNear, scaleFar, e);
+      if (xBiasPush !== 0) {
+        const depthBefore = (cfg.cameraZ ?? 0) - zBeforeBias;
+        const depthAfter = (cfg.cameraZ ?? 0) - z;
+        depthRatio = depthAfter / depthBefore;
+      }
+    }
+
+    // Plant the root on the hill surface at the (narrowed-depth, pre-push)
+    // (x, z) — the same height function Terrain.tsx built its mesh from —
+    // then correct for the perspective rise the Z push alone would
+    // introduce, so the root's on-screen vertical anchor stays where it
+    // would have been without xBias — scale (xBiasScaleMul) is what's left
+    // to communicate "farther away", not an unwanted upward drift.
+    const yBeforeBias = terrainHeightAt(x, zBeforeBias);
+    const y = (cfg.cameraY ?? 0) + (yBeforeBias - (cfg.cameraY ?? 0)) * depthRatio;
     const rotation = Math.random() * Math.PI * 2;
-    const scaleX = THREE.MathUtils.lerp(cfg.scaleXRange[0], cfg.scaleXRange[1], Math.random());
+    const scaleX = THREE.MathUtils.lerp(cfg.scaleXRange[0], cfg.scaleXRange[1], Math.random()) * xBiasScaleMul;
     // A minority of "hero" fronds sweep much taller, giving the field a
-    // dramatic reaching silhouette rather than a uniform short lawn line.
-    const isHero = Math.random() < cfg.heroChance;
-    const scaleY = isHero
+    // dramatic reaching silhouette rather than a uniform short lawn line —
+    // dialed back as xBias strengthens, since a sparse, shrunk cluster of
+    // mostly-short blades with the occasional full-height hero towering
+    // over them reads as scattered outliers rather than a coherent distant
+    // patch.
+    const isHero = Math.random() < cfg.heroChance * (1 - e * 0.9);
+    const scaleY = (isHero
       ? THREE.MathUtils.lerp(cfg.heroScaleYRange[0], cfg.heroScaleYRange[1], Math.random())
-      : THREE.MathUtils.lerp(cfg.scaleYRange[0], cfg.scaleYRange[1], Math.random());
+      : THREE.MathUtils.lerp(cfg.scaleYRange[0], cfg.scaleYRange[1], Math.random())) * xBiasScaleMul;
     const tilt = (Math.random() - 0.5) * cfg.tiltRange;
     const colorVar = Math.random();
 
@@ -387,9 +449,15 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
     const nearRatio = lowTier ? 0.55 : 0.62;
     const midRatio = lowTier ? 0.44 : 0.52;
 
+    // Only the near layer reads these this round — mid/far are left
+    // untouched, so this is scoped narrowly rather than hoisted for reuse.
+    const cameraY = camera.position.y;
+    const cameraZ = camera.position.z;
+
     return [
       // Near — large, thick, dense, the layer whose individual blade shape
-      // and sway is meant to actually read.
+      // and sway is meant to actually read. Now also carries the left-near/
+      // right-far xBias asymmetry; mid/far stay full-width/uniform for now.
       {
         count: Math.round(count * nearRatio),
         nearZ: -1.7,
@@ -408,6 +476,13 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
         fadeStart: 16,
         fadeEnd: 24,
         stratified: true,
+        xBiasEnabled: true,
+        xBiasCurvePower: 2.4,
+        xBiasPush: 5.0,
+        xBiasScaleRange: [1.3, 0.05],
+        xBiasDepthNarrowing: 0.6,
+        cameraY,
+        cameraZ,
       },
       // Mid — noticeably smaller/sparser and a touch dimmer/less saturated
       // than the near layer, but still clearly grass-shaped up close.
