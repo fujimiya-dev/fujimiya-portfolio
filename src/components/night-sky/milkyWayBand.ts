@@ -3,8 +3,12 @@
 // rejection sampling). Keeping one JS-side source of truth means the two
 // can't silently drift apart the way two independently hand-tuned copies
 // of the same tilt/roll/curve numbers eventually would.
+// ROLL nudged up ~13% for a longer, more corner-to-corner diagonal sweep
+// across the frame — shared with Starfield.tsx's own band-bias sampling, so
+// the star clustering rotates along with the rendered band and the two
+// never drift apart.
 export const MILKY_WAY_BAND_TILT = -0.35;
-export const MILKY_WAY_BAND_ROLL = 0.6;
+export const MILKY_WAY_BAND_ROLL = 0.68;
 export const MILKY_WAY_BAND_WIDTH = 0.095;
 export const MILKY_WAY_BAND_CURVE = 0.13;
 

@@ -10,6 +10,19 @@ import {
   MILKY_WAY_BAND_CURVE,
 } from "./milkyWayBand";
 
+// The rendered band is widened slightly below (uBandWidth) for more visual
+// presence, but MILKY_WAY_BAND_WIDTH itself stays untouched — that's the
+// shared constant Starfield.tsx also reads for its own band-biased star
+// density, and the request was explicitly to leave the star clustering as
+// it is. Deliberately not importing the widened value into that shared
+// constant, so the two stay decoupled: the visual band reads a bit bigger
+// without moving where stars cluster to match it.
+// Widened two more steps beyond the earlier +12% pass, per request — only
+// this multiplier changes; sparkle/mottle/dust/BAND_BIAS (density/texture)
+// are untouched, so the band gets visually broader without reading as any
+// denser or star-crowded than before.
+const RENDER_BAND_WIDTH = MILKY_WAY_BAND_WIDTH * 1.45;
+
 // Procedural galactic band, adapted from the procedural-starfield skill's
 // milky_way.frag (see procedural-stars-threejs/celestial-shaders.md).
 // The skill's warm/cool temperature tint is replaced with a mint-core /
@@ -208,11 +221,15 @@ export default function MilkyWay() {
 
   const uniforms = useMemo(
     () => ({
-      // uBrightness kept at the level tuned in the previous round rather
-      // than the reference 0.3 starting point — that value predates raising
-      // it to stay visible against the brighter horizon backdrop.
-      uBrightness: { value: 1.1 },
-      uBandWidth: { value: MILKY_WAY_BAND_WIDTH },
+      // Raised ~20% from the previous 1.1 for more overall presence, per
+      // request — texture (mottle/dust/core tint/sparkle) below is
+      // untouched, so this only scales the band's brightness, not its look.
+      uBrightness: { value: 1.32 },
+      // +12% over the shared MILKY_WAY_BAND_WIDTH (see RENDER_BAND_WIDTH
+      // above) — kept modest since a wider band risks reading as a soft
+      // "cloud" rather than a band with real texture, per the earlier
+      // lesson on this exact shader.
+      uBandWidth: { value: RENDER_BAND_WIDTH },
       uBandTilt: { value: MILKY_WAY_BAND_TILT },
       uBandRoll: { value: MILKY_WAY_BAND_ROLL },
       uBandCurve: { value: MILKY_WAY_BAND_CURVE },
