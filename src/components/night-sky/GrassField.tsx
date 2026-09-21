@@ -110,11 +110,23 @@ type LayerConfig = {
   // （mid/far/フィラー等）を一切変更せずに済ませるため — 実際に使うのは
   // xBiasEnabled:true のレイヤーだけで、そこでは必ず併せて指定する想定。
   xBiasEnabled?: boolean;
-  // e(t) = 1 - (1-t)^power の指数。大きいほど「左側で長くアップを維持して
-  // から急降下する」形になる。
-  xBiasCurvePower?: number;
+  // e(t) は rampStart までは 0 固定（完全にバイアスなし）、rampStart〜
+  // rampEnd の間で smoothstep によりなだらかにS字を描いて 0→1 へ遷移、
+  // rampEnd 以降は 1 固定（バイアス最大＝ほぼ消失）。旧 1-(1-t)^power 式は
+  // t=0（左端）で最も傾きが急という意図と逆の形をしており、左側の草まで
+  // 想定以上に早く縮小してしまっていたため、この明示的な3区間の式に置き
+  // 換えた。
+  xBiasRampStart?: number;
+  xBiasRampEnd?: number;
   xBiasPush?: number; // 右端で追加的にZ方向へ押し出す量（ワールド単位）
-  xBiasScaleRange?: [number, number]; // [左端でのスケール倍率, 右端でのスケール倍率]
+  // [左端でのスケール倍率, 右端でのスケール倍率] — 右端でもこの値より
+  // 小さくはならない。米粒サイズまで縮めるのではなく、代わりに
+  // xBiasCullStart 以降は個体を間引いて自然に消す。
+  xBiasScaleRange?: [number, number];
+  // e がこの値を超えたあたりから、e に比例した確率でインスタンスの配置
+  // 自体を間引き始める（サイズを縮めるのではなく本数を減らして消す）。
+  // 未指定なら間引きなし。
+  xBiasCullStart?: number;
   // 列(x位置)ごとに、その列が取りうる奥行き(z)のばらつき幅を狭める度合い。
   // 0〜1、1に近いほど右側でzをほぼ一点（手前側の境界）に揃える。
   xBiasDepthNarrowing?: number;
@@ -156,12 +168,26 @@ function scatterInstances(cfg: LayerConfig) {
       zFrac = Math.random();
     }
 
-    // e: 0(左端)〜1(右端)。1-(1-t)^power 型で、左は緩やか、右へ行くほど
-    // 加速して1へ収束する。
+    // e: 0(左端)〜1(右端)。rampStart までは0固定(完全にバイアスなし)、
+    // rampStart〜rampEnd でなだらかにS字を描いて0→1へ遷移、rampEnd以降は
+    // 1固定(ほぼ消失)。
     let e = 0;
     if (cfg.xBiasEnabled) {
       const tForRange = THREE.MathUtils.clamp((x + widthRange / 2) / widthRange, 0, 1);
-      e = 1 - Math.pow(1 - tForRange, cfg.xBiasCurvePower ?? 1);
+      e = THREE.MathUtils.smoothstep(tForRange, cfg.xBiasRampStart ?? 0, cfg.xBiasRampEnd ?? 1);
+    }
+
+    if (cfg.xBiasEnabled && cfg.xBiasCullStart !== undefined) {
+      // xBiasCullStart 以降、e に比例した確率で間引く。サイズを米粒まで
+      // 縮めるのではなく、本数自体を減らして自然に消える演出にする。
+      const cullChance = THREE.MathUtils.clamp(
+        (e - cfg.xBiasCullStart) / (1 - cfg.xBiasCullStart),
+        0,
+        1
+      );
+      if (Math.random() < cullChance) {
+        continue; // このインスタンスは配置しない（posRot/scaleVarは0のまま=非表示）
+      }
     }
 
     // 奥行きの散らばりを、右へ行くほど手前の境界(zEnd)寄りに狭める。
@@ -477,9 +503,11 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
         fadeEnd: 24,
         stratified: true,
         xBiasEnabled: true,
-        xBiasCurvePower: 2.4,
+        xBiasRampStart: 0.1,
+        xBiasRampEnd: 0.7,
         xBiasPush: 5.0,
-        xBiasScaleRange: [1.3, 0.05],
+        xBiasScaleRange: [1.3, 0.4],
+        xBiasCullStart: 0.5,
         xBiasDepthNarrowing: 0.6,
         cameraY,
         cameraZ,
@@ -505,9 +533,11 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
         fadeEnd: 36,
         stratified: true,
         xBiasEnabled: true,
-        xBiasCurvePower: 2.0,
+        xBiasRampStart: 0.08,
+        xBiasRampEnd: 0.8,
         xBiasPush: 2.8,
-        xBiasScaleRange: [1.05, 0.05],
+        xBiasScaleRange: [1.05, 0.35],
+        xBiasCullStart: 0.55,
         xBiasDepthNarrowing: 0.5,
         cameraY,
         cameraZ,
@@ -533,9 +563,11 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
         fadeStart: 38,
         fadeEnd: 50,
         xBiasEnabled: true,
-        xBiasCurvePower: 1.6,
+        xBiasRampStart: 0.05,
+        xBiasRampEnd: 0.9,
         xBiasPush: 1.2,
-        xBiasScaleRange: [1.0, 0.15],
+        xBiasScaleRange: [1.0, 0.3],
+        xBiasCullStart: 0.65,
         xBiasDepthNarrowing: 0.3,
         cameraY,
         cameraZ,
