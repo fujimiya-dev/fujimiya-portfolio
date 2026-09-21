@@ -37,7 +37,7 @@ const MoonGlow = forwardRef<THREE.Mesh>(function MoonGlow(_props, ref) {
   const uniforms = useMemo(() => ({ uColor: { value: new THREE.Color("#8fe0ab") } }), []);
   // Sized in world units, so it must shrink on the much narrower mobile
   // frustum or it overruns the whole screen instead of staying corner-confined.
-  const glowSize = tier === "mobile" ? 26 : 50;
+  const glowSize = tier === "low" ? 26 : tier === "mid" ? 38 : 50;
 
   return (
     <Billboard position={position}>

@@ -1,132 +1,240 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { useMoonPosition } from "./useMoonPosition";
+import { milkyWayBandMask } from "./milkyWayBand";
 
-// Magnitude-based star field, adapted from the procedural-starfield skill's
-// star.vert/star.frag (see procedural-stars-threejs/celestial-shaders.md),
-// recolored to a navy/mint palette instead of the skill's blackbody warm tones.
+// How strongly star placement is pulled toward the Milky Way band: 0 would
+// be a uniform sky, larger values concentrate more stars into the band.
+// Implemented as rejection sampling — draw a candidate position, accept it
+// with probability proportional to (1 + BAND_BIAS * bandMask), else redraw
+// — rather than a different overall distribution, so the total star count
+// is untouched and only *where* they land shifts.
+const BAND_BIAS = 2.2;
+const BAND_ACCEPT_CEILING = 1 + BAND_BIAS;
+const BAND_SAMPLE_ATTEMPTS = 8;
+
+// The camera never moves or rotates beyond ParallaxRig's small tilt, so
+// there is no reason to scatter stars over a full sphere shell (measured:
+// only ~62% of a full-shell placement ever actually lands in the visible
+// frustum, the rest silently discarded — wasted generation, and it also
+// forces a huge total count just to get a comfortable *visible* density,
+// which read as "static/snow" rather than a starfield). Sampling directly
+// within the frustum's angular cone at each depth means every star drawn
+// is one that can actually be seen. MARGIN pads the cone slightly so
+// ParallaxRig's subtle rotation never reveals an empty edge.
+const DEPTH_NEAR = 21;
+const DEPTH_FAR = 55;
+const FRUSTUM_MARGIN = 1.18;
+
+function sampleStarPosition(
+  tanV: number,
+  tanH: number,
+  cameraZ: number
+): [number, number, number] {
+  let candidate: [number, number, number] = [0, 0, 0];
+  for (let attempt = 0; attempt < BAND_SAMPLE_ATTEMPTS; attempt++) {
+    const depth = DEPTH_NEAR + Math.random() * (DEPTH_FAR - DEPTH_NEAR);
+    const halfH = depth * tanV * FRUSTUM_MARGIN;
+    const halfW = depth * tanH * FRUSTUM_MARGIN;
+
+    const x = (Math.random() * 2 - 1) * halfW;
+    const y = (Math.random() * 2 - 1) * halfH;
+    const z = cameraZ - depth;
+    candidate = [x, y, z];
+
+    const mask = milkyWayBandMask(x, y, z);
+    if (Math.random() * BAND_ACCEPT_CEILING <= 1 + BAND_BIAS * mask) {
+      return candidate;
+    }
+  }
+  // Ran out of attempts — place it anyway rather than dropping a star, so
+  // the total count stays exactly `count` regardless of bias.
+  return candidate;
+}
+
+// Mirrors shaderChunks.ts's EXTINCTION_GLSL exactly — needed on the JS side
+// too because brightness/size are precomputed once at generation time
+// (a star's direction never changes), not recomputed per frame.
+function atmosphericExtinctionJS(elevationY: number): number {
+  const horizonCloseness = 1 - Math.min(1, Math.abs(elevationY));
+  return 1 - horizonCloseness * horizonCloseness * 0.55;
+}
+
+function smoothstepJS(edge0: number, edge1: number, x: number): number {
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+const DIMMEST = 0.09;
+const FALLOFF = 26;
+const SATURATION = 0.55;
+// Halved from the original 1.6 — that produced ~7-14px stars (before even
+// accounting for the pixel-ratio bug below), reading as solid discs rather
+// than faint points.
+const BASE_SIZE = 0.8;
+const TWINKLE_SPEED = 3.8;
+const TWINKLE = 0.45;
+const TWINKLE_SHARE = 0.25;
+const TWINKLE_CALM = 0.35;
+
+const COOL = new THREE.Color("#bcd0ff");
+const WHITE = new THREE.Color("#fff6ec");
+const WARM = new THREE.Color("#ffc79a");
+const NEUTRAL = new THREE.Color("#f3f2f6");
+
+function starHueFor(t: number): THREE.Color {
+  if (t < 0.62) {
+    return COOL.clone().lerp(WHITE, t / 0.62);
+  }
+  return WHITE.clone().lerp(WARM, Math.pow((t - 0.62) / 0.38, 1.6));
+}
+
+// Rebuilt around an explicit, fully-specified pipeline: 4 named base hues
+// blended by a skewed random draw, brightness as a steep power-law with a
+// non-zero floor, size compressed by sqrt(lum) so it doesn't swing as
+// wildly as brightness does, and twinkle as two golden-ratio-related sine
+// waves whose amplitude is itself randomized per star (a minority flicker
+// hard, the rest stay calm) and boosted near the horizon. Glow is entirely
+// a core+halo shape in the fragment shader with custom (Src:One, Dst:One)
+// additive blending — never the scene's postprocess Bloom pass.
 const VERTEX_SHADER = /* glsl */ `
-  attribute float aMagnitude;
-  attribute float aColorMix;
+  attribute vec3 aColor;
+  attribute float aSize;
+  attribute float aPhase;
+  attribute float aRateMul;
+  attribute float aTwinkleAmt;
   uniform float uTime;
   uniform float uPixelRatio;
-  uniform float uBaseSizePx;
-  uniform vec3 uMoonDir;
-  varying float vBrightness;
-  varying float vColorMix;
-
-  float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  varying vec3 vColor;
 
   void main() {
-    vColorMix = aColorMix;
+    float rate = ${TWINKLE_SPEED.toFixed(3)} * aRateMul;
+    // Two sine waves related by the golden ratio (both in frequency and
+    // phase) so the flicker never settles into a repeating beat.
+    float wave = 0.62 * sin(uTime * rate + aPhase) + 0.38 * sin(uTime * rate * 1.618 + aPhase * 2.7);
+    float flicker = 1.0 + aTwinkleAmt * wave;
 
-    // Each magnitude step is ~2.512x dimmer (Pogson's ratio).
-    float brightness = pow(2.512, -aMagnitude);
-
-    float size = uBaseSizePx * pow(brightness, 0.35);
-    size = clamp(size, 0.4, 3.2);
-
-    // Multi-frequency twinkle, unique per star via hash-seeded phase.
-    float phase = hash(position.xy + position.z) * 6.283;
-    float twinkle = 1.0
-      + sin(uTime * 2.3 + phase) * 0.32
-      + sin(uTime * 5.7 + phase * 2.0) * 0.18
-      + sin(uTime * 11.0 + phase * 3.0) * 0.1;
-    // Brighter stars twinkle less (their apparent disc is more stable).
-    float twinkleAmt = mix(1.0, twinkle, clamp(1.0 - brightness * 0.4, 0.25, 1.0));
-
-    // Stars angularly close to the moon catch a touch of extra brightness —
-    // a gentle stand-in for "washed out by moonlight" that still reads as
-    // sparkle rather than the fainter ones simply vanishing.
-    float moonAlign = max(dot(normalize(position), uMoonDir), 0.0);
-    float moonBoost = pow(moonAlign, 3.5) * 0.3;
-
-    vBrightness = brightness * twinkleAmt * (1.0 + moonBoost);
-    // A touch of size pulse alongside the brightness pulse reads as an
-    // actual glinting sparkle rather than just a dimmer/brighter dot.
-    size *= mix(1.0, clamp(twinkleAmt, 0.5, 1.6), 0.35);
+    vColor = aColor * flicker;
 
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
     float dist = max(-mvPosition.z, 1.0);
-    float screenSize = size * uPixelRatio * (95.0 / dist);
-    float capSize = brightness > 1.0 ? 13.0 : 4.0;
-    gl_PointSize = clamp(screenSize, 0.6, capSize);
+    // sqrt(flicker) halves the size swing relative to the brightness swing
+    // — without it, twinkling reads as "blinking discs" instead of stars
+    // glinting.
+    float screenSize = aSize * sqrt(max(flicker, 0.0)) * uPixelRatio * (95.0 / dist);
+    gl_PointSize = clamp(screenSize, 0.5, 20.0);
     gl_Position = projectionMatrix * mvPosition;
   }
 `;
 
 const FRAGMENT_SHADER = /* glsl */ `
-  uniform vec3 uColorWhite;
-  uniform vec3 uColorMint;
-  varying float vBrightness;
-  varying float vColorMix;
+  varying vec3 vColor;
 
   void main() {
-    vec2 uv = gl_PointCoord - 0.5;
-    float dist = length(uv);
+    // Normalized to the point sprite's inscribed circle (0 at center, 1 at
+    // the circle's edge) with a hard discard beyond it. Without this, the
+    // square corners of the point sprite (still non-zero under the old
+    // unnormalized falloff, and CustomBlending(Src:One, Dst:One) doesn't
+    // attenuate by alpha at all) show up as a visible square — this is
+    // what actually caused the rough/sandy look, especially at the ~1px
+    // sizes most stars render at, since there just aren't enough fragment
+    // samples for a soft gradient to read as round at that size; a clean
+    // discard at least guarantees the corners are truly empty.
+    vec2 uv = gl_PointCoord - vec2(0.5);
+    float d = length(uv) * 2.0;
+    if (d > 1.0) discard;
 
-    float core = smoothstep(0.5, 0.05, dist);
-    float glow = exp(-dist * dist / (0.35 * 0.35)) * 0.35;
-    float alpha = core + glow;
+    float core = exp(-d * d * 8.0);
+    float halo = exp(-d * d * 1.6) * 0.42;
+    float glow = core + halo;
 
-    // Diffraction-spike hint, only for the brightest handful of stars.
-    float spike = 0.0;
-    if (vBrightness > 1.1) {
-      float angle = atan(uv.y, uv.x);
-      spike = pow(abs(cos(angle * 2.0)), 32.0) * (1.0 - dist * 3.0);
-      spike = max(spike, 0.0) * (vBrightness - 1.1) * 0.5;
-    }
+    vec3 finalColor = vColor * glow;
+    // Kept under the scene's shared Bloom luminance threshold (0.7) even
+    // though gain can push vColor above 1.0 for the brightest stars — the
+    // blown-out core with a colored halo around it must come entirely from
+    // this shader's own core/halo shape, never from Bloom rehashing a
+    // tiny bright point into a blocky mip-blur artifact.
+    finalColor = min(finalColor, vec3(0.62));
 
-    vec3 color = mix(uColorWhite, uColorMint, vColorMix);
-    // Visibility floor keeps faint stars as soft points without crossing the
-    // bloom threshold; only genuinely bright stars push past it.
-    float visibility = clamp(0.32 + vBrightness * 0.45, 0.32, 1.6);
-
-    vec3 finalColor = color * visibility;
-    gl_FragColor = vec4(finalColor, (alpha + spike) * min(alpha + spike, 1.0));
+    gl_FragColor = vec4(finalColor, clamp(glow, 0.0, 1.0));
   }
 `;
 
 export default function Starfield({ count }: { count: number }) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
-  const moonPos = useMoonPosition();
+  const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
+  const size = useThree((s) => s.size);
 
-  const { positions, magnitudes, colorMixes } = useMemo(() => {
+  const { positions, colors, sizes, phases, rateMuls, twinkleAmts } = useMemo(() => {
     const positions = new Float32Array(count * 3);
-    const magnitudes = new Float32Array(count);
-    const colorMixes = new Float32Array(count);
+    const colors = new Float32Array(count * 3);
+    const sizes = new Float32Array(count);
+    const phases = new Float32Array(count);
+    const rateMuls = new Float32Array(count);
+    const twinkleAmts = new Float32Array(count);
 
-    const minMagnitude = -1.0;
-    const maxMagnitude = 6.2;
+    const vFov = THREE.MathUtils.degToRad(camera.fov);
+    const tanV = Math.tan(vFov / 2);
+    const tanH = tanV * camera.aspect;
+    const cameraZ = camera.position.z;
 
     for (let i = 0; i < count; i++) {
-      const radius = 16 + Math.random() * 28;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+      const [x, y, z] = sampleStarPosition(tanV, tanH, cameraZ);
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
 
-      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta) * 0.6;
-      positions[i * 3 + 2] = -Math.abs(radius * Math.cos(phi)) - 9;
+      const dirLen = Math.hypot(x, y, z) || 1;
+      const dirY = y / dirLen;
 
-      // Astronomical magnitude distribution: many faint, few bright.
-      magnitudes[i] = minMagnitude + Math.pow(Math.random(), 0.4) * (maxMagnitude - minMagnitude);
-      colorMixes[i] = Math.random() < 0.25 ? 0.5 + Math.random() * 0.5 : 0;
+      let lum = DIMMEST + (1 - DIMMEST) * Math.pow(Math.random(), FALLOFF);
+      lum *= atmosphericExtinctionJS(dirY);
+      lum = Math.min(1, Math.max(0, lum));
+
+      const hue = starHueFor(Math.random());
+      const neutralMix = 1 - SATURATION * (0.3 + 0.7 * lum);
+      const shaded = hue.clone().lerp(NEUTRAL, neutralMix);
+      const gain = lum * (1 + 0.18 * lum * lum);
+      shaded.multiplyScalar(gain);
+
+      colors[i * 3] = shaded.r;
+      colors[i * 3 + 1] = shaded.g;
+      colors[i * 3 + 2] = shaded.b;
+
+      sizes[i] = BASE_SIZE * (0.62 + 1.5 * Math.sqrt(lum));
+
+      phases[i] = Math.random() * Math.PI * 2;
+      rateMuls[i] = 0.6 + Math.random() * 0.9;
+
+      // Stars near the horizon twinkle more (more atmosphere to shimmer
+      // through); a random minority flicker hard while the rest stay calm,
+      // so the whole sky doesn't shimmer in unison like static. Brighter
+      // (larger-drawn) stars are damped toward 0.6x so their twinkle isn't
+      // disproportionately eye-catching just because they cover more
+      // pixels — without this, the sky's biggest stars flickered the
+      // hardest, which read as noisy.
+      const low = 1 - smoothstepJS(0.05, 0.55, dirY);
+      const isStrong = Math.random() < TWINKLE_SHARE;
+      twinkleAmts[i] =
+        TWINKLE * (0.6 + 0.4 * (1 - lum)) * (0.35 + 0.65 * low) * (isStrong ? 1 : TWINKLE_CALM);
     }
 
-    return { positions, magnitudes, colorMixes };
-  }, [count]);
+    return { positions, colors, sizes, phases, rateMuls, twinkleAmts };
+    // Regenerates on resize too — the frustum's shape (and so the volume
+    // stars are sampled within) changes with aspect ratio.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [count, camera, size.width, size.height]);
 
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uPixelRatio: { value: typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 2) : 1 },
-      uBaseSizePx: { value: 2.2 },
-      uColorWhite: { value: new THREE.Color("#eafcef") },
-      uColorMint: { value: new THREE.Color("#a9d8c2") },
-      uMoonDir: { value: new THREE.Vector3(0, 0, -1) },
+      // Seeded from the renderer's actual current ratio rather than the raw
+      // display's window.devicePixelRatio — kept in sync every frame below,
+      // since it changes with the quality tier's dpr ceiling and with
+      // PerformanceMonitor's live dprBoost toggling, not just the display.
+      uPixelRatio: { value: 1 },
     }),
     []
   );
@@ -134,9 +242,11 @@ export default function Starfield({ count }: { count: number }) {
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
-      materialRef.current.uniforms.uMoonDir.value
-        .set(moonPos[0], moonPos[1], moonPos[2])
-        .normalize();
+      // gl.getPixelRatio() is what the renderer is actually using right
+      // now (clamped by the Canvas's dpr prop) — the one value that's
+      // guaranteed to match what gl_PointSize is measured against,
+      // regardless of the display's own raw devicePixelRatio.
+      materialRef.current.uniforms.uPixelRatio.value = state.gl.getPixelRatio();
     }
   });
 
@@ -144,8 +254,11 @@ export default function Starfield({ count }: { count: number }) {
     <points>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-        <bufferAttribute attach="attributes-aMagnitude" args={[magnitudes, 1]} />
-        <bufferAttribute attach="attributes-aColorMix" args={[colorMixes, 1]} />
+        <bufferAttribute attach="attributes-aColor" args={[colors, 3]} />
+        <bufferAttribute attach="attributes-aSize" args={[sizes, 1]} />
+        <bufferAttribute attach="attributes-aPhase" args={[phases, 1]} />
+        <bufferAttribute attach="attributes-aRateMul" args={[rateMuls, 1]} />
+        <bufferAttribute attach="attributes-aTwinkleAmt" args={[twinkleAmts, 1]} />
       </bufferGeometry>
       <shaderMaterial
         ref={materialRef}
@@ -154,7 +267,10 @@ export default function Starfield({ count }: { count: number }) {
         uniforms={uniforms}
         transparent
         depthWrite={false}
-        blending={THREE.AdditiveBlending}
+        blending={THREE.CustomBlending}
+        blendEquation={THREE.AddEquation}
+        blendSrc={THREE.OneFactor}
+        blendDst={THREE.OneFactor}
       />
     </points>
   );
