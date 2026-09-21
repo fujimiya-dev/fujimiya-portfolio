@@ -532,6 +532,13 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
         petalThreshold: 0.9,
         fadeStart: 38,
         fadeEnd: 50,
+        xBiasEnabled: true,
+        xBiasCurvePower: 1.6,
+        xBiasPush: 1.2,
+        xBiasScaleRange: [1.0, 0.15],
+        xBiasDepthNarrowing: 0.3,
+        cameraY,
+        cameraZ,
       },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
