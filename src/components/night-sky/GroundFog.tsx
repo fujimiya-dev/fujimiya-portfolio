@@ -4,23 +4,24 @@ import { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
-// A midground depth cue: previously the scene only had a sharp foreground
-// (grass) and a distant background (stars/Milky Way/moon), with nothing in
-// between to read as "space" — a single low, wide plane of drifting haze,
-// positioned behind the grass but well in front of the star field, gives a
-// third depth layer. It uses the same atmospheric-extinction idea already
-// applied to stars and the sky (things fade/desaturate with distance): the
-// fog is thickest near the ground and fades both upward and toward its own
-// edges, so it reads as haze rather than a solid wall. Normal (not
-// additive) blending on purpose — fog's job is to obscure/wash out what's
+// A thin ground-hugging mist among the grass roots — now that the scene has
+// real terrain and a 3-layer grass field, this sits close to the near/mid
+// layers' base rather than acting as its own separate depth layer the way
+// it did over the old flat ground. It uses the same atmospheric-extinction
+// idea already applied to stars/terrain (things fade/desaturate with
+// distance): thickest right at ground height, fading both upward and
+// toward its own edges, so it reads as haze rather than a solid wall.
+// Normal (not additive) blending — fog's job is to obscure/wash out what's
 // behind it, not add extra light, unlike the scene's glowing elements.
-const FOG_DEPTH_Z = -18;
-// Raised from -5 (the grass blades' own base height) to sit closer to the
-// grass tips instead — at -5 the band's screen-space footprint fell almost
-// entirely behind the dense, opaque near-camera grass silhouettes and was
-// never actually visible. Nearer the tip line, it shows through the gaps
-// between blades and in the open band between grass and stars instead.
-const GROUND_Y = -3.4;
+//
+// Previous round's lesson: positioned too low (right at the grass' own
+// root height), the band's screen-space footprint fell almost entirely
+// behind the dense, opaque near-camera grass silhouettes and was
+// effectively invisible even at a real, non-trivial opacity — it needs to
+// sit noticeably above the terrain's own average height to actually show
+// through the gaps between blades instead of being hidden behind them.
+const FOG_DEPTH_Z = -10;
+const GROUND_Y = -4.6; // ~1.8 above terrain's average ground height (-6.4)
 const FRUSTUM_MARGIN = 1.25;
 
 const VERTEX_SHADER = /* glsl */ `
@@ -114,9 +115,14 @@ export default function GroundFog({ octaves }: { octaves: number }) {
     () => ({
       uTime: { value: 0 },
       uGroundY: { value: GROUND_Y },
-      uThickness: { value: 7 },
-      uOpacity: { value: 0.5 },
-      uFogColor: { value: new THREE.Color("#48597a") },
+      // Thin this time — "ごく低い位置" — a low band hugging the grass
+      // roots, not the tall wall the previous round used.
+      uThickness: { value: 2.2 },
+      uOpacity: { value: 0.45 },
+      // A dusty blue-teal — close enough to the terrain's own haze/sky
+      // family to read as belonging to the scene, but light enough against
+      // the dark ground to stay legible as mist rather than disappearing.
+      uFogColor: { value: new THREE.Color("#3a5568") },
       uOctaves: { value: octaves },
       uHalfWidth: { value: halfWidth },
     }),
