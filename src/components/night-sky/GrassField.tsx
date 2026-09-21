@@ -504,6 +504,13 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
         fadeStart: 26,
         fadeEnd: 36,
         stratified: true,
+        xBiasEnabled: true,
+        xBiasCurvePower: 2.0,
+        xBiasPush: 2.8,
+        xBiasScaleRange: [1.05, 0.05],
+        xBiasDepthNarrowing: 0.5,
+        cameraY,
+        cameraZ,
       },
       // Far — small, sparse, sunk deep into the same navy the sky/terrain
       // haze uses, per the atmospheric-extinction reasoning applied
