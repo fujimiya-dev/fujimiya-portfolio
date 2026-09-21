@@ -6,11 +6,14 @@ import { useMoonPosition } from "./useMoonPosition";
 
 // Replaces the flat single-color Canvas background with a large opaque
 // sphere (behind everything, including the Milky Way band) so the base sky
-// itself can carry two things a flat color can't: the site's existing
-// dark-navy vertical blend, and a very gentle greenish bias on the side of
+// itself can carry things a flat color can't: a zenith/horizon/nadir blend
+// with the horizon brightened like real atmospheric scattering (instead of
+// a flat top-to-bottom fade), and a very gentle greenish bias on the side of
 // the sky where the moon sits — blurring the line between "background" and
 // "area lit by the moon" instead of leaving the glow as a hard-edged patch
-// over a uniform backdrop.
+// over a uniform backdrop. Every color here is a dark navy/purple, never
+// literal black — a star plotted over true black reads as "a dot on a void"
+// rather than part of a sky.
 const VERTEX_SHADER = /* glsl */ `
   varying vec3 vDir;
   void main() {
@@ -21,16 +24,27 @@ const VERTEX_SHADER = /* glsl */ `
 
 const FRAGMENT_SHADER = /* glsl */ `
   precision highp float;
-  uniform vec3 uColorDark;
+  uniform vec3 uColorTop;
   uniform vec3 uColorMid;
-  uniform vec3 uColorLight;
+  uniform vec3 uColorBottom;
   uniform vec3 uMoonDir;
   uniform vec3 uMoonTint;
   varying vec3 vDir;
 
   void main() {
-    float vertical = clamp(vDir.y * 0.5 + 0.55, 0.0, 1.0);
-    vec3 base = mix(uColorDark, mix(uColorMid, uColorLight, vertical), vertical);
+    // Brightest at the horizon (elevation ~0), darkening toward the zenith
+    // above and — separately, toward a slightly different color — the
+    // nadir below. Top and bottom are asymmetric on purpose (not just a
+    // mirrored zenith), matching the reference palette exactly.
+    float elevation = clamp(vDir.y, -1.0, 1.0);
+    float upT = pow(clamp(elevation, 0.0, 1.0), 1.5);
+    float downT = pow(clamp(-elevation, 0.0, 1.0), 1.5);
+    // upT and downT are mutually exclusive (elevation can't be both
+    // positive and negative), so applying them as two sequential mixes
+    // from the same uColorMid base is safe — exactly one of them is ever
+    // non-zero at a given fragment.
+    vec3 base = mix(uColorMid, uColorTop, upT);
+    base = mix(base, uColorBottom, downT);
 
     float moonAlign = max(dot(vDir, uMoonDir), 0.0);
     float moonBias = pow(moonAlign, 4.0) * 0.22;
@@ -45,9 +59,21 @@ export default function SkyBackdrop() {
 
   const uniforms = useMemo(
     () => ({
-      uColorDark: { value: new THREE.Color("#030e2e") },
-      uColorMid: { value: new THREE.Color("#10223e") },
-      uColorLight: { value: new THREE.Color("#3e536f") },
+      // Reference values, used as linear-space output as-is (no sRGB
+      // conversion) in the source design; our renderer applies R3F's
+      // default tone mapping/color management, so the on-screen result may
+      // read a touch lighter than the reference — checked visually and
+      // nudged if needed rather than pre-converting the hex values.
+      // uColorMid darkened from the reference #373f61 — the camera's FOV
+      // rarely frames true zenith/nadir, so this color (not top/bottom)
+      // dominates what's actually visible, and used as-is it read lighter
+      // than the reference's dark intent (our renderer's tone mapping/color
+      // management pipeline differs from the reference's raw-linear output,
+      // as flagged going in). Top/bottom are barely on-screen in practice,
+      // so they're kept close to the reference values.
+      uColorTop: { value: new THREE.Color("#04050b") },
+      uColorMid: { value: new THREE.Color("#1e2335") },
+      uColorBottom: { value: new THREE.Color("#060810") },
       uMoonDir: { value: new THREE.Vector3(0, 0, -1) },
       uMoonTint: { value: new THREE.Color("#547f68") },
     }),

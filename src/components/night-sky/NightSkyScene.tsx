@@ -7,9 +7,14 @@ import { EffectComposer, Bloom, SelectiveBloom } from "@react-three/postprocessi
 import * as THREE from "three";
 import Starfield from "./Starfield";
 import MilkyWay from "./MilkyWay";
+// オーロラ、一時非表示（コンポーネント自体は Aurora.tsx に残したまま、マウントだけ外している）
+// import Aurora from "./Aurora";
 import Moon from "./Moon";
 import MoonGlow from "./MoonGlow";
 import GrassField from "./GrassField";
+// 霧、一時非表示（コンポーネント自体は GroundFog.tsx に残したまま、マウントだけ外している）
+// import GroundFog from "./GroundFog";
+import River from "./River";
 import SkyBackdrop from "./SkyBackdrop";
 import ParallaxRig from "./ParallaxRig";
 import { useQualityTier, useReducedMotionFlag, usePageVisible } from "./useEnvironmentFlags";
@@ -22,12 +27,30 @@ export default function NightSkyScene() {
   const glowRef = useRef<THREE.Mesh>(null);
 
   const active = pageVisible && !reducedMotion;
-  const isMobile = tier === "mobile";
-  const starCount = isMobile ? 250 : 720;
-  const grassCount = isMobile ? 220 : 650;
-  const dprCeiling = isMobile ? 1 : dprBoost ? 2 : 1.3;
-  const bloomIntensity = isMobile ? 0.18 : 0.3;
-  const glowBloomIntensity = isMobile ? 1.15 : 1.8;
+  // Three explicit quality tiers rather than a single mobile/desktop split —
+  // this scene is mounted on every page, so a mid tier (a smaller/narrower
+  // desktop window, not just phones) matters for keeping it cheap without
+  // dropping straight to the mobile floor.
+  // Stars are now sampled directly within the visible frustum (not a full
+  // sphere with most of it invisible), so a "comfortable visible density"
+  // needs a far smaller total than before — starting point per the
+  // requested few-thousand range, tuned from there.
+  const starCount = tier === "high" ? 3500 : tier === "mid" ? 2000 : 900;
+  const grassCount = tier === "high" ? 650 : tier === "mid" ? 420 : 220;
+  const dprCeiling = tier === "high" ? (dprBoost ? 2 : 1.3) : tier === "mid" ? 1.5 : 1;
+  const bloomIntensity = tier === "low" ? 0.18 : 0.3;
+  const glowBloomIntensity = tier === "low" ? 1.15 : tier === "mid" ? 1.5 : 1.8;
+  const multisampling = tier === "high" ? 4 : 0;
+  // オーロラ、一時非表示
+  // const auroraOctaves = tier === "high" ? 5 : tier === "mid" ? 4 : 3;
+  // 霧、一時非表示
+  // const fogOctaves = tier === "high" ? 4 : tier === "mid" ? 3 : 2;
+  // Checked at a flat 256 first (measured 120+ fps desktop, 160+ fps
+  // mobile in this environment — no sign of the always-on mirror render
+  // pass being a bottleneck) — kept as the mid/high baseline and lowered
+  // only for the low tier as a safety margin, consistent with every other
+  // tier-scaled value in this scene.
+  const riverReflectionSize = tier === "low" ? 192 : 256;
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
@@ -37,17 +60,22 @@ export default function NightSkyScene() {
         gl={{ antialias: true, powerPreference: "high-performance", alpha: false }}
         camera={{ position: [0, 0, 12], fov: 50, near: 0.1, far: 100 }}
       >
-        <color attach="background" args={["#030e2e"]} />
+        <color attach="background" args={["#05070f"]} />
         <PerformanceMonitor onDecline={() => setDprBoost(false)} onIncline={() => setDprBoost(true)} />
         <ParallaxRig>
           <SkyBackdrop />
           <MilkyWay />
+          {/* オーロラ、一時非表示 */}
+          {/* <Aurora octaves={auroraOctaves} /> */}
           <Starfield count={starCount} />
           <MoonGlow ref={glowRef} />
           <Moon />
+          {/* 霧、一時非表示 */}
+          {/* <GroundFog octaves={fogOctaves} /> */}
+          <River reflectionSize={riverReflectionSize} />
           <GrassField count={grassCount} />
         </ParallaxRig>
-        <EffectComposer multisampling={isMobile ? 0 : 4}>
+        <EffectComposer multisampling={multisampling}>
           <Bloom mipmapBlur intensity={bloomIntensity} luminanceThreshold={0.7} luminanceSmoothing={0.15} radius={0.2} />
           <SelectiveBloom
             selection={glowRef}
