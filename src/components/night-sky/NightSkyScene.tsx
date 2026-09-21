@@ -41,7 +41,7 @@ export default function NightSkyScene() {
   // needs a far smaller total than before — starting point per the
   // requested few-thousand range, tuned from there.
   const starCount = tier === "high" ? 3500 : tier === "mid" ? 2000 : 900;
-  const grassCount = tier === "high" ? 650 : tier === "mid" ? 420 : 220;
+  const grassCount = tier === "high" ? 900 : tier === "mid" ? 580 : 300;
   // もや、一時非表示
   // const mistPlaneCount = tier === "low" ? 2 : 3;
   const dprCeiling = tier === "high" ? (dprBoost ? 2 : 1.3) : tier === "mid" ? 1.5 : 1;
