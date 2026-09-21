@@ -546,10 +546,10 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
       // haze uses, per the atmospheric-extinction reasoning applied
       // everywhere else in this scene. Left exactly as it was.
       {
-        count: Math.round(count * 0.2),
+        count: Math.round(count * 0.32),
         nearZ: -14,
-        farZ: -30,
-        widthRange: widthAt(-30),
+        farZ: -48,
+        widthRange: widthAt(-48),
         bladeWidth: 0.03,
         bladeSegments: 3,
         scaleXRange: [0.35, 0.6],
@@ -560,8 +560,8 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
         brightnessMul: 0.6,
         hazeAmount: 0.48,
         petalThreshold: 0.9,
-        fadeStart: 38,
-        fadeEnd: 50,
+        fadeStart: 54,
+        fadeEnd: 68,
         xBiasEnabled: true,
         xBiasRampStart: 0.05,
         xBiasRampEnd: 0.9,
