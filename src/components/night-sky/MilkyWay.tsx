@@ -237,8 +237,12 @@ export default function MilkyWay() {
       uCoreBoost: { value: 1.3 },
       uDustDepth: { value: 0.8 },
       uDustWidth: { value: 0.04 },
-      uCoreColor: { value: new THREE.Color("#cdeedd") },
-      uEdgeColor: { value: new THREE.Color("#3e536f") },
+      // Recolored toward a reference image's teal/mint night sky (sampled
+      // directly from it: background gradient ~#093851-#22606d near the
+      // brighter side, star particles ~#8ef1b4) — same band shape/texture
+      // below, just a color swap.
+      uCoreColor: { value: new THREE.Color("#b8f5d4") },
+      uEdgeColor: { value: new THREE.Color("#123c42") },
     }),
     []
   );

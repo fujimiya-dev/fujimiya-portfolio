@@ -79,10 +79,14 @@ const TWINKLE = 0.45;
 const TWINKLE_SHARE = 0.25;
 const TWINKLE_CALM = 0.35;
 
-const COOL = new THREE.Color("#bcd0ff");
-const WHITE = new THREE.Color("#fff6ec");
-const WARM = new THREE.Color("#ffc79a");
-const NEUTRAL = new THREE.Color("#f3f2f6");
+// Recolored toward a reference image's vivid mint/lime star field (sampled
+// directly from it: individual star particles cluster around #62d496 to
+// #a1fbc3) — same cool→white→warm blend pipeline below, just reskinned onto
+// a green family instead of blue-white-orange.
+const COOL = new THREE.Color("#6fe0a8");
+const WHITE = new THREE.Color("#eafff0");
+const WARM = new THREE.Color("#c9ffa0");
+const NEUTRAL = new THREE.Color("#bdf5cf");
 
 function starHueFor(t: number): THREE.Color {
   if (t < 0.62) {
