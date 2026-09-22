@@ -51,7 +51,11 @@ const MoonGlow = forwardRef<THREE.Mesh>(function MoonGlow(_props, ref) {
   // falloff above — see that comment. The tradeoff is a noticeably more
   // contained glow (less ambient sky tint spreading away from the Moon)
   // than the earlier, larger sizing.
-  const glowSize = tier === "low" ? 24 : tier === "mid" ? 34 : 45;
+  // Nudged up ~15% per follow-up feedback asking for just a touch more —
+  // deliberately small, since the same falloff exponent means a bigger
+  // jump here starts reapproaching the bright-ring problem it was tuned
+  // to avoid.
+  const glowSize = tier === "low" ? 28 : tier === "mid" ? 39 : 52;
 
   return (
     <Billboard position={position}>
