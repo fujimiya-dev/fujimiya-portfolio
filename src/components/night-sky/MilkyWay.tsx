@@ -240,9 +240,12 @@ export default function MilkyWay() {
       // Recolored toward a reference image's teal/mint night sky (sampled
       // directly from it: background gradient ~#093851-#22606d near the
       // brighter side, star particles ~#8ef1b4) — same band shape/texture
-      // below, just a color swap.
-      uCoreColor: { value: new THREE.Color("#b8f5d4") },
-      uEdgeColor: { value: new THREE.Color("#123c42") },
+      // below, just a color swap. uCoreColor pushed further toward a more
+      // saturated emerald to match the follow-up star-color intensification
+      // (Starfield.tsx) — the original was pale enough to read closer to
+      // white than green.
+      uCoreColor: { value: new THREE.Color("#57e6a0") },
+      uEdgeColor: { value: new THREE.Color("#123d34") },
     }),
     []
   );
