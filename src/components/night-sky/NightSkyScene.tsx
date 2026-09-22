@@ -41,7 +41,10 @@ export default function NightSkyScene() {
   // needs a far smaller total than before — starting point per the
   // requested few-thousand range, tuned from there.
   const starCount = tier === "high" ? 3500 : tier === "mid" ? 2000 : 900;
-  const grassCount = tier === "high" ? 1150 : tier === "mid" ? 740 : 380;
+  // 奥行方向(near/mid/far全レイヤー)の草の量を全体的に底上げ — 元の
+  // 1150/740/380から約20%増。near/midの比率を上げた前回とは別に、count
+  // 自体を上げることでfarを含む全レイヤーに均等に反映させる。
+  const grassCount = tier === "high" ? 1380 : tier === "mid" ? 890 : 460;
   // もや、一時非表示
   // const mistPlaneCount = tier === "low" ? 2 : 3;
   const dprCeiling = tier === "high" ? (dprBoost ? 2 : 1.3) : tier === "mid" ? 1.5 : 1;
