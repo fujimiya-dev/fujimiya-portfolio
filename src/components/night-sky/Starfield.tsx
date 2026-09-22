@@ -82,11 +82,14 @@ const TWINKLE_CALM = 0.35;
 // Recolored toward a reference image's vivid mint/lime star field (sampled
 // directly from it: individual star particles cluster around #62d496 to
 // #a1fbc3) — same cool→white→warm blend pipeline below, just reskinned onto
-// a green family instead of blue-white-orange.
-const COOL = new THREE.Color("#6fe0a8");
-const WHITE = new THREE.Color("#eafff0");
-const WARM = new THREE.Color("#c9ffa0");
-const NEUTRAL = new THREE.Color("#bdf5cf");
+// a green family instead of blue-white-orange. Pushed further toward a more
+// saturated emerald per follow-up feedback — WHITE and NEUTRAL in particular
+// were close enough to true white/pale mint that dim and "white-blended"
+// stars barely read as green at all.
+const COOL = new THREE.Color("#3ecf8e");
+const WHITE = new THREE.Color("#a8f5c8");
+const WARM = new THREE.Color("#8ef0a0");
+const NEUTRAL = new THREE.Color("#4fd896");
 
 function starHueFor(t: number): THREE.Color {
   if (t < 0.62) {
