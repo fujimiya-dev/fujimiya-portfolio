@@ -71,11 +71,16 @@ export default function SkyBackdrop() {
       // management pipeline differs from the reference's raw-linear output,
       // as flagged going in). Top/bottom are barely on-screen in practice,
       // so they're kept close to the reference values.
-      uColorTop: { value: new THREE.Color("#04050b") },
-      uColorMid: { value: new THREE.Color("#1e2335") },
-      uColorBottom: { value: new THREE.Color("#060810") },
+      // Recolored toward a reference image's teal/emerald night sky
+      // (sampled directly from it: dominant mid-sky background
+      // ~#07293a-#0b3247, brightening toward ~#246a73-#276d73 on the
+      // moon's side) — same zenith/mid/nadir + moon-tint structure as
+      // before, just a color swap.
+      uColorTop: { value: new THREE.Color("#020d16") },
+      uColorMid: { value: new THREE.Color("#0a2e3f") },
+      uColorBottom: { value: new THREE.Color("#041018") },
       uMoonDir: { value: new THREE.Vector3(0, 0, -1) },
-      uMoonTint: { value: new THREE.Color("#547f68") },
+      uMoonTint: { value: new THREE.Color("#2b7a80") },
     }),
     []
   );

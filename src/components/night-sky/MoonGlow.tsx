@@ -26,7 +26,17 @@ const FRAGMENT_SHADER = /* glsl */ `
   void main() {
     vec2 uv = (vUv - 0.5) * 2.0;
     float d = length(uv);
-    float falloff = pow(clamp(1.0 - d, 0.0, 1.0), 1.45);
+    // Steepened from 2.2 — at that value the glow's own alpha right at the
+    // Moon's edge (d ≈ moonRadius / glowHalfWidth) was still substantial,
+    // and once Moon.tsx's own lighting became genuinely flat (no more
+    // NdotL-driven shading), that leftover brightness read as an obvious
+    // bright rim around an otherwise uniform disc — worse than before,
+    // when the disc's own shading variation had hidden it. A much steeper
+    // falloff (plus the smaller glowSize below) pushes the glow's value at
+    // the Moon's edge down close to zero, so it doesn't visibly ring the
+    // disc; the visible bloom now comes almost entirely from inside the
+    // Moon's own silhouette outward into the sky, not wrapping its edge.
+    float falloff = pow(clamp(1.0 - d, 0.0, 1.0), 10.0);
     gl_FragColor = vec4(uColor, falloff);
   }
 `;
@@ -37,7 +47,15 @@ const MoonGlow = forwardRef<THREE.Mesh>(function MoonGlow(_props, ref) {
   const uniforms = useMemo(() => ({ uColor: { value: new THREE.Color("#8fe0ab") } }), []);
   // Sized in world units, so it must shrink on the much narrower mobile
   // frustum or it overruns the whole screen instead of staying corner-confined.
-  const glowSize = tier === "low" ? 26 : tier === "mid" ? 38 : 50;
+  // Shrunk further (from a ~1.3x-of-original pass) alongside the steeper
+  // falloff above — see that comment. The tradeoff is a noticeably more
+  // contained glow (less ambient sky tint spreading away from the Moon)
+  // than the earlier, larger sizing.
+  // Nudged up ~15% per follow-up feedback asking for just a touch more —
+  // deliberately small, since the same falloff exponent means a bigger
+  // jump here starts reapproaching the bright-ring problem it was tuned
+  // to avoid.
+  const glowSize = tier === "low" ? 28 : tier === "mid" ? 39 : 52;
 
   return (
     <Billboard position={position}>
