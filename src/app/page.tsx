@@ -114,6 +114,8 @@ export default async function HomePage() {
             フロントからバックまで幅広く手がけつつ、特にUIデザインへのこだわりがあります。
           </p>
         </RevealFade>
+
+        <div className="mx-auto mb-4 mt-16 max-w-xl border-t border-white/10" />
         </div>
 
         <div className="mt-12 flex justify-center">
