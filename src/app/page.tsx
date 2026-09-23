@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { RevealGlow, RevealFade } from "@/components/RevealSection";
+import IntroOverlay from "@/components/IntroOverlay";
 import { getDictionary } from "@/i18n/server";
 import { TbBrandPython, TbBrandTypescript, TbBrandCSharp, TbBrandCpp, TbBrandUnity } from "react-icons/tb";
 import { FaJava } from "react-icons/fa";
@@ -25,6 +26,8 @@ export default async function HomePage() {
 
   return (
     <>
+      <IntroOverlay />
+
       <section className="flex min-h-screen flex-col items-center justify-end px-5 pb-20 text-center" />
 
       <section id="about" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-24 pt-16">

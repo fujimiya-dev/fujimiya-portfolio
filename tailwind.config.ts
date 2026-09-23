@@ -31,6 +31,7 @@ const config: Config = {
         sans: ["var(--font-zen-kaku)", "sans-serif"],
         display: ["var(--font-display)", "serif"],
         label: ["var(--font-label)", "serif"],
+        intro: ["var(--font-intro)", "cursive"],
       },
     },
   },

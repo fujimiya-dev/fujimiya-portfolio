@@ -42,6 +42,14 @@ const kaiseiDecol = localFont({
   display: "swap",
 });
 
+const nothingYouCouldDo = localFont({
+  src: [
+    { path: "../fonts/nothing-you-could-do/NothingYouCouldDo-Regular.ttf", weight: "400", style: "normal" },
+  ],
+  variable: "--font-intro",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "藤田都 — Portfolio",
   description: "北陸先端科学技術大学院大学 修士1年 藤田都のポートフォリオ",
@@ -53,7 +61,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja" className={`${zenOldMincho.variable} ${zenKaku.variable} ${marcellus.variable} ${kaiseiDecol.variable}`}>
+    <html
+      lang="ja"
+      className={`${zenOldMincho.variable} ${zenKaku.variable} ${marcellus.variable} ${kaiseiDecol.variable} ${nothingYouCouldDo.variable}`}
+    >
       <body className="font-sans">
         <NightSky />
         <TopNav />
