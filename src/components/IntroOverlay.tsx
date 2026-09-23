@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import introPathData from "./introPathData.json";
 
-// Timing (ms), per spec: 2.6s draw-on sweep, 0.6s hold, 0.5s fade-out.
+// Timing (ms), per spec: 2.6s stroke-on trace, 0.6s hold, 0.5s fade-out.
 const DRAW_MS = 2600;
 const HOLD_MS = 600;
 const FADE_MS = 500;
+// Each glyph's own trace takes this fraction of DRAW_MS, with glyphs'
+// start times staggered evenly across the remaining span so consecutive
+// letters overlap slightly — reading as one continuous left-to-right
+// stroke rather than a per-letter typewriter chop.
+const PER_GLYPH_FRACTION = 0.35;
 
 type Phase = "drawing" | "fading" | "done";
 
@@ -17,16 +23,50 @@ export default function IntroOverlay() {
   // portal straight onto <body> instead, where our z-index is compared
   // directly against TopNav's.
   const [mounted, setMounted] = useState(false);
+  const pathRefs = useRef<(SVGPathElement | null)[]>([]);
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Runs on the render *after* mounted flips true — the <path> elements only
+  // exist in the DOM from that render onward (gated by `!mounted` below), so
+  // doing this in the same effect that calls setMounted would find every
+  // ref still null and silently skip the whole animation.
+  useEffect(() => {
+    if (!mounted) return;
+    const els = pathRefs.current.filter((el): el is SVGPathElement => el !== null);
+    if (els.length === 0) return;
+
+    const perGlyphMs = DRAW_MS * PER_GLYPH_FRACTION;
+    const spanMs = DRAW_MS - perGlyphMs;
+
+    for (const el of els) {
+      const length = el.getTotalLength();
+      el.style.transition = "none";
+      el.style.strokeDasharray = `${length}`;
+      el.style.strokeDashoffset = `${length}`;
+    }
+    // Force a synchronous layout flush so the browser actually commits this
+    // fully-hidden state before the transitions are enabled below —
+    // without it, a single rAF can still get coalesced with this write and
+    // the strokes jump straight to fully drawn instead of animating.
+    void els[0].getBoundingClientRect();
+    requestAnimationFrame(() => {
+      els.forEach((el, i) => {
+        const delay = els.length > 1 ? (spanMs * i) / (els.length - 1) : 0;
+        el.style.transition = `stroke-dashoffset ${perGlyphMs}ms cubic-bezier(0.65, 0, 0.35, 1) ${delay}ms`;
+        el.style.strokeDashoffset = "0";
+      });
+    });
+
     const toFading = setTimeout(() => setPhase("fading"), DRAW_MS + HOLD_MS);
     const toDone = setTimeout(() => setPhase("done"), DRAW_MS + HOLD_MS + FADE_MS);
     return () => {
       clearTimeout(toFading);
       clearTimeout(toDone);
     };
-  }, []);
+  }, [mounted]);
 
   if (phase === "done" || !mounted) return null;
 
@@ -40,36 +80,35 @@ export default function IntroOverlay() {
       }}
       aria-hidden="true"
     >
-      <div
-        className="intro-reveal text-center"
+      <svg
+        viewBox={introPathData.viewBox}
         style={{
-          fontFamily: "var(--font-intro)",
-          color: "#eaf6ff",
-          textShadow: "0 0 2px #eaf6ff, 0 0 10px #7FB7FF, 0 0 22px #1E40FF, 0 0 48px #1E40FF",
+          width: "min(90vw, 900px)",
+          height: "auto",
+          filter: "drop-shadow(0 0 8px #1E40FF) drop-shadow(0 0 20px #1E40FF)",
         }}
       >
-        <p className="text-3xl leading-tight sm:text-5xl">Welcome to the</p>
-        <p className="text-4xl leading-tight sm:text-6xl">Moonlit Dream</p>
-      </div>
-
-      <style jsx>{`
-        .intro-reveal {
-          -webkit-mask-image: linear-gradient(to right, black 0%, black 80%, transparent 100%);
-          mask-image: linear-gradient(to right, black 0%, black 80%, transparent 100%);
-          -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-          -webkit-mask-size: 0% 100%;
-          mask-size: 0% 100%;
-          animation: intro-reveal-sweep ${DRAW_MS}ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
-        }
-
-        @keyframes intro-reveal-sweep {
-          to {
-            -webkit-mask-size: 140% 100%;
-            mask-size: 140% 100%;
-          }
-        }
-      `}</style>
+        <defs>
+          <filter id="intro-glow" x="-20%" y="-100%" width="140%" height="300%">
+            <feGaussianBlur stdDeviation="4" />
+          </filter>
+        </defs>
+        {introPathData.glyphs.map((d, i) => (
+          <path
+            key={i}
+            ref={(el) => {
+              pathRefs.current[i] = el;
+            }}
+            d={d}
+            fill="none"
+            stroke="#eaf6ff"
+            strokeWidth={3.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="url(#intro-glow)"
+          />
+        ))}
+      </svg>
     </div>,
     document.body
   );
