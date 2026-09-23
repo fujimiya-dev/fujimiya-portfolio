@@ -55,7 +55,7 @@ body {
    薄く・ぼかしを弱めて、背後の星空/草がうっすら透けるグラスモーフィ
    ズムにする。枠が「別画面が乗っている」ような唐突さを避けるため。 */
 .glass-panel-soft {
-  background: rgba(10, 18, 30, 0.25);
+  background: rgba(10, 18, 30, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
