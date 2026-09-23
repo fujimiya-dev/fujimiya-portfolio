@@ -6,7 +6,7 @@ import { sendContactMessage } from "@/actions/contact";
 type Status = { type: "idle" } | { type: "success" } | { type: "error"; message: string };
 
 const fieldClass =
-  "w-full border-b border-white/20 bg-transparent py-2 text-sm outline-none placeholder:text-ink-faint focus:border-accent-teal";
+  "w-full border-b border-white/20 bg-transparent py-2 text-sm outline-none placeholder:text-accent-blue/50 focus:border-accent-teal";
 
 export default function ContactForm() {
   const formRef = useRef<HTMLFormElement>(null);
@@ -36,27 +36,29 @@ export default function ContactForm() {
   return (
     <form ref={formRef} action={onSubmit} className="glass-panel space-y-5 rounded-sm p-8">
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">お名前</label>
+        <label className="mb-1 block text-xs text-accent-blue/80">お名前</label>
         <input name="name" required className={fieldClass} placeholder="山田 太郎" />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">メールアドレス</label>
+        <label className="mb-1 block text-xs text-accent-blue/80">メールアドレス</label>
         <input name="email" type="email" required className={fieldClass} placeholder="you@example.com" />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">メッセージ</label>
+        <label className="mb-1 block text-xs text-accent-blue/80">メッセージ</label>
         <textarea name="message" required rows={5} className={fieldClass} placeholder="お問い合わせ内容をご記入ください" />
       </div>
 
       {status.type === "error" && <p className="text-xs text-red-400">{status.message}</p>}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="rounded-sm border border-accent-teal px-6 py-2 text-sm text-accent-teal transition-colors hover:bg-accent-teal hover:text-sky-deep disabled:opacity-50"
-      >
-        {isPending ? "送信中…" : "送信する"}
-      </button>
+      <div className="flex justify-center">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="rounded-sm border border-accent-teal px-6 py-2 text-sm text-accent-teal transition-colors hover:bg-accent-teal hover:text-sky-deep disabled:opacity-50"
+        >
+          {isPending ? "送信中…" : "送信する"}
+        </button>
+      </div>
     </form>
   );
 }
