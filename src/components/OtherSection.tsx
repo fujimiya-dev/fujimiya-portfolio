@@ -102,7 +102,7 @@ export default function OtherSection({
     <div className="space-y-14">
       {/* ピアノ */}
       <div className="glass-panel rounded-sm p-7">
-        <h3 className="mb-5 font-serif text-lg">
+        <h3 className="mb-5 font-label text-lg">
           ピアノ
         </h3>
 
@@ -146,7 +146,7 @@ export default function OtherSection({
       {/* 茶道 */}
       {teaCeremony && (
         <div className="glass-panel rounded-sm p-7">
-          <h3 className="mb-2 font-serif text-lg">
+          <h3 className="mb-2 font-label text-lg">
             {teaCeremony.title}
           </h3>
           <p className="whitespace-pre-line text-sm leading-relaxed text-ink-soft">{teaCeremony.body}</p>
@@ -155,7 +155,7 @@ export default function OtherSection({
 
       {/* 美術館巡り */}
       <div className="glass-panel rounded-sm p-7">
-        <h3 className="mb-5 font-serif text-lg">
+        <h3 className="mb-5 font-label text-lg">
           美術館巡り
         </h3>
 
@@ -180,7 +180,7 @@ export default function OtherSection({
 
       {/* ゲーム */}
       <div className="glass-panel rounded-sm p-7">
-        <h3 className="mb-5 font-serif text-lg">
+        <h3 className="mb-5 font-label text-lg">
           お気に入りゲーム
         </h3>
         <div className="space-y-6">

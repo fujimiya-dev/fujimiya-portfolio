@@ -29,6 +29,8 @@ const config: Config = {
       fontFamily: {
         serif: ["var(--font-heading)", "serif"],
         sans: ["var(--font-zen-kaku)", "sans-serif"],
+        display: ["var(--font-display)", "serif"],
+        label: ["var(--font-label)", "serif"],
       },
     },
   },

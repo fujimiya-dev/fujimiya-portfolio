@@ -13,7 +13,7 @@ export default async function ContactPage() {
         <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           連絡先
         </span>
-        <h2 className="font-serif text-4xl font-bold">{dict.nav.contact}</h2>
+        <h2 className="font-display text-4xl font-bold">{dict.nav.contact}</h2>
       </RevealGlow>
       <RevealFade>
         <ContactForm />

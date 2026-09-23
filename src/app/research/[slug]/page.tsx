@@ -23,7 +23,7 @@ export default async function ResearchDetailPage({
 
       <RevealFade>
         <span className="mb-2 block text-xs tracking-wide text-accent-blue">{item.stage}</span>
-        <h1 className="mb-8 font-serif text-4xl font-bold leading-relaxed">{item.title}</h1>
+        <h1 className="mb-8 font-label text-4xl font-bold leading-relaxed">{item.title}</h1>
 
         <div className="glass-panel relative mb-2 aspect-video border border-white/15 bg-white/[0.02]">
           {item.imageUrl ? (
@@ -58,13 +58,13 @@ export default async function ResearchDetailPage({
 
         <div className="mb-8 space-y-4">
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="mb-3 font-serif text-sm tracking-wide text-accent-teal">概要</h2>
+            <h2 className="mb-3 font-label text-sm tracking-wide text-accent-teal">概要</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">{item.summary}</p>
           </div>
 
           <div className="glass-panel space-y-4 rounded-sm p-6">
             <div>
-              <h2 className="mb-2 font-serif text-sm tracking-wide text-accent-teal">タグ</h2>
+              <h2 className="mb-2 font-label text-sm tracking-wide text-accent-teal">タグ</h2>
               <div className="flex flex-wrap gap-2">
                 {item.tags.map((tag) => (
                   <span
@@ -78,7 +78,7 @@ export default async function ResearchDetailPage({
             </div>
             {item.techStack.length > 0 && (
               <div>
-                <h2 className="mb-2 font-serif text-sm tracking-wide text-accent-teal">使用技術</h2>
+                <h2 className="mb-2 font-label text-sm tracking-wide text-accent-teal">使用技術</h2>
                 <div className="flex flex-wrap gap-2">
                   {item.techStack.map((tag) => (
                     <span
@@ -95,7 +95,7 @@ export default async function ResearchDetailPage({
 
           {item.achievements.length > 0 && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="mb-3 font-serif text-sm tracking-wide text-accent-teal">実績</h2>
+              <h2 className="mb-3 font-label text-sm tracking-wide text-accent-teal">実績</h2>
               <ul className="list-disc space-y-1 pl-5 text-[15px] leading-relaxed text-ink-soft">
                 {item.achievements.map((achievement) => (
                   <li key={achievement}>{achievement}</li>
@@ -106,7 +106,7 @@ export default async function ResearchDetailPage({
 
           {item.references.length > 0 && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="mb-3 font-serif text-sm tracking-wide text-accent-teal">主な参考文献</h2>
+              <h2 className="mb-3 font-label text-sm tracking-wide text-accent-teal">主な参考文献</h2>
               <ul className="list-disc space-y-1 pl-5 text-[15px] leading-relaxed text-ink-soft">
                 {item.references.map((ref) => (
                   <li key={ref}>{ref}</li>

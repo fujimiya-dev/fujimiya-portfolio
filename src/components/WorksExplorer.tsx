@@ -190,7 +190,7 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
                   )}
                 </div>
                 <div className="flex flex-1 flex-col p-6">
-                  <h3 className="font-serif text-xl font-bold transition-colors group-hover:text-accent-teal">
+                  <h3 className="font-label text-xl font-bold transition-colors group-hover:text-accent-teal">
                     {work.title}
                   </h3>
                   <span className="mb-3 mt-1 block text-xs text-ink-faint">

@@ -156,7 +156,7 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
             <div className="glass-panel grid grid-cols-[98px_1fr] gap-8 rounded-sm p-5">
               <div className="pt-1 font-serif text-sm text-ink-faint">{item.dateLabel}</div>
               <div>
-                <h3 className="mb-1 font-serif text-base">{item.org}</h3>
+                <h3 className="mb-1 font-label text-base">{item.org}</h3>
                 <p className="mb-3 text-sm text-ink-soft">{item.summary}</p>
                 <div className="flex flex-wrap gap-2">
                   {item.tags.map((tag) => (

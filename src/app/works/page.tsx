@@ -18,7 +18,7 @@ export default async function WorksPage() {
         <span className="mb-4 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           作ったもの
         </span>
-        <h2 className="mb-10 font-serif text-4xl font-bold">{dict.nav.works}</h2>
+        <h2 className="mb-10 font-display text-4xl font-bold">{dict.nav.works}</h2>
       </RevealGlow>
       <WorksExplorer works={works} />
 

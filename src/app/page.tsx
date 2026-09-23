@@ -32,7 +32,7 @@ export default async function HomePage() {
           <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
             私について
           </span>
-          <h2 className="font-serif text-4xl font-bold">{dict.nav.aboutMe}</h2>
+          <h2 className="font-display text-4xl font-bold">{dict.nav.aboutMe}</h2>
         </RevealGlow>
 
         <div className="glass-panel rounded-sm px-6 py-10 sm:px-8 sm:py-12">
@@ -50,37 +50,37 @@ export default async function HomePage() {
             <table className="mb-6 w-full text-sm">
               <tbody>
                 <tr className="border-b border-white/10">
-                  <td className="w-24 py-3 font-serif text-ink-faint">名前</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">名前</td>
                   <td className="py-3">藤田 都</td>
                 </tr>
                 <tr className="border-b border-white/10">
-                  <td className="w-24 py-3 font-serif text-ink-faint">所属</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">所属</td>
                   <td className="py-3">北陸先端科学技術大学院大学</td>
                 </tr>
                 <tr className="border-b border-white/10">
-                  <td className="w-24 py-3 font-serif text-ink-faint">専攻</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">専攻</td>
                   <td className="py-3">先端科学技術研究科 先端科学技術専攻</td>
                 </tr>
                 <tr className="border-b border-white/10">
-                  <td className="w-24 py-3 font-serif text-ink-faint">学年</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">学年</td>
                   <td className="py-3">修士1年</td>
                 </tr>
                 <tr className="border-b border-white/10">
-                  <td className="w-24 py-3 font-serif text-ink-faint">出身大学</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">出身大学</td>
                   <td className="py-3">昭和女子大学</td>
                 </tr>
                 <tr className="border-b border-white/10">
-                  <td className="w-24 py-3 font-serif text-ink-faint">学部・学科</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">学部・学科</td>
                   <td className="py-3">人間文化学部 歴史文化学科</td>
                 </tr>
                 <tr className="border-b border-white/10">
-                  <td className="w-24 py-3 font-serif text-ink-faint">資格</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">資格</td>
                   <td className="py-3">中学校・高校教諭一種免許状(社会)、温泉ソムリエ</td>
                 </tr>
               </tbody>
             </table>
 
-            <p className="mb-3 font-serif text-xs tracking-widest text-ink-faint">勉強している技術</p>
+            <p className="mb-3 font-label text-xs tracking-widest text-ink-faint">勉強している技術</p>
             <div className="mb-6 grid grid-cols-4 gap-x-2 gap-y-4 sm:grid-cols-7">
               {techStack.map(({ label, Icon }) => (
                 <div key={label} className="flex flex-col items-center gap-2">
@@ -90,7 +90,7 @@ export default async function HomePage() {
               ))}
             </div>
 
-            <p className="mb-3 font-serif text-xs tracking-widest text-ink-faint">興味分野</p>
+            <p className="mb-3 font-label text-xs tracking-widest text-ink-faint">興味分野</p>
             <div className="flex flex-wrap gap-2">
               {interests.map((tag) => (
                 <span key={tag} className="rounded-full border border-white/20 px-3 py-1 text-xs text-ink-soft">

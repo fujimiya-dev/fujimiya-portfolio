@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Zen_Old_Mincho, Zen_Kaku_Gothic_New } from "next/font/google";
+import { Zen_Old_Mincho, Zen_Kaku_Gothic_New, Marcellus, Kaisei_Decol } from "next/font/google";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
 import NightSky from "@/components/night-sky/NightSky";
@@ -16,6 +16,18 @@ const zenKaku = Zen_Kaku_Gothic_New({
   variable: "--font-zen-kaku",
 });
 
+const marcellus = Marcellus({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-display",
+});
+
+const kaiseiDecol = Kaisei_Decol({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-label",
+});
+
 export const metadata: Metadata = {
   title: "藤田都 — Portfolio",
   description: "北陸先端科学技術大学院大学 修士1年 藤田都のポートフォリオ",
@@ -27,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja" className={`${zenOldMincho.variable} ${zenKaku.variable}`}>
+    <html lang="ja" className={`${zenOldMincho.variable} ${zenKaku.variable} ${marcellus.variable} ${kaiseiDecol.variable}`}>
       <body className="font-sans">
         <NightSky />
         <TopNav />

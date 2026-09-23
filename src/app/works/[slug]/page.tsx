@@ -22,7 +22,7 @@ export default async function WorkDetailPage({
       </Link>
 
       <RevealFade>
-        <h1 className="mb-2 font-serif text-4xl font-bold">{work.title}</h1>
+        <h1 className="mb-2 font-label text-4xl font-bold">{work.title}</h1>
         <span className="mb-8 block text-xs text-ink-faint">{work.dateLabel}</span>
 
         <div className="glass-panel relative mb-8 aspect-video border border-white/15 bg-white/[0.02]">
@@ -57,14 +57,14 @@ export default async function WorkDetailPage({
 
         <div className="mb-8 space-y-4">
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="mb-3 font-serif text-sm tracking-wide text-accent-teal">作品詳細</h2>
+            <h2 className="mb-3 font-label text-sm tracking-wide text-accent-teal">作品詳細</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
               {work.description}
             </p>
           </div>
 
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="mb-3 font-serif text-sm tracking-wide text-accent-teal">製作者コメント</h2>
+            <h2 className="mb-3 font-label text-sm tracking-wide text-accent-teal">製作者コメント</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
               {work.comment}
             </p>
@@ -72,11 +72,11 @@ export default async function WorkDetailPage({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="mb-3 font-serif text-sm tracking-wide text-accent-teal">担当人数</h2>
+              <h2 className="mb-3 font-label text-sm tracking-wide text-accent-teal">担当人数</h2>
               <p className="text-[15px] text-ink-soft">{work.teamSize}人</p>
             </div>
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="mb-3 font-serif text-sm tracking-wide text-accent-teal">担当部分</h2>
+              <h2 className="mb-3 font-label text-sm tracking-wide text-accent-teal">担当部分</h2>
               <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
                 {work.role}
               </p>
@@ -85,7 +85,7 @@ export default async function WorkDetailPage({
 
           <div className="glass-panel space-y-4 rounded-sm p-6">
             <div>
-              <h2 className="mb-2 font-serif text-sm tracking-wide text-accent-teal">カテゴリ</h2>
+              <h2 className="mb-2 font-label text-sm tracking-wide text-accent-teal">カテゴリ</h2>
               <div className="flex flex-wrap gap-2">
                 {work.category.map((tag) => (
                   <span
@@ -98,7 +98,7 @@ export default async function WorkDetailPage({
               </div>
             </div>
             <div>
-              <h2 className="mb-2 font-serif text-sm tracking-wide text-accent-teal">使用技術</h2>
+              <h2 className="mb-2 font-label text-sm tracking-wide text-accent-teal">使用技術</h2>
               <div className="flex flex-wrap gap-2">
                 {work.techStack.map((tag) => (
                   <span

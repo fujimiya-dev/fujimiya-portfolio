@@ -17,7 +17,7 @@ export default async function ExperiencePage() {
         <span className="mb-4 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           行ってきたこと
         </span>
-        <h2 className="mb-10 font-serif text-4xl font-bold">{dict.nav.experience}</h2>
+        <h2 className="mb-10 font-display text-4xl font-bold">{dict.nav.experience}</h2>
       </RevealGlow>
       <ExperienceExplorer items={items} />
     </section>
