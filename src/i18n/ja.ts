@@ -12,10 +12,6 @@ export const ja: Dictionary = {
     langToggleLabel: "言語",
   },
   home: {
-    scrollCue: "SCROLL",
-    aboutHeading: "自己紹介",
     goToWorks: "Worksへ",
-    contactLabel: "Contact",
-    contactHeading: "お問い合わせ",
   },
 };

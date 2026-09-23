@@ -20,10 +20,6 @@ export type Dictionary = {
     langToggleLabel: string;
   };
   home: {
-    scrollCue: string;
-    aboutHeading: string;
     goToWorks: string;
-    contactLabel: string;
-    contactHeading: string;
   };
 };

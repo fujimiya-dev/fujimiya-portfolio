@@ -17,7 +17,7 @@ const config: Config = {
           faint: "#6c837f",
         },
         accent: {
-          teal: "#48e0b0",
+          teal: "#1E40FF",
           blue: "#5ea0ff",
           moon: "#cdeedd",
         },

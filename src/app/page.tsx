@@ -25,21 +25,17 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="flex min-h-screen flex-col items-center justify-end px-5 pb-20 text-center">
-        <div className="flex flex-col items-center gap-3 text-[11px] tracking-[0.3em] text-ink-faint">
-          <span>{dict.home.scrollCue}</span>
-          <span className="h-14 w-px bg-gradient-to-b from-ink-faint to-transparent" />
-        </div>
-      </section>
+      <section className="flex min-h-screen flex-col items-center justify-end px-5 pb-20 text-center" />
 
       <section id="about" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-24 pt-16">
         <RevealGlow className="mb-16 border-b border-white/10 pb-16 text-center">
           <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
-            {dict.nav.aboutMe}
+            私について
           </span>
-          <h2 className="font-serif text-4xl font-bold">自己紹介</h2>
+          <h2 className="font-serif text-4xl font-bold">{dict.nav.aboutMe}</h2>
         </RevealGlow>
 
+        <div className="glass-panel rounded-sm p-6 sm:p-8">
         <RevealFade className="grid grid-cols-1 gap-10 md:grid-cols-[230px_1fr] md:items-start">
           <div className="glass-panel w-full p-2">
             <Image
@@ -118,8 +114,7 @@ export default async function HomePage() {
             フロントからバックまで幅広く手がけつつ、特にUIデザインへのこだわりがあります。
           </p>
         </RevealFade>
-
-        <div className="mx-auto mt-16 max-w-xl border-t border-white/10" />
+        </div>
 
         <div className="mt-12 flex justify-center">
           <Link

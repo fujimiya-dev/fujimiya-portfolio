@@ -21,10 +21,10 @@ export default async function OtherPage() {
     <section className="mx-auto max-w-4xl px-6 pb-24 pt-28">
       <RevealGlow>
         <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal">
-          {dict.nav.other}
+          その他趣味など
         </span>
       </RevealGlow>
-      <h2 className="mb-10 font-serif text-4xl font-bold">その他の活動・趣味</h2>
+      <h2 className="mb-10 font-serif text-4xl font-bold">{dict.nav.other}</h2>
       <OtherSection
         pianoHistory={pianoHistory}
         pianoVideos={pianoVideos}

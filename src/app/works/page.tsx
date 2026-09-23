@@ -16,10 +16,10 @@ export default async function WorksPage() {
     <section className="mx-auto max-w-4xl px-6 pb-24 pt-28">
       <RevealGlow>
         <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal">
-          {dict.nav.works}
+          作ったもの
         </span>
       </RevealGlow>
-      <h2 className="mb-10 font-serif text-4xl font-bold">制作物</h2>
+      <h2 className="mb-10 font-serif text-4xl font-bold">{dict.nav.works}</h2>
       <WorksExplorer works={works} />
 
       <div className="mt-12 flex justify-center">

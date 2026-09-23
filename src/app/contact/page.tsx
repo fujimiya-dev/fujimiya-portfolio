@@ -11,9 +11,9 @@ export default async function ContactPage() {
     <section className="mx-auto max-w-xl px-6 pb-24 pt-28">
       <RevealGlow className="mb-10 text-center">
         <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
-          {dict.home.contactLabel}
+          連絡先
         </span>
-        <h2 className="font-serif text-4xl font-bold">{dict.home.contactHeading}</h2>
+        <h2 className="font-serif text-4xl font-bold">{dict.nav.contact}</h2>
       </RevealGlow>
       <RevealFade>
         <ContactForm />

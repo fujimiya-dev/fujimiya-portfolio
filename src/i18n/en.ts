@@ -12,10 +12,6 @@ export const en: Dictionary = {
     langToggleLabel: "Language",
   },
   home: {
-    scrollCue: "SCROLL",
-    aboutHeading: "About me",
     goToWorks: "See Works",
-    contactLabel: "Contact",
-    contactHeading: "Contact",
   },
 };
