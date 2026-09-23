@@ -19,12 +19,12 @@ export default async function OtherPage() {
 
   return (
     <section className="mx-auto max-w-4xl px-6 pb-24 pt-28">
-      <RevealGlow>
-        <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal">
+      <RevealGlow className="text-center">
+        <span className="mb-4 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           その他趣味など
         </span>
+        <h2 className="mb-10 font-serif text-4xl font-bold">{dict.nav.other}</h2>
       </RevealGlow>
-      <h2 className="mb-10 font-serif text-4xl font-bold">{dict.nav.other}</h2>
       <OtherSection
         pianoHistory={pianoHistory}
         pianoVideos={pianoVideos}
