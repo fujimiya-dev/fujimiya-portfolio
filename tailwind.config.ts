@@ -11,10 +11,12 @@ const config: Config = {
           teal: "#123138",
         },
         panel: "rgba(11, 22, 30, 0.62)",
+        // ink.soft/faintは元々G>Bの緑がかったグレーだったため、青テーマに
+        // 合わせてB>Gの青みがかったグレーへ調整(明度はほぼ維持)
         ink: {
-          DEFAULT: "#eef4f1",
-          soft: "#9fb6b2",
-          faint: "#6c837f",
+          DEFAULT: "#eef1f4",
+          soft: "#9fabc4",
+          faint: "#6c7c91",
         },
         accent: {
           // 参考画像(草花に光が当たって最も明るく見える部分)から直接サンプ

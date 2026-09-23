@@ -57,7 +57,7 @@ export default function ResearchExplorer({ items }: { items: ResearchItem[] }) {
                 )}
               </figure>
               <div>
-                <span className="mb-2 block text-xs tracking-wide text-accent-moon">{item.stage}</span>
+                <span className="mb-2 block text-xs tracking-wide text-accent-blue">{item.stage}</span>
                 <h3 className="mb-4 font-serif text-xl font-bold leading-relaxed transition-colors group-hover:text-accent-teal">
                   {item.title}
                 </h3>

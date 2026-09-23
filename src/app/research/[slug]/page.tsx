@@ -22,7 +22,7 @@ export default async function ResearchDetailPage({
       </Link>
 
       <RevealFade>
-        <span className="mb-2 block text-xs tracking-wide text-accent-moon">{item.stage}</span>
+        <span className="mb-2 block text-xs tracking-wide text-accent-blue">{item.stage}</span>
         <h1 className="mb-8 font-serif text-4xl font-bold leading-relaxed">{item.title}</h1>
 
         <div className="glass-panel relative mb-2 aspect-video border border-white/15 bg-white/[0.02]">
