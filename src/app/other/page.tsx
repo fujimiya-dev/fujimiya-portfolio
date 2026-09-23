@@ -20,7 +20,7 @@ export default async function OtherPage() {
   return (
     <section className="mx-auto max-w-4xl px-6 pb-24 pt-28">
       <RevealGlow>
-        <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal text-glow-accent">
+        <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal">
           その他趣味など
         </span>
       </RevealGlow>
