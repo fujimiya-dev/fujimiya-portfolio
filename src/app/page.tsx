@@ -104,7 +104,7 @@ export default async function HomePage() {
         <div className="mx-auto mt-16 max-w-xl border-t border-white/10" />
 
         <RevealFade delay={0.1} className="mx-auto mt-16 max-w-xl text-center">
-          <p className="text-sm leading-relaxed text-ink-soft">
+          <p className="text-sm leading-relaxed text-ink">
             学部では西洋美術史を専攻。
             <br />
             大学3年でのハッカソン初参加をきっかけに、「アイデアを形にする」楽しさに目覚める。
