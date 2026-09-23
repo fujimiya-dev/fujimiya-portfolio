@@ -14,7 +14,7 @@ export default async function ExperiencePage() {
   return (
     <section className="mx-auto max-w-4xl px-6 pb-24 pt-28">
       <RevealGlow>
-        <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal">
+        <span className="mb-4 flex items-center gap-2 text-xs tracking-widest text-accent-teal text-glow-accent">
           行ってきたこと
         </span>
       </RevealGlow>

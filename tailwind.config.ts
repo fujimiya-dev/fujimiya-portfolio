@@ -17,7 +17,8 @@ const config: Config = {
           faint: "#6c837f",
         },
         accent: {
-          teal: "#1E40FF",
+          // GrassFieldのPETAL_COLOR(光が当たって最も明るく見える草の青)に統一
+          teal: "#7FB7FF",
           blue: "#5ea0ff",
           moon: "#cdeedd",
         },
