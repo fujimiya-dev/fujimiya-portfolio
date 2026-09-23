@@ -35,7 +35,7 @@ export default async function HomePage() {
           <h2 className="font-serif text-4xl font-bold">{dict.nav.aboutMe}</h2>
         </RevealGlow>
 
-        <div className="glass-panel rounded-sm px-6 py-10 sm:px-8 sm:py-12">
+        <div className="glass-panel-soft rounded-sm px-6 py-10 sm:px-8 sm:py-12">
         <RevealFade className="grid grid-cols-1 gap-10 md:grid-cols-[230px_1fr] md:items-start">
           <div className="glass-panel w-full p-2">
             <Image

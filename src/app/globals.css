@@ -51,6 +51,17 @@ body {
   backdrop-filter: blur(14px);
 }
 
+/* About meのような大面積の枠専用。glass-panel(Worksカード等)より
+   薄く・ぼかしを弱めて、背後の星空/草がうっすら透けるグラスモーフィ
+   ズムにする。枠が「別画面が乗っている」ような唐突さを避けるため。 */
+.glass-panel-soft {
+  background: rgba(10, 18, 30, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
 .search-sticky {
   position: sticky;
   top: 0;
