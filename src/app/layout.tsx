@@ -1,31 +1,45 @@
 import type { Metadata } from "next";
-import { Zen_Old_Mincho, Zen_Kaku_Gothic_New, Marcellus, Kaisei_Decol } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
 import NightSky from "@/components/night-sky/NightSky";
 
-const zenOldMincho = Zen_Old_Mincho({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "900"],
+const zenOldMincho = localFont({
+  src: [
+    { path: "../fonts/zen-old-mincho/ZenOldMincho-Regular.ttf", weight: "400", style: "normal" },
+    { path: "../fonts/zen-old-mincho/ZenOldMincho-Medium.ttf", weight: "500", style: "normal" },
+    { path: "../fonts/zen-old-mincho/ZenOldMincho-SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "../fonts/zen-old-mincho/ZenOldMincho-Bold.ttf", weight: "700", style: "normal" },
+    { path: "../fonts/zen-old-mincho/ZenOldMincho-Black.ttf", weight: "900", style: "normal" },
+  ],
   variable: "--font-heading",
+  display: "swap",
 });
 
-const zenKaku = Zen_Kaku_Gothic_New({
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "900"],
+const zenKaku = localFont({
+  src: [
+    { path: "../fonts/zen-kaku-gothic-new/ZenKakuGothicNew-Regular.ttf", weight: "400", style: "normal" },
+    { path: "../fonts/zen-kaku-gothic-new/ZenKakuGothicNew-Medium.ttf", weight: "500", style: "normal" },
+    { path: "../fonts/zen-kaku-gothic-new/ZenKakuGothicNew-Bold.ttf", weight: "700", style: "normal" },
+    { path: "../fonts/zen-kaku-gothic-new/ZenKakuGothicNew-Black.ttf", weight: "900", style: "normal" },
+  ],
   variable: "--font-zen-kaku",
+  display: "swap",
 });
 
-const marcellus = Marcellus({
-  subsets: ["latin"],
-  weight: ["400"],
+const marcellus = localFont({
+  src: [{ path: "../fonts/marcellus/Marcellus-Regular.ttf", weight: "400", style: "normal" }],
   variable: "--font-display",
+  display: "swap",
 });
 
-const kaiseiDecol = Kaisei_Decol({
-  subsets: ["latin"],
-  weight: ["400", "700"],
+const kaiseiDecol = localFont({
+  src: [
+    { path: "../fonts/kaisei-decol/KaiseiDecol-Regular.ttf", weight: "400", style: "normal" },
+    { path: "../fonts/kaisei-decol/KaiseiDecol-Bold.ttf", weight: "700", style: "normal" },
+  ],
   variable: "--font-label",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
