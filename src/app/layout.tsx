@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
+import Footer from "@/components/Footer";
 import NightSky from "@/components/night-sky/NightSky";
 import { IntroPlayingProvider } from "@/components/IntroPlayingContext";
 
@@ -54,7 +55,7 @@ const nothingYouCouldDo = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "藤田都 — Portfolio",
+  title: "Fujimiya",
   description: "北陸先端科学技術大学院大学 修士1年 藤田都のポートフォリオ",
 };
 
@@ -73,6 +74,7 @@ export default function RootLayout({
           <NightSky />
           <TopNav />
           <main className="relative z-[2]">{children}</main>
+          <Footer />
         </IntroPlayingProvider>
       </body>
     </html>

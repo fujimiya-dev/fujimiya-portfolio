@@ -20,7 +20,7 @@ export default async function TopNav() {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-sky-deep/60 backdrop-blur-md">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
         <Link href="/" className="font-display text-sm text-ink-soft">
-          portfolio
+          Fujimiya.dev
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
