@@ -17,13 +17,15 @@ export default function LanguageToggle({ current }: { current: Locale }) {
     });
   }
 
+  // Same neon palette as the horizon nav's active-item glow: core #eaf6ff,
+  // halo #7FB7FF / #1E40FF.
+  const activeClass = "text-[#eaf6ff] [text-shadow:0_0_4px_#eaf6ff,0_0_10px_#7FB7FF,0_0_18px_#1E40FF]";
+
   return (
-    <div className="flex items-center gap-1 text-xs" aria-busy={isPending}>
+    <div className="flex items-center gap-1 text-sm" aria-busy={isPending}>
       <button
         onClick={() => choose("ja")}
-        className={`px-2 py-1 transition-colors ${
-          current === "ja" ? "text-accent-teal" : "text-ink-faint hover:text-ink"
-        }`}
+        className={`px-2 py-1 transition-all duration-300 ${current === "ja" ? activeClass : "text-ink-faint hover:text-ink"}`}
         aria-current={current === "ja"}
       >
         JA
@@ -31,9 +33,7 @@ export default function LanguageToggle({ current }: { current: Locale }) {
       <span className="text-ink-faint">/</span>
       <button
         onClick={() => choose("en")}
-        className={`px-2 py-1 transition-colors ${
-          current === "en" ? "text-accent-teal" : "text-ink-faint hover:text-ink"
-        }`}
+        className={`px-2 py-1 transition-all duration-300 ${current === "en" ? activeClass : "text-ink-faint hover:text-ink"}`}
         aria-current={current === "en"}
       >
         EN

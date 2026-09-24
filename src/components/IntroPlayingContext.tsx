@@ -58,9 +58,32 @@ export function clearForcePlayIntro() {
   forcePlayIntro = false;
 }
 
-function hasHash() {
-  if (typeof window === "undefined") return false;
-  return window.location.hash !== "";
+// Whether the true, hard page load that started this JS session landed
+// directly on bare "/" — evaluated exactly once, as a module-level
+// constant, the moment this file is first evaluated. This module is
+// imported unconditionally by the root layout, so that happens on every
+// route, at real page-load time, before any client-side navigation can
+// occur — window.location is therefore guaranteed to still reflect the
+// actual requested URL (path *and* hash) rather than a hash that a
+// same-tab SPA transition is in the middle of applying.
+//
+// This constant (not a fresh read) is deliberately what later checks
+// consult: reading window.location.hash again during a subsequent
+// client-side navigation (e.g. clicking "About me") is unreliable — Next
+// updates the hash slightly *after* the new route's first render, so a
+// check made at that moment can race and see the old ("") hash.
+const initialHardLoadWillAutoPlay =
+  typeof window !== "undefined" && window.location.pathname === "/" && window.location.hash === "";
+let autoPlayAvailable = true;
+
+// Side-effect-free peek, for the same StrictMode-double-invoke reason as
+// peekForcePlayIntro above.
+export function peekInitialAutoPlayIntro() {
+  return autoPlayAvailable && initialHardLoadWillAutoPlay;
+}
+
+export function clearInitialAutoPlayIntro() {
+  autoPlayAvailable = false;
 }
 
 // The intro should play when landing directly on "/" (first visit, or the
@@ -69,7 +92,7 @@ function hasHash() {
 // "About me" ("/#about") — that should land straight on the section.
 function willIntroPlay(pathname: string) {
   if (pathname !== "/") return false;
-  return peekForcePlayIntro() || !hasHash();
+  return peekForcePlayIntro() || peekInitialAutoPlayIntro();
 }
 
 export function IntroPlayingProvider({ children }: { children: ReactNode }) {

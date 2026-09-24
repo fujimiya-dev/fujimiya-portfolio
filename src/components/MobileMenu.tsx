@@ -13,7 +13,7 @@ export default function MobileMenu({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         aria-label={open ? "メニューを閉じる" : "メニューを開く"}
         aria-expanded={open}

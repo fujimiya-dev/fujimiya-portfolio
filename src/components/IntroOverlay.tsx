@@ -3,7 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import introPathData from "./introPathData.json";
-import { useSetIntroPlaying, useSetHeroReady, peekForcePlayIntro, clearForcePlayIntro } from "./IntroPlayingContext";
+import {
+  useSetIntroPlaying,
+  useSetHeroReady,
+  peekForcePlayIntro,
+  clearForcePlayIntro,
+  peekInitialAutoPlayIntro,
+  clearInitialAutoPlayIntro,
+} from "./IntroPlayingContext";
 
 // Timing (ms).
 const DRAW_MS = 4000;
@@ -41,29 +48,22 @@ const MINT_FILTER = "drop-shadow(0 0 8px #3ecf8e) drop-shadow(0 0 20px #8ef0a0)"
 
 type Phase = "drawing" | "sweeping" | "done";
 
-// Whether this is the very first time IntroOverlay has ever tried to mount
-// in this JS session (i.e. a real hard page load, not a client-side route
-// change). Client-side navigations to "/#about" (About me) update
-// window.location.hash slightly *after* the new route's first render, so
-// checking the hash mid-SPA-navigation is a race; it's only reliable at a
-// genuine hard load, where the browser has already parsed the full URL
-// (path + hash) before the page even starts loading. Cleared from an
-// effect after mount (see below), not read-and-cleared here — this
-// function must stay side-effect-free since React 18 StrictMode calls
-// useState lazy initializers twice on a component's first render.
-let isFirstMountCheck = true;
-
 // Decides once, at mount, whether this playthrough should actually run.
 // The force-play flag (set by IntroTriggerLink — the "Fujimiya.dev" logo
-// and "Top" nav link only) always wins. Otherwise, only the very first
-// mount ever gets to play, and only if it landed directly on bare "/" (no
-// hash) — every later client-side arrival at "/" (e.g. "About me") skips
-// straight to "done" instead of replaying the trace.
+// and "Top" nav link only) always wins. Otherwise this only plays once,
+// and only if the true hard page load that started this session landed
+// directly on bare "/" (no hash) — see peekInitialAutoPlayIntro. Every
+// later client-side arrival at "/" (e.g. "About me", or "Top" without an
+// explicit click) skips straight to "done" instead of replaying the trace.
+//
+// Deliberately does NOT read window.location.hash itself here: IntroOverlay
+// can mount for the first time well after the actual page load (e.g. the
+// user's hard load was "/research" and this is the first time they've ever
+// navigated near "/"), at which point a hash read would be racing the very
+// same client-side navigation that's about to change it.
 function shouldPlayOnMount() {
   if (peekForcePlayIntro()) return true;
-  if (!isFirstMountCheck) return false;
-  if (typeof window === "undefined") return false;
-  return window.location.hash === "";
+  return peekInitialAutoPlayIntro();
 }
 
 type Particle = {
@@ -120,7 +120,7 @@ export default function IntroOverlay() {
     // committed — clearing them inside shouldPlayOnMount itself would lose
     // the flag on StrictMode's first (discarded) initializer call.
     clearForcePlayIntro();
-    isFirstMountCheck = false;
+    clearInitialAutoPlayIntro();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
