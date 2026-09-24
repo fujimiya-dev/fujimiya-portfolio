@@ -23,15 +23,22 @@ import GrassField from "./GrassField";
 import SkyBackdrop from "./SkyBackdrop";
 import ParallaxRig from "./ParallaxRig";
 import { useQualityTier, useReducedMotionFlag, usePageVisible } from "./useEnvironmentFlags";
+import { useIntroPlaying } from "@/components/IntroPlayingContext";
 
 export default function NightSkyScene() {
   const tier = useQualityTier();
   const reducedMotion = useReducedMotionFlag();
   const pageVisible = usePageVisible();
+  const introPlaying = useIntroPlaying();
   const [dprBoost, setDprBoost] = useState(true);
   const glowRef = useRef<THREE.Mesh>(null);
 
-  const active = pageVisible && !reducedMotion;
+  // IntroOverlay's black background fully covers Hero anyway while it's
+  // playing, so pausing the frameloop here costs nothing visually but saves
+  // the main thread from running Hero's WebGL render loop and the intro's
+  // own SVG/canvas animation at the same time — that overlap was the main
+  // cause of the intro stuttering partway through.
+  const active = pageVisible && !reducedMotion && !introPlaying;
   // Three explicit quality tiers rather than a single mobile/desktop split —
   // this scene is mounted on every page, so a mid tier (a smaller/narrower
   // desktop window, not just phones) matters for keeping it cheap without

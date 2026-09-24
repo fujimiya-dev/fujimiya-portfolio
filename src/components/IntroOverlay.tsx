@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import introPathData from "./introPathData.json";
+import { useSetIntroPlaying } from "./IntroPlayingContext";
 
 // Timing (ms).
 const DRAW_MS = 4000;
@@ -53,6 +54,7 @@ function easeOutCubic(t: number) {
 }
 
 export default function IntroOverlay() {
+  const setIntroPlaying = useSetIntroPlaying();
   const [phase, setPhase] = useState<Phase>("drawing");
   // TopNav/main each create their own stacking context in layout.tsx, so a
   // z-index alone here can't escape main's context to sit above TopNav —
@@ -187,6 +189,16 @@ export default function IntroOverlay() {
       timers.push(
         setTimeout(() => {
           particlesRef.current = [];
+          // Hand the frameloop back to NightSkyScene right as the overlay
+          // goes away — frameloop="always" resumes continuous rendering on
+          // its own very next tick, confirmed with no stale/black frame at
+          // the reveal. (A standalone invalidate() import from
+          // @react-three/fiber was tried here as an extra safety net, but
+          // it pulls the entire Three.js/R3F chain into this page's
+          // synchronous bundle — NightSky.tsx keeps that dependency behind
+          // a next/dynamic(ssr:false) split specifically to avoid that, so
+          // it was removed once verified unnecessary.)
+          setIntroPlaying?.(false);
           setPhase("done");
         }, PARTICLE_MAX_MS)
       );

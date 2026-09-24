@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
 import NightSky from "@/components/night-sky/NightSky";
+import { IntroPlayingProvider } from "@/components/IntroPlayingContext";
 
 const zenOldMincho = localFont({
   src: [
@@ -66,9 +67,11 @@ export default function RootLayout({
       className={`${zenOldMincho.variable} ${zenKaku.variable} ${marcellus.variable} ${kaiseiDecol.variable} ${nothingYouCouldDo.variable}`}
     >
       <body className="font-sans">
-        <NightSky />
-        <TopNav />
-        <main className="relative z-[2]">{children}</main>
+        <IntroPlayingProvider>
+          <NightSky />
+          <TopNav />
+          <main className="relative z-[2]">{children}</main>
+        </IntroPlayingProvider>
       </body>
     </html>
   );
