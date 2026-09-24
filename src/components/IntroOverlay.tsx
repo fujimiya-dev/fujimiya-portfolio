@@ -6,16 +6,19 @@ import introPathData from "./introPathData.json";
 
 // Timing (ms).
 const DRAW_MS = 4000;
-const HOLD_MS = 500; // pause after the trace finishes, before the color morph
-const MORPH_MS = 1200; // blue -> mint color transition
-const TEXT_FADE_MS = 800; // text fade-out, starts together with the particle burst
+const HOLD_MS = 500; // pause after the trace finishes, before the sweep starts
+const SWEEP_MS = 2800; // left-to-right color+particle sweep across all glyphs
+const PER_GLYPH_COLOR_MS = 300; // each glyph's own blue->mint snap, once the sweep reaches it
+const TEXT_FADE_MS = 800; // whole-text fade-out once the sweep finishes
+const PARTICLES_PER_GLYPH_MIN = 3;
+const PARTICLES_PER_GLYPH_MAX = 6;
 const PARTICLE_MIN_MS = 1400;
 const PARTICLE_MAX_MS = 2200;
-const PARTICLE_COUNT = 50;
 const PARTICLE_MIN_DIST = 60;
 const PARTICLE_MAX_DIST = 220;
-// Background starts fading a little before the particles finish dispersing,
-// so the two resolve into the real Hero starfield at roughly the same time.
+// Background starts fading a little before the last-spawned particles finish
+// dispersing, so the two resolve into the real Hero starfield at roughly the
+// same time.
 const BG_FADE_DELAY_MS = 1300;
 const BG_FADE_MS = 900;
 // Each glyph's own trace takes this fraction of DRAW_MS, with glyphs'
@@ -32,7 +35,7 @@ const NEON_FILTER = "drop-shadow(0 0 8px #1E40FF) drop-shadow(0 0 20px #7FB7FF)"
 const MINT_STROKE = "#a8f5c8";
 const MINT_FILTER = "drop-shadow(0 0 8px #3ecf8e) drop-shadow(0 0 20px #8ef0a0)";
 
-type Phase = "drawing" | "morphing" | "dispersing" | "done";
+type Phase = "drawing" | "sweeping" | "done";
 
 type Particle = {
   id: number;
@@ -58,6 +61,7 @@ export default function IntroOverlay() {
   const [particles, setParticles] = useState<Particle[]>([]);
   const pathRefs = useRef<(SVGPathElement | null)[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
+  const particleIdRef = useRef(0);
 
   useEffect(() => {
     setMounted(true);
@@ -94,34 +98,86 @@ export default function IntroOverlay() {
       });
     });
 
+    const toSweeping = setTimeout(() => {
+      setPhase("sweeping");
+      setMinted(true);
+    }, DRAW_MS + HOLD_MS);
+
+    return () => clearTimeout(toSweeping);
+  }, [mounted]);
+
+  // Left-to-right sweep: reuses the same 0->1 "progress" idea as the trace
+  // itself. Each glyph's own left-edge position (normalized against the
+  // full text's bounding box) is compared against progress every frame —
+  // once progress reaches it, that glyph snaps to mint and spawns its own
+  // handful of particles, instead of the whole word changing at once.
+  useEffect(() => {
+    if (phase !== "sweeping") return;
+    const els = pathRefs.current.filter((el): el is SVGPathElement => el !== null);
+    if (els.length === 0) return;
+
+    const [vbX, , vbWidth] = introPathData.viewBox.split(" ").map(Number);
+    const positions = els.map((el) => (el.getBBox().x - vbX) / vbWidth);
+
+    const triggered = new Set<number>();
+    const start = performance.now();
+    let raf = 0;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    timers.push(
-      setTimeout(() => {
-        setPhase("morphing");
-        setMinted(true);
-      }, DRAW_MS + HOLD_MS)
-    );
+    const spawnForGlyph = (el: SVGPathElement) => {
+      const length = el.getTotalLength();
+      const ctm = el.getScreenCTM();
+      if (length <= 0 || !ctm) return;
+      const count = PARTICLES_PER_GLYPH_MIN + Math.floor(Math.random() * (PARTICLES_PER_GLYPH_MAX - PARTICLES_PER_GLYPH_MIN + 1));
+      const next: Particle[] = [];
+      for (let i = 0; i < count; i++) {
+        const pt = el.getPointAtLength(Math.random() * length).matrixTransform(ctm);
+        const angle = Math.random() * Math.PI * 2;
+        const dist = PARTICLE_MIN_DIST + Math.random() * (PARTICLE_MAX_DIST - PARTICLE_MIN_DIST);
+        next.push({
+          id: particleIdRef.current++,
+          x: pt.x,
+          y: pt.y,
+          dx: Math.cos(angle) * dist,
+          dy: Math.sin(angle) * dist,
+          size: 2 + Math.random() * 3,
+          color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
+          duration: PARTICLE_MIN_MS + Math.random() * (PARTICLE_MAX_MS - PARTICLE_MIN_MS),
+        });
+      }
+      if (next.length > 0) setParticles((prev) => [...prev, ...next]);
+    };
 
-    timers.push(
-      setTimeout(() => {
-        setPhase("dispersing");
-        setTextFading(true);
-        setParticles(spawnParticles(els));
-        timers.push(setTimeout(() => setBgFading(true), BG_FADE_DELAY_MS));
-        timers.push(
-          setTimeout(() => {
-            setParticles([]);
-            setPhase("done");
-          }, PARTICLE_MAX_MS)
-        );
-      }, DRAW_MS + HOLD_MS + MORPH_MS)
-    );
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / SWEEP_MS);
+      els.forEach((el, i) => {
+        if (!triggered.has(i) && positions[i] <= t) {
+          triggered.add(i);
+          el.style.transition = `stroke ${PER_GLYPH_COLOR_MS}ms ease`;
+          el.style.stroke = MINT_STROKE;
+          spawnForGlyph(el);
+        }
+      });
+      if (t < 1) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      setTextFading(true);
+      timers.push(setTimeout(() => setBgFading(true), BG_FADE_DELAY_MS));
+      timers.push(
+        setTimeout(() => {
+          setParticles([]);
+          setPhase("done");
+        }, PARTICLE_MAX_MS)
+      );
+    };
+    raf = requestAnimationFrame(tick);
 
     return () => {
-      for (const t of timers) clearTimeout(t);
+      cancelAnimationFrame(raf);
+      for (const tm of timers) clearTimeout(tm);
     };
-  }, [mounted]);
+  }, [phase]);
 
   if (!mounted || phase === "done") return null;
 
@@ -150,8 +206,13 @@ export default function IntroOverlay() {
           height: "auto",
           pointerEvents: "none",
           opacity: textFading ? 0 : 1,
+          // The ambient glow drifts blue->mint smoothly across the whole
+          // sweep (it's one shared filter over the composited group, so it
+          // can't snap per-glyph without reintroducing the multi-filter
+          // banding problem) while each glyph's own crisp core stroke snaps
+          // color abruptly as the sweep passes over it, below.
           filter: minted ? MINT_FILTER : NEON_FILTER,
-          transition: `filter ${MORPH_MS}ms ease${textFading ? `, opacity ${TEXT_FADE_MS}ms ease` : ""}`,
+          transition: `filter ${SWEEP_MS}ms ease${textFading ? `, opacity ${TEXT_FADE_MS}ms ease` : ""}`,
         }}
         aria-hidden="true"
       >
@@ -163,11 +224,10 @@ export default function IntroOverlay() {
             }}
             d={d}
             fill="none"
-            stroke={minted ? MINT_STROKE : NEON_STROKE}
+            stroke={NEON_STROKE}
             strokeWidth={4.5}
             strokeLinecap="round"
             strokeLinejoin="round"
-            style={{ transition: `stroke ${MORPH_MS}ms ease` }}
           />
         ))}
       </svg>
@@ -216,40 +276,4 @@ export default function IntroOverlay() {
     </>,
     document.body
   );
-}
-
-function spawnParticles(glyphEls: SVGPathElement[]): Particle[] {
-  const lengths = glyphEls.map((el) => el.getTotalLength());
-  const totalLength = lengths.reduce((a, b) => a + b, 0);
-  if (totalLength <= 0) return [];
-
-  const particles: Particle[] = [];
-  for (let i = 0; i < PARTICLE_COUNT; i++) {
-    let target = Math.random() * totalLength;
-    let glyphIndex = 0;
-    while (glyphIndex < lengths.length - 1 && target > lengths[glyphIndex]) {
-      target -= lengths[glyphIndex];
-      glyphIndex++;
-    }
-    const el = glyphEls[glyphIndex];
-    const ctm = el.getScreenCTM();
-    if (!ctm) continue;
-    const localLength = Math.min(target, lengths[glyphIndex]);
-    const pt = el.getPointAtLength(localLength).matrixTransform(ctm);
-
-    const angle = Math.random() * Math.PI * 2;
-    const dist = PARTICLE_MIN_DIST + Math.random() * (PARTICLE_MAX_DIST - PARTICLE_MIN_DIST);
-
-    particles.push({
-      id: i,
-      x: pt.x,
-      y: pt.y,
-      dx: Math.cos(angle) * dist,
-      dy: Math.sin(angle) * dist,
-      size: 2 + Math.random() * 3,
-      color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
-      duration: PARTICLE_MIN_MS + Math.random() * (PARTICLE_MAX_MS - PARTICLE_MIN_MS),
-    });
-  }
-  return particles;
 }
