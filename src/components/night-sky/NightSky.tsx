@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useHeroReady } from "@/components/IntroPlayingContext";
 
 const NightSkyScene = dynamic(() => import("./NightSkyScene"), { ssr: false });
 
@@ -19,29 +20,19 @@ function detectWebGL(): boolean {
 
 export default function NightSky() {
   const [webglReady, setWebglReady] = useState(false);
-  const [sceneReady, setSceneReady] = useState(false);
+  // On "/", IntroOverlay holds this false until the trace finishes and
+  // flips it during HOLD_MS (see IntroPlayingContext) — the one quiet
+  // stretch of the intro timeline with nothing else running, so Hero's
+  // one-time Three.js/shader construction cost lands there instead of
+  // competing with the trace or the color-sweep/particle burst. Other
+  // pages have no IntroOverlay to gate this, so it's true from the start.
+  const heroReady = useHeroReady();
 
   useEffect(() => {
     setWebglReady(detectWebGL());
   }, []);
 
-  useEffect(() => {
-    if (!webglReady) return;
-    // Defer the heavy Three.js/WebGL scene mount (shader compilation for
-    // grass/stars/moon/river/postprocessing) so it doesn't compete with
-    // IntroOverlay's first paint on "/" — mounting both at once caused a
-    // ~500ms+ main-thread stall right as the intro's stroke-dashoffset
-    // transition started, measured via an in-page rAF timeline recorder.
-    // requestIdleCallback (unlike a bare setTimeout(0)) waits for an actual
-    // idle slot, giving the intro's first frame priority; the timeout caps
-    // how long we wait on browsers where idle never comes soon.
-    const ric = window.requestIdleCallback ?? ((cb: IdleRequestCallback) => window.setTimeout(cb, 50));
-    const cic = window.cancelIdleCallback ?? window.clearTimeout;
-    const id = ric(() => setSceneReady(true), { timeout: 800 });
-    return () => cic(id);
-  }, [webglReady]);
-
-  if (!webglReady || !sceneReady) {
+  if (!webglReady || !heroReady) {
     return (
       <>
         <div className="sky-fixed" aria-hidden="true" />

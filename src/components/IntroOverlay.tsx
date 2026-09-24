@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import introPathData from "./introPathData.json";
-import { useSetIntroPlaying } from "./IntroPlayingContext";
+import { useSetIntroPlaying, useSetHeroReady } from "./IntroPlayingContext";
 
 // Timing (ms).
 const DRAW_MS = 4000;
@@ -56,6 +56,7 @@ function easeOutCubic(t: number) {
 
 export default function IntroOverlay() {
   const setIntroPlaying = useSetIntroPlaying();
+  const setHeroReady = useSetHeroReady();
   const [phase, setPhase] = useState<Phase>("drawing");
   // TopNav/main each create their own stacking context in layout.tsx, so a
   // z-index alone here can't escape main's context to sit above TopNav —
@@ -117,12 +118,22 @@ export default function IntroOverlay() {
       });
     });
 
+    // Right as the trace finishes, let Hero start mounting — this lands its
+    // one-time Three.js/shader construction cost in the HOLD_MS pause that
+    // follows, the one stretch of the intro with nothing else animating,
+    // rather than during the trace itself or racing the color-sweep/particle
+    // burst that starts right after HOLD_MS.
+    const toHeroReady = setTimeout(() => setHeroReady?.(true), DRAW_MS);
+
     const toSweeping = setTimeout(() => {
       setPhase("sweeping");
       setMinted(true);
     }, DRAW_MS + HOLD_MS);
 
-    return () => clearTimeout(toSweeping);
+    return () => {
+      clearTimeout(toHeroReady);
+      clearTimeout(toSweeping);
+    };
   }, [mounted]);
 
   // Left-to-right sweep: reuses the same 0->1 "progress" idea as the trace
