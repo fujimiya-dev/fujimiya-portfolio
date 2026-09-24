@@ -10,7 +10,8 @@ const DRAW_MS = 4000;
 const HOLD_MS = 500; // pause after the trace finishes, before the sweep starts
 const SWEEP_MS = 2800; // left-to-right color+particle sweep across all glyphs
 const PER_GLYPH_COLOR_MS = 300; // each glyph's own blue->mint snap, once the sweep reaches it
-const TEXT_FADE_MS = 800; // whole-text fade-out once the sweep finishes
+const GLYPH_VANISH_DELAY_MS = 150; // hold on the mint color just long enough to register before vanishing
+const GLYPH_VANISH_MS = 250; // that glyph's own fade-out, once it's turned mint and burst into particles
 const PARTICLES_PER_GLYPH_MIN = 3;
 const PARTICLES_PER_GLYPH_MAX = 6;
 const PARTICLE_MIN_MS = 1400;
@@ -62,7 +63,6 @@ export default function IntroOverlay() {
   // directly against TopNav's.
   const [mounted, setMounted] = useState(false);
   const [minted, setMinted] = useState(false);
-  const [textFading, setTextFading] = useState(false);
   const [bgFading, setBgFading] = useState(false);
   const pathRefs = useRef<(SVGPathElement | null)[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -175,8 +175,13 @@ export default function IntroOverlay() {
       els.forEach((el, i) => {
         if (!triggered.has(i) && positions[i] <= t) {
           triggered.add(i);
-          el.style.transition = `stroke ${PER_GLYPH_COLOR_MS}ms ease`;
+          // Snap to mint immediately, hold it just long enough to read as
+          // "this letter turned green", then burst its own particles and
+          // fade this glyph out on its own — instead of every glyph
+          // staying visible until one fade at the very end of the sweep.
+          el.style.transition = `stroke ${PER_GLYPH_COLOR_MS}ms ease, opacity ${GLYPH_VANISH_MS}ms ease ${GLYPH_VANISH_DELAY_MS}ms`;
           el.style.stroke = MINT_STROKE;
+          el.style.opacity = "0";
           spawnForGlyph(el, i);
         }
       });
@@ -184,7 +189,6 @@ export default function IntroOverlay() {
         raf = requestAnimationFrame(tick);
         return;
       }
-      setTextFading(true);
       timers.push(setTimeout(() => setBgFading(true), BG_FADE_DELAY_MS));
       timers.push(
         setTimeout(() => {
@@ -291,14 +295,14 @@ export default function IntroOverlay() {
           width: "min(90vw, 900px)",
           height: "auto",
           pointerEvents: "none",
-          opacity: textFading ? 0 : 1,
           // The ambient glow drifts blue->mint smoothly across the whole
           // sweep (it's one shared filter over the composited group, so it
           // can't snap per-glyph without reintroducing the multi-filter
           // banding problem) while each glyph's own crisp core stroke snaps
-          // color abruptly as the sweep passes over it, below.
+          // color and vanishes individually as the sweep passes over it —
+          // see the per-glyph opacity transition set in the tick loop above.
           filter: minted ? MINT_FILTER : NEON_FILTER,
-          transition: `filter ${SWEEP_MS}ms ease${textFading ? `, opacity ${TEXT_FADE_MS}ms ease` : ""}`,
+          transition: `filter ${SWEEP_MS}ms ease`,
         }}
         aria-hidden="true"
       >
