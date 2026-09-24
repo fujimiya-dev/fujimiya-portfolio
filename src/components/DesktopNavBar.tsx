@@ -58,7 +58,11 @@ export default function DesktopNavBar({
       <div aria-hidden="true" />
 
       {logoRect && (
-        <div className="fixed z-50" style={{ left: logoRect.left, top: logoRect.top }}>
+        // translateX(-50%) centers the logo ON logoRect.left, rather than
+        // starting its left edge there — without it, the logo's left edge
+        // (not its visual center) landed on the midpoint, which read as
+        // "not actually centered in the gap" despite the math being right.
+        <div className="fixed z-50" style={{ left: logoRect.left, top: logoRect.top, transform: "translateX(-50%)" }}>
           <IntroTriggerLink href="/" className={LOGO_CLASS}>
             Fujimiya.dev
           </IntroTriggerLink>
