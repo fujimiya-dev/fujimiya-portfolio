@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import introPathData from "./introPathData.json";
 
-// Timing (ms), per spec: 2.6s stroke-on trace, 0.6s hold, 0.5s fade-out.
-const DRAW_MS = 2600;
+// Timing (ms). Slowed from the original 2.6s per follow-up feedback asking
+// for a more leisurely trace.
+const DRAW_MS = 4000;
 const HOLD_MS = 600;
 const FADE_MS = 500;
 // Each glyph's own trace takes this fraction of DRAW_MS, with glyphs'
@@ -85,14 +86,14 @@ export default function IntroOverlay() {
         style={{
           width: "min(90vw, 900px)",
           height: "auto",
+          // Glow comes entirely from these two stacked CSS drop-shadows now.
+          // An SVG feGaussianBlur filter on the strokes was tried too, but
+          // stacking a third blur pass on top of these two produced visible
+          // 8-bit banding in the glow gradient — these alone render smooth
+          // and the crisp core stroke reads better besides.
           filter: "drop-shadow(0 0 8px #1E40FF) drop-shadow(0 0 20px #1E40FF)",
         }}
       >
-        <defs>
-          <filter id="intro-glow" x="-20%" y="-100%" width="140%" height="300%">
-            <feGaussianBlur stdDeviation="4" />
-          </filter>
-        </defs>
         {introPathData.glyphs.map((d, i) => (
           <path
             key={i}
@@ -102,10 +103,9 @@ export default function IntroOverlay() {
             d={d}
             fill="none"
             stroke="#eaf6ff"
-            strokeWidth={3.5}
+            strokeWidth={4.5}
             strokeLinecap="round"
             strokeLinejoin="round"
-            filter="url(#intro-glow)"
           />
         ))}
       </svg>
