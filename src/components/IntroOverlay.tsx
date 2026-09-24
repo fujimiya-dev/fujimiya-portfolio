@@ -38,7 +38,6 @@ const MINT_FILTER = "drop-shadow(0 0 8px #3ecf8e) drop-shadow(0 0 20px #8ef0a0)"
 type Phase = "drawing" | "sweeping" | "done";
 
 type Particle = {
-  id: number;
   x: number;
   y: number;
   dx: number;
@@ -46,7 +45,12 @@ type Particle = {
   size: number;
   color: string;
   duration: number;
+  spawnTime: number;
 };
+
+function easeOutCubic(t: number) {
+  return 1 - Math.pow(1 - t, 3);
+}
 
 export default function IntroOverlay() {
   const [phase, setPhase] = useState<Phase>("drawing");
@@ -58,10 +62,20 @@ export default function IntroOverlay() {
   const [minted, setMinted] = useState(false);
   const [textFading, setTextFading] = useState(false);
   const [bgFading, setBgFading] = useState(false);
-  const [particles, setParticles] = useState<Particle[]>([]);
   const pathRefs = useRef<(SVGPathElement | null)[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
-  const particleIdRef = useRef(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Particles live entirely outside React state — pushed/filtered in place
+  // by the canvas render loop — since 60-120 of them re-rendering as DOM
+  // nodes on every spawn was the main cost behind the mid-animation stutter.
+  const particlesRef = useRef<Particle[]>([]);
+  // getTotalLength()/getScreenCTM() both force a synchronous layout pass;
+  // calling either from inside the per-frame sweep tick or from
+  // spawnForGlyph (i.e. while particles are actively being triggered) was
+  // the other source of jank. Both are computed once up front and cached
+  // here instead.
+  const glyphLengthsRef = useRef<number[]>([]);
+  const glyphCTMsRef = useRef<(DOMMatrix | null)[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -79,12 +93,15 @@ export default function IntroOverlay() {
     const perGlyphMs = DRAW_MS * PER_GLYPH_FRACTION;
     const spanMs = DRAW_MS - perGlyphMs;
 
+    const lengths: number[] = [];
     for (const el of els) {
       const length = el.getTotalLength();
+      lengths.push(length);
       el.style.transition = "none";
       el.style.strokeDasharray = `${length}`;
       el.style.strokeDashoffset = `${length}`;
     }
+    glyphLengthsRef.current = lengths;
     // Force a synchronous layout flush so the browser actually commits this
     // fully-hidden state before the transitions are enabled below —
     // without it, a single rAF can still get coalesced with this write and
@@ -118,24 +135,27 @@ export default function IntroOverlay() {
 
     const [vbX, , vbWidth] = introPathData.viewBox.split(" ").map(Number);
     const positions = els.map((el) => (el.getBBox().x - vbX) / vbWidth);
+    // Snapshot every glyph's screen transform once, before the tick loop
+    // starts — calling getScreenCTM() lazily as each glyph gets triggered
+    // would force a layout recalculation mid-rAF-loop.
+    glyphCTMsRef.current = els.map((el) => el.getScreenCTM());
 
     const triggered = new Set<number>();
     const start = performance.now();
     let raf = 0;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    const spawnForGlyph = (el: SVGPathElement) => {
-      const length = el.getTotalLength();
-      const ctm = el.getScreenCTM();
-      if (length <= 0 || !ctm) return;
+    const spawnForGlyph = (el: SVGPathElement, i: number) => {
+      const length = glyphLengthsRef.current[i];
+      const ctm = glyphCTMsRef.current[i];
+      if (!length || length <= 0 || !ctm) return;
       const count = PARTICLES_PER_GLYPH_MIN + Math.floor(Math.random() * (PARTICLES_PER_GLYPH_MAX - PARTICLES_PER_GLYPH_MIN + 1));
-      const next: Particle[] = [];
-      for (let i = 0; i < count; i++) {
+      const now = performance.now();
+      for (let n = 0; n < count; n++) {
         const pt = el.getPointAtLength(Math.random() * length).matrixTransform(ctm);
         const angle = Math.random() * Math.PI * 2;
         const dist = PARTICLE_MIN_DIST + Math.random() * (PARTICLE_MAX_DIST - PARTICLE_MIN_DIST);
-        next.push({
-          id: particleIdRef.current++,
+        particlesRef.current.push({
           x: pt.x,
           y: pt.y,
           dx: Math.cos(angle) * dist,
@@ -143,9 +163,9 @@ export default function IntroOverlay() {
           size: 2 + Math.random() * 3,
           color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
           duration: PARTICLE_MIN_MS + Math.random() * (PARTICLE_MAX_MS - PARTICLE_MIN_MS),
+          spawnTime: now,
         });
       }
-      if (next.length > 0) setParticles((prev) => [...prev, ...next]);
     };
 
     const tick = (now: number) => {
@@ -155,7 +175,7 @@ export default function IntroOverlay() {
           triggered.add(i);
           el.style.transition = `stroke ${PER_GLYPH_COLOR_MS}ms ease`;
           el.style.stroke = MINT_STROKE;
-          spawnForGlyph(el);
+          spawnForGlyph(el, i);
         }
       });
       if (t < 1) {
@@ -166,7 +186,7 @@ export default function IntroOverlay() {
       timers.push(setTimeout(() => setBgFading(true), BG_FADE_DELAY_MS));
       timers.push(
         setTimeout(() => {
-          setParticles([]);
+          particlesRef.current = [];
           setPhase("done");
         }, PARTICLE_MAX_MS)
       );
@@ -176,6 +196,60 @@ export default function IntroOverlay() {
     return () => {
       cancelAnimationFrame(raf);
       for (const tm of timers) clearTimeout(tm);
+    };
+  }, [phase]);
+
+  // Canvas particle renderer — a single element instead of 60-120 divs.
+  // Runs only during "sweeping" and is torn down (canceled + cleared) the
+  // moment the phase leaves it, so nothing keeps painting once the intro
+  // is done.
+  useEffect(() => {
+    if (phase !== "sweeping") return;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    let raf = 0;
+    const render = () => {
+      ctx.clearRect(0, 0, w, h);
+      const now = performance.now();
+      const alive: Particle[] = [];
+      for (const p of particlesRef.current) {
+        const elapsed = now - p.spawnTime;
+        if (elapsed >= p.duration) continue;
+        const eased = easeOutCubic(elapsed / p.duration);
+        const x = p.x + p.dx * eased;
+        const y = p.y + p.dy * eased;
+        const radius = Math.max(0.1, (p.size / 2) * (1 - eased * 0.8));
+        ctx.globalAlpha = 1 - eased;
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        grad.addColorStop(0, "#ffffff");
+        grad.addColorStop(0.45, p.color);
+        grad.addColorStop(0.75, "transparent");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        alive.push(p);
+      }
+      ctx.globalAlpha = 1;
+      particlesRef.current = alive;
+      raf = requestAnimationFrame(render);
+    };
+    raf = requestAnimationFrame(render);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ctx.clearRect(0, 0, w, h);
     };
   }, [phase]);
 
@@ -232,47 +306,7 @@ export default function IntroOverlay() {
         ))}
       </svg>
 
-      {particles.length > 0 && (
-        <div className="fixed inset-0 z-[102]" style={{ pointerEvents: "none", mixBlendMode: "screen" }} aria-hidden="true">
-          {particles.map((p) => (
-            <div
-              key={p.id}
-              className="intro-particle"
-              style={
-                {
-                  position: "fixed",
-                  left: p.x,
-                  top: p.y,
-                  width: p.size,
-                  height: p.size,
-                  borderRadius: "9999px",
-                  background: `radial-gradient(circle, #ffffff 0%, ${p.color} 45%, transparent 75%)`,
-                  animationDuration: `${p.duration}ms`,
-                  "--dx": `${p.dx}px`,
-                  "--dy": `${p.dy}px`,
-                } as React.CSSProperties
-              }
-            />
-          ))}
-          <style jsx>{`
-            .intro-particle {
-              animation-name: intro-particle-disperse;
-              animation-timing-function: ease-out;
-              animation-fill-mode: forwards;
-            }
-            @keyframes intro-particle-disperse {
-              0% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-              }
-              100% {
-                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2);
-                opacity: 0;
-              }
-            }
-          `}</style>
-        </div>
-      )}
+      <canvas ref={canvasRef} className="fixed inset-0 z-[102]" style={{ pointerEvents: "none", mixBlendMode: "screen" }} aria-hidden="true" />
     </>,
     document.body
   );
