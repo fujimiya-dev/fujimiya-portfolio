@@ -4,18 +4,20 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import introPathData from "./introPathData.json";
 
-// Timing (ms). Slowed from the original 2.6s per follow-up feedback asking
-// for a more leisurely trace.
+// Timing (ms).
 const DRAW_MS = 4000;
-const HOLD_MS = 600;
-const FADE_MS = 500;
+const HOLD_MS = 400; // pause after the trace finishes, before the panels split
+const SPLIT_MS = 1100; // panel slide-open duration
 // Each glyph's own trace takes this fraction of DRAW_MS, with glyphs'
 // start times staggered evenly across the remaining span so consecutive
 // letters overlap slightly — reading as one continuous left-to-right
 // stroke rather than a per-letter typewriter chop.
 const PER_GLYPH_FRACTION = 0.35;
+// Text is fully faded once the user has scrolled this fraction of one
+// viewport height.
+const SCROLL_FADE_VH_FRACTION = 0.6;
 
-type Phase = "drawing" | "fading" | "done";
+type Phase = "drawing" | "splitting" | "revealed";
 
 export default function IntroOverlay() {
   const [phase, setPhase] = useState<Phase>("drawing");
@@ -24,6 +26,7 @@ export default function IntroOverlay() {
   // portal straight onto <body> instead, where our z-index is compared
   // directly against TopNav's.
   const [mounted, setMounted] = useState(false);
+  const [textOpacity, setTextOpacity] = useState(1);
   const pathRefs = useRef<(SVGPathElement | null)[]>([]);
 
   useEffect(() => {
@@ -61,31 +64,80 @@ export default function IntroOverlay() {
       });
     });
 
-    const toFading = setTimeout(() => setPhase("fading"), DRAW_MS + HOLD_MS);
-    const toDone = setTimeout(() => setPhase("done"), DRAW_MS + HOLD_MS + FADE_MS);
+    const toSplitting = setTimeout(() => setPhase("splitting"), DRAW_MS + HOLD_MS);
+    const toRevealed = setTimeout(() => setPhase("revealed"), DRAW_MS + HOLD_MS + SPLIT_MS);
     return () => {
-      clearTimeout(toFading);
-      clearTimeout(toDone);
+      clearTimeout(toSplitting);
+      clearTimeout(toRevealed);
     };
   }, [mounted]);
 
-  if (phase === "done" || !mounted) return null;
+  // Scroll-linked text fade — only wired up once the panels have fully split
+  // open. Registering it any earlier would let an accidental scroll during
+  // the trace/split fade the text out before the reveal even finishes.
+  useEffect(() => {
+    if (phase !== "revealed") return;
+
+    let ticking = false;
+    const update = () => {
+      const vh = window.innerHeight;
+      setTextOpacity(Math.max(0, 1 - window.scrollY / (vh * SCROLL_FADE_VH_FRACTION)));
+      ticking = false;
+    };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [phase]);
+
+  if (!mounted) return null;
+
+  const isSplitting = phase === "splitting";
+  const showPanels = phase === "drawing" || phase === "splitting";
+  const panelTransition = isSplitting ? `transform ${SPLIT_MS}ms cubic-bezier(0.76, 0, 0.24, 1)` : "none";
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#020308]"
-      style={{
-        opacity: phase === "fading" ? 0 : 1,
-        transition: `opacity ${FADE_MS}ms ease`,
-        pointerEvents: phase === "fading" ? "none" : "auto",
-      }}
-      aria-hidden="true"
-    >
+    <>
+      {showPanels && (
+        <>
+          <div
+            className="fixed inset-x-0 top-0 z-[99] bg-[#020308]"
+            style={{
+              height: "50vh",
+              transform: isSplitting ? "translateY(-100%)" : "translateY(0)",
+              transition: panelTransition,
+            }}
+            aria-hidden="true"
+          />
+          <div
+            className="fixed inset-x-0 bottom-0 z-[99] bg-[#020308]"
+            style={{
+              height: "50vh",
+              transform: isSplitting ? "translateY(100%)" : "translateY(0)",
+              transition: panelTransition,
+            }}
+            aria-hidden="true"
+          />
+        </>
+      )}
+
       <svg
         viewBox={introPathData.viewBox}
         style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 101,
           width: "min(90vw, 900px)",
           height: "auto",
+          opacity: textOpacity,
+          pointerEvents: textOpacity <= 0 ? "none" : "auto",
           // Glow comes entirely from these two stacked CSS drop-shadows now.
           // An SVG feGaussianBlur filter on the strokes was tried too, but
           // stacking a third blur pass on top of these two produced visible
@@ -93,6 +145,7 @@ export default function IntroOverlay() {
           // and the crisp core stroke reads better besides.
           filter: "drop-shadow(0 0 8px #1E40FF) drop-shadow(0 0 20px #1E40FF)",
         }}
+        aria-hidden="true"
       >
         {introPathData.glyphs.map((d, i) => (
           <path
@@ -109,7 +162,7 @@ export default function IntroOverlay() {
           />
         ))}
       </svg>
-    </div>,
+    </>,
     document.body
   );
 }
