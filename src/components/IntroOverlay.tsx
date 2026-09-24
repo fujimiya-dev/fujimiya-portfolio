@@ -6,18 +6,44 @@ import introPathData from "./introPathData.json";
 
 // Timing (ms).
 const DRAW_MS = 4000;
-const HOLD_MS = 400; // pause after the trace finishes, before the panels split
-const SPLIT_MS = 1900; // panel slide-open duration
+const HOLD_MS = 500; // pause after the trace finishes, before the color morph
+const MORPH_MS = 1200; // blue -> mint color transition
+const TEXT_FADE_MS = 800; // text fade-out, starts together with the particle burst
+const PARTICLE_MIN_MS = 1400;
+const PARTICLE_MAX_MS = 2200;
+const PARTICLE_COUNT = 50;
+const PARTICLE_MIN_DIST = 60;
+const PARTICLE_MAX_DIST = 220;
+// Background starts fading a little before the particles finish dispersing,
+// so the two resolve into the real Hero starfield at roughly the same time.
+const BG_FADE_DELAY_MS = 1300;
+const BG_FADE_MS = 900;
 // Each glyph's own trace takes this fraction of DRAW_MS, with glyphs'
 // start times staggered evenly across the remaining span so consecutive
 // letters overlap slightly — reading as one continuous left-to-right
 // stroke rather than a per-letter typewriter chop.
 const PER_GLYPH_FRACTION = 0.35;
-// Text is fully faded once the user has scrolled this fraction of one
-// viewport height.
-const SCROLL_FADE_VH_FRACTION = 0.6;
 
-type Phase = "drawing" | "splitting" | "revealed";
+// Matches Starfield.tsx's cool/white/warm palette.
+const PARTICLE_COLORS = ["#3ecf8e", "#a8f5c8", "#8ef0a0"];
+
+const NEON_STROKE = "#eaf6ff";
+const NEON_FILTER = "drop-shadow(0 0 8px #1E40FF) drop-shadow(0 0 20px #7FB7FF)";
+const MINT_STROKE = "#a8f5c8";
+const MINT_FILTER = "drop-shadow(0 0 8px #3ecf8e) drop-shadow(0 0 20px #8ef0a0)";
+
+type Phase = "drawing" | "morphing" | "dispersing" | "done";
+
+type Particle = {
+  id: number;
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+  size: number;
+  color: string;
+  duration: number;
+};
 
 export default function IntroOverlay() {
   const [phase, setPhase] = useState<Phase>("drawing");
@@ -26,8 +52,12 @@ export default function IntroOverlay() {
   // portal straight onto <body> instead, where our z-index is compared
   // directly against TopNav's.
   const [mounted, setMounted] = useState(false);
-  const [textOpacity, setTextOpacity] = useState(1);
+  const [minted, setMinted] = useState(false);
+  const [textFading, setTextFading] = useState(false);
+  const [bgFading, setBgFading] = useState(false);
+  const [particles, setParticles] = useState<Particle[]>([]);
   const pathRefs = useRef<(SVGPathElement | null)[]>([]);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -64,69 +94,51 @@ export default function IntroOverlay() {
       });
     });
 
-    const toSplitting = setTimeout(() => setPhase("splitting"), DRAW_MS + HOLD_MS);
-    const toRevealed = setTimeout(() => setPhase("revealed"), DRAW_MS + HOLD_MS + SPLIT_MS);
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    timers.push(
+      setTimeout(() => {
+        setPhase("morphing");
+        setMinted(true);
+      }, DRAW_MS + HOLD_MS)
+    );
+
+    timers.push(
+      setTimeout(() => {
+        setPhase("dispersing");
+        setTextFading(true);
+        setParticles(spawnParticles(els));
+        timers.push(setTimeout(() => setBgFading(true), BG_FADE_DELAY_MS));
+        timers.push(
+          setTimeout(() => {
+            setParticles([]);
+            setPhase("done");
+          }, PARTICLE_MAX_MS)
+        );
+      }, DRAW_MS + HOLD_MS + MORPH_MS)
+    );
+
     return () => {
-      clearTimeout(toSplitting);
-      clearTimeout(toRevealed);
+      for (const t of timers) clearTimeout(t);
     };
   }, [mounted]);
 
-  // Scroll-linked text fade — only wired up once the panels have fully split
-  // open. Registering it any earlier would let an accidental scroll during
-  // the trace/split fade the text out before the reveal even finishes.
-  useEffect(() => {
-    if (phase !== "revealed") return;
-
-    let ticking = false;
-    const update = () => {
-      const vh = window.innerHeight;
-      setTextOpacity(Math.max(0, 1 - window.scrollY / (vh * SCROLL_FADE_VH_FRACTION)));
-      ticking = false;
-    };
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(update);
-    };
-
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [phase]);
-
-  if (!mounted) return null;
-
-  const isSplitting = phase === "splitting";
-  const showPanels = phase === "drawing" || phase === "splitting";
-  const panelTransition = isSplitting ? `transform ${SPLIT_MS}ms cubic-bezier(0.76, 0, 0.24, 1)` : "none";
+  if (!mounted || phase === "done") return null;
 
   return createPortal(
     <>
-      {showPanels && (
-        <>
-          <div
-            className="fixed inset-x-0 top-0 z-[99] bg-[#020308]"
-            style={{
-              height: "50vh",
-              transform: isSplitting ? "translateY(-100%)" : "translateY(0)",
-              transition: panelTransition,
-            }}
-            aria-hidden="true"
-          />
-          <div
-            className="fixed inset-x-0 bottom-0 z-[99] bg-[#020308]"
-            style={{
-              height: "50vh",
-              transform: isSplitting ? "translateY(100%)" : "translateY(0)",
-              transition: panelTransition,
-            }}
-            aria-hidden="true"
-          />
-        </>
-      )}
+      <div
+        className="fixed inset-0 z-[99] bg-[#020308]"
+        style={{
+          opacity: bgFading ? 0 : 1,
+          transition: bgFading ? `opacity ${BG_FADE_MS}ms ease` : "none",
+          pointerEvents: bgFading ? "none" : "auto",
+        }}
+        aria-hidden="true"
+      />
 
       <svg
+        ref={svgRef}
         viewBox={introPathData.viewBox}
         style={{
           position: "fixed",
@@ -136,14 +148,10 @@ export default function IntroOverlay() {
           zIndex: 101,
           width: "min(90vw, 900px)",
           height: "auto",
-          opacity: textOpacity,
-          pointerEvents: textOpacity <= 0 ? "none" : "auto",
-          // Glow comes entirely from these two stacked CSS drop-shadows now.
-          // An SVG feGaussianBlur filter on the strokes was tried too, but
-          // stacking a third blur pass on top of these two produced visible
-          // 8-bit banding in the glow gradient — these alone render smooth
-          // and the crisp core stroke reads better besides.
-          filter: "drop-shadow(0 0 8px #1E40FF) drop-shadow(0 0 20px #1E40FF)",
+          pointerEvents: "none",
+          opacity: textFading ? 0 : 1,
+          filter: minted ? MINT_FILTER : NEON_FILTER,
+          transition: `filter ${MORPH_MS}ms ease${textFading ? `, opacity ${TEXT_FADE_MS}ms ease` : ""}`,
         }}
         aria-hidden="true"
       >
@@ -155,14 +163,93 @@ export default function IntroOverlay() {
             }}
             d={d}
             fill="none"
-            stroke="#eaf6ff"
+            stroke={minted ? MINT_STROKE : NEON_STROKE}
             strokeWidth={4.5}
             strokeLinecap="round"
             strokeLinejoin="round"
+            style={{ transition: `stroke ${MORPH_MS}ms ease` }}
           />
         ))}
       </svg>
+
+      {particles.length > 0 && (
+        <div className="fixed inset-0 z-[102]" style={{ pointerEvents: "none", mixBlendMode: "screen" }} aria-hidden="true">
+          {particles.map((p) => (
+            <div
+              key={p.id}
+              className="intro-particle"
+              style={
+                {
+                  position: "fixed",
+                  left: p.x,
+                  top: p.y,
+                  width: p.size,
+                  height: p.size,
+                  borderRadius: "9999px",
+                  background: `radial-gradient(circle, #ffffff 0%, ${p.color} 45%, transparent 75%)`,
+                  animationDuration: `${p.duration}ms`,
+                  "--dx": `${p.dx}px`,
+                  "--dy": `${p.dy}px`,
+                } as React.CSSProperties
+              }
+            />
+          ))}
+          <style jsx>{`
+            .intro-particle {
+              animation-name: intro-particle-disperse;
+              animation-timing-function: ease-out;
+              animation-fill-mode: forwards;
+            }
+            @keyframes intro-particle-disperse {
+              0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+              }
+              100% {
+                transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2);
+                opacity: 0;
+              }
+            }
+          `}</style>
+        </div>
+      )}
     </>,
     document.body
   );
+}
+
+function spawnParticles(glyphEls: SVGPathElement[]): Particle[] {
+  const lengths = glyphEls.map((el) => el.getTotalLength());
+  const totalLength = lengths.reduce((a, b) => a + b, 0);
+  if (totalLength <= 0) return [];
+
+  const particles: Particle[] = [];
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    let target = Math.random() * totalLength;
+    let glyphIndex = 0;
+    while (glyphIndex < lengths.length - 1 && target > lengths[glyphIndex]) {
+      target -= lengths[glyphIndex];
+      glyphIndex++;
+    }
+    const el = glyphEls[glyphIndex];
+    const ctm = el.getScreenCTM();
+    if (!ctm) continue;
+    const localLength = Math.min(target, lengths[glyphIndex]);
+    const pt = el.getPointAtLength(localLength).matrixTransform(ctm);
+
+    const angle = Math.random() * Math.PI * 2;
+    const dist = PARTICLE_MIN_DIST + Math.random() * (PARTICLE_MAX_DIST - PARTICLE_MIN_DIST);
+
+    particles.push({
+      id: i,
+      x: pt.x,
+      y: pt.y,
+      dx: Math.cos(angle) * dist,
+      dy: Math.sin(angle) * dist,
+      size: 2 + Math.random() * 3,
+      color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
+      duration: PARTICLE_MIN_MS + Math.random() * (PARTICLE_MAX_MS - PARTICLE_MIN_MS),
+    });
+  }
+  return particles;
 }
