@@ -28,17 +28,19 @@ const zenKaku = localFont({
   display: "swap",
 });
 
-const marcellus = localFont({
-  src: [{ path: "../fonts/marcellus/Marcellus-Regular.ttf", weight: "400", style: "normal" }],
+// Marcellus/Kaisei Decol were replaced by Hina Mincho for both the display
+// and label roles. The same ttf is loaded twice under two variable names so
+// the existing font-display/font-label call sites (19 files) don't need to
+// change. src/fonts/marcellus/ and src/fonts/kaisei-decol/ are left in place
+// (unused for now) in case this gets reverted.
+const hinaMincho = localFont({
+  src: [{ path: "../fonts/hina-mincho/HinaMincho-Regular.ttf", weight: "400", style: "normal" }],
   variable: "--font-display",
   display: "swap",
 });
 
-const kaiseiDecol = localFont({
-  src: [
-    { path: "../fonts/kaisei-decol/KaiseiDecol-Regular.ttf", weight: "400", style: "normal" },
-    { path: "../fonts/kaisei-decol/KaiseiDecol-Bold.ttf", weight: "700", style: "normal" },
-  ],
+const hinaMinchoLabel = localFont({
+  src: [{ path: "../fonts/hina-mincho/HinaMincho-Regular.ttf", weight: "400", style: "normal" }],
   variable: "--font-label",
   display: "swap",
 });
@@ -64,7 +66,7 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${zenOldMincho.variable} ${zenKaku.variable} ${marcellus.variable} ${kaiseiDecol.variable} ${nothingYouCouldDo.variable}`}
+      className={`${zenOldMincho.variable} ${zenKaku.variable} ${hinaMincho.variable} ${hinaMinchoLabel.variable} ${nothingYouCouldDo.variable}`}
     >
       <body className="font-sans">
         <IntroPlayingProvider>
