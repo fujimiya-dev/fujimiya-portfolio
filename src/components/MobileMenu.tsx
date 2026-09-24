@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import IntroTriggerLink from "@/components/IntroTriggerLink";
 
 export default function MobileMenu({
   links,
@@ -43,17 +44,20 @@ export default function MobileMenu({
             className="fixed inset-0 z-[70] flex items-center justify-center bg-sky-deep/90 backdrop-blur-xl"
           >
             <ul className="flex flex-col items-center gap-2">
-              {links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="px-5 py-2 font-serif text-3xl text-ink-soft transition-colors hover:text-accent-teal"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {links.map((link) => {
+                const LinkComponent = link.href === "/" ? IntroTriggerLink : Link;
+                return (
+                  <li key={link.href}>
+                    <LinkComponent
+                      href={link.href}
+                      onClick={() => setOpen(false)}
+                      className="px-5 py-2 font-serif text-3xl text-ink-soft transition-colors hover:text-accent-teal"
+                    >
+                      {link.label}
+                    </LinkComponent>
+                  </li>
+                );
+              })}
             </ul>
           </motion.nav>
         )}

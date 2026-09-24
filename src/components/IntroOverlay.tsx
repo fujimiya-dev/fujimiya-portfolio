@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import introPathData from "./introPathData.json";
-import { useSetIntroPlaying, useSetHeroReady } from "./IntroPlayingContext";
+import { useSetIntroPlaying, useSetHeroReady, peekForcePlayIntro, clearForcePlayIntro } from "./IntroPlayingContext";
 
 // Timing (ms).
 const DRAW_MS = 4000;
@@ -41,6 +41,31 @@ const MINT_FILTER = "drop-shadow(0 0 8px #3ecf8e) drop-shadow(0 0 20px #8ef0a0)"
 
 type Phase = "drawing" | "sweeping" | "done";
 
+// Whether this is the very first time IntroOverlay has ever tried to mount
+// in this JS session (i.e. a real hard page load, not a client-side route
+// change). Client-side navigations to "/#about" (About me) update
+// window.location.hash slightly *after* the new route's first render, so
+// checking the hash mid-SPA-navigation is a race; it's only reliable at a
+// genuine hard load, where the browser has already parsed the full URL
+// (path + hash) before the page even starts loading. Cleared from an
+// effect after mount (see below), not read-and-cleared here — this
+// function must stay side-effect-free since React 18 StrictMode calls
+// useState lazy initializers twice on a component's first render.
+let isFirstMountCheck = true;
+
+// Decides once, at mount, whether this playthrough should actually run.
+// The force-play flag (set by IntroTriggerLink — the "Fujimiya.dev" logo
+// and "Top" nav link only) always wins. Otherwise, only the very first
+// mount ever gets to play, and only if it landed directly on bare "/" (no
+// hash) — every later client-side arrival at "/" (e.g. "About me") skips
+// straight to "done" instead of replaying the trace.
+function shouldPlayOnMount() {
+  if (peekForcePlayIntro()) return true;
+  if (!isFirstMountCheck) return false;
+  if (typeof window === "undefined") return false;
+  return window.location.hash === "";
+}
+
 type Particle = {
   x: number;
   y: number;
@@ -59,7 +84,7 @@ function easeOutCubic(t: number) {
 export default function IntroOverlay() {
   const setIntroPlaying = useSetIntroPlaying();
   const setHeroReady = useSetHeroReady();
-  const [phase, setPhase] = useState<Phase>("drawing");
+  const [phase, setPhase] = useState<Phase>(() => (shouldPlayOnMount() ? "drawing" : "done"));
   // TopNav/main each create their own stacking context in layout.tsx, so a
   // z-index alone here can't escape main's context to sit above TopNav —
   // portal straight onto <body> instead, where our z-index is compared
@@ -84,6 +109,19 @@ export default function IntroOverlay() {
 
   useEffect(() => {
     setMounted(true);
+    // The pathname-keyed effect in IntroPlayingContext only fires on an
+    // actual route change, so it won't notice a same-route replay
+    // (clicking "Top" while already on "/"). This mount-only effect is
+    // what actually flips introPlaying true for every real playthrough.
+    if (phase === "drawing") {
+      setIntroPlaying?.(true);
+    }
+    // Only safe to clear these *after* the phase decision above has been
+    // committed — clearing them inside shouldPlayOnMount itself would lose
+    // the flag on StrictMode's first (discarded) initializer call.
+    clearForcePlayIntro();
+    isFirstMountCheck = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Runs on the render *after* mounted flips true — the <path> elements only

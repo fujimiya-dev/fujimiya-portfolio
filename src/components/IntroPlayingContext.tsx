@@ -1,6 +1,15 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import { usePathname } from "next/navigation";
 
 const IntroPlayingContext = createContext(true);
@@ -16,25 +25,83 @@ const SetIntroPlayingContext = createContext<Dispatch<SetStateAction<boolean>> |
 const HeroReadyContext = createContext(true);
 const SetHeroReadyContext = createContext<Dispatch<SetStateAction<boolean>> | null>(null);
 
+// Forces IntroOverlay to remount from scratch, replaying the trace even
+// when the pathname doesn't change (e.g. clicking "Top" while already on
+// "/", scrolled down at #about — a plain pathname-keyed effect wouldn't
+// otherwise notice anything happened).
+const IntroEpochContext = createContext(0);
+const BumpIntroEpochContext = createContext<(() => void) | null>(null);
+
+// Set by IntroTriggerLink's onClick (the "Fujimiya.dev" logo / "Top" nav
+// link — the only two things that should ever replay the intro) right
+// before navigating. IntroOverlay consumes it once, on its own mount, to
+// decide whether to actually play. A plain module-level flag survives a
+// client-side route change (same JS runtime, no reload) but not a full
+// page load, which is exactly the scope we want it to have.
+let forcePlayIntro = false;
+
+export function triggerIntroReplay() {
+  forcePlayIntro = true;
+}
+
+// Deliberately side-effect-free (just a read) — React 18 StrictMode calls
+// useState lazy initializers twice on a component's first render, and a
+// "peek and clear in the same call" version would lose the flag on the
+// first of those two calls, leaving the second (the one that actually
+// wins) to see it already gone. IntroOverlay clears the flag itself, once,
+// from an effect after mount instead — see clearForcePlayIntro.
+export function peekForcePlayIntro() {
+  return forcePlayIntro;
+}
+
+export function clearForcePlayIntro() {
+  forcePlayIntro = false;
+}
+
+function hasHash() {
+  if (typeof window === "undefined") return false;
+  return window.location.hash !== "";
+}
+
+// The intro should play when landing directly on "/" (first visit, or the
+// "Fujimiya.dev"/"Top" links, which point at bare "/" and also set the
+// force-play flag above) but NOT when arriving via a hash link such as
+// "About me" ("/#about") — that should land straight on the section.
+function willIntroPlay(pathname: string) {
+  if (pathname !== "/") return false;
+  return peekForcePlayIntro() || !hasHash();
+}
+
 export function IntroPlayingProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  // IntroOverlay only exists on "/", so the shared flag defaults to
-  // whether we're currently there — pages without an IntroOverlay never
-  // get stuck with introPlaying permanently true (which would otherwise
-  // freeze NightSkyScene's frameloop forever on every other page).
-  const [introPlaying, setIntroPlaying] = useState(() => pathname === "/");
-  const [heroReady, setHeroReady] = useState(() => pathname !== "/");
+  const [introPlaying, setIntroPlaying] = useState(() => willIntroPlay(pathname));
+  const [heroReady, setHeroReady] = useState(() => !willIntroPlay(pathname));
+  const [introEpoch, setIntroEpoch] = useState(0);
 
   useEffect(() => {
-    setIntroPlaying(pathname === "/");
-    setHeroReady(pathname !== "/");
+    // Leaving "/" (or arriving anywhere but "/") — reset to the safe
+    // defaults so NightSkyScene's frameloop never stays paused off "/".
+    // While pathname === "/", IntroOverlay's own mount effects are the
+    // ones that decide and drive these two flags (see willIntroPlay /
+    // peekForcePlayIntro in IntroOverlay.tsx) since only it knows whether
+    // it actually started playing.
+    if (pathname !== "/") {
+      setIntroPlaying(false);
+      setHeroReady(true);
+    }
   }, [pathname]);
+
+  const bumpIntroEpoch = useCallback(() => setIntroEpoch((e) => e + 1), []);
 
   return (
     <SetIntroPlayingContext.Provider value={setIntroPlaying}>
       <IntroPlayingContext.Provider value={introPlaying}>
         <SetHeroReadyContext.Provider value={setHeroReady}>
-          <HeroReadyContext.Provider value={heroReady}>{children}</HeroReadyContext.Provider>
+          <HeroReadyContext.Provider value={heroReady}>
+            <BumpIntroEpochContext.Provider value={bumpIntroEpoch}>
+              <IntroEpochContext.Provider value={introEpoch}>{children}</IntroEpochContext.Provider>
+            </BumpIntroEpochContext.Provider>
+          </HeroReadyContext.Provider>
         </SetHeroReadyContext.Provider>
       </IntroPlayingContext.Provider>
     </SetIntroPlayingContext.Provider>
@@ -55,4 +122,12 @@ export function useHeroReady() {
 
 export function useSetHeroReady() {
   return useContext(SetHeroReadyContext);
+}
+
+export function useIntroEpoch() {
+  return useContext(IntroEpochContext);
+}
+
+export function useBumpIntroEpoch() {
+  return useContext(BumpIntroEpochContext);
 }
