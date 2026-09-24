@@ -7,7 +7,7 @@ import introPathData from "./introPathData.json";
 // Timing (ms).
 const DRAW_MS = 4000;
 const HOLD_MS = 400; // pause after the trace finishes, before the panels split
-const SPLIT_MS = 1100; // panel slide-open duration
+const SPLIT_MS = 1900; // panel slide-open duration
 // Each glyph's own trace takes this fraction of DRAW_MS, with glyphs'
 // start times staggered evenly across the remaining span so consecutive
 // letters overlap slightly — reading as one continuous left-to-right
