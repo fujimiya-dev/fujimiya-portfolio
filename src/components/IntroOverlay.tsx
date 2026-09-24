@@ -12,12 +12,14 @@ const SWEEP_MS = 2800; // left-to-right color+particle sweep across all glyphs
 const PER_GLYPH_COLOR_MS = 300; // each glyph's own blue->mint snap, once the sweep reaches it
 const GLYPH_VANISH_DELAY_MS = 150; // hold on the mint color just long enough to register before vanishing
 const GLYPH_VANISH_MS = 250; // that glyph's own fade-out, once it's turned mint and burst into particles
-const PARTICLES_PER_GLYPH_MIN = 3;
-const PARTICLES_PER_GLYPH_MAX = 6;
+// A bit more dramatic than the original 3-6/60-220 per follow-up feedback —
+// bumped moderately (count, spread, size), not maxed out.
+const PARTICLES_PER_GLYPH_MIN = 5;
+const PARTICLES_PER_GLYPH_MAX = 9;
 const PARTICLE_MIN_MS = 1400;
 const PARTICLE_MAX_MS = 2200;
-const PARTICLE_MIN_DIST = 60;
-const PARTICLE_MAX_DIST = 220;
+const PARTICLE_MIN_DIST = 80;
+const PARTICLE_MAX_DIST = 280;
 // Background starts fading a little before the last-spawned particles finish
 // dispersing, so the two resolve into the real Hero starfield at roughly the
 // same time.
@@ -173,7 +175,7 @@ export default function IntroOverlay() {
           y: pt.y,
           dx: Math.cos(angle) * dist,
           dy: Math.sin(angle) * dist,
-          size: 2 + Math.random() * 3,
+          size: 2.5 + Math.random() * 4,
           color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
           duration: PARTICLE_MIN_MS + Math.random() * (PARTICLE_MAX_MS - PARTICLE_MIN_MS),
           spawnTime: now,
