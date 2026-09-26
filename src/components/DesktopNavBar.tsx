@@ -37,36 +37,33 @@ export default function DesktopNavBar({
   return (
     <div className="hidden grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center lg:grid">
       <div aria-hidden="true" />
-      <div className="flex items-center gap-7 whitespace-nowrap">
-        {/* Invisible same-size placeholder — keeps this row's total width
-            (and therefore the grid's centering of the bar as a whole)
-            byte-for-byte identical to when the logo rendered inline here.
-            The real, visible logo is the separately fixed-positioned
-            element below, driven by a live measurement rather than static
-            CSS, since "screen edge to bar edge" isn't expressible as a
-            fixed offset — it depends on the bar's actual rendered
-            position, which itself depends on locale/label widths. */}
-        <span className={`${LOGO_CLASS} invisible`} aria-hidden="true">
-          Fujimiya.dev
-        </span>
-        <div ref={barRef} className="relative flex items-center gap-7 whitespace-nowrap pb-4">
-          <HorizonNav links={links} />
-          <span className="h-4 w-px bg-[rgba(158,212,255,0.35)]" aria-hidden="true" />
-          <LanguageToggle current={locale} showGlowDot />
+      {/* The bar (Top ... EN, everything the horizon line/glow-dots cover)
+          is the grid's ENTIRE center column, with nothing else sharing it —
+          an earlier version also parked an invisible logo-sized placeholder
+          in here to reserve room for the logo's own midpoint math, but that
+          placeholder's width/gap was itself inside the thing being
+          centered, so the *visible* bar ended up centered together with an
+          invisible chunk to its left and consequently sat off-center to
+          the right by half that chunk's width. The logo now has nothing
+          in the centering flow at all — it's purely the separate
+          fixed-position element below. */}
+      <div ref={barRef} className="relative flex items-center gap-7 whitespace-nowrap pb-4">
+        <HorizonNav links={links} />
+        <span className="h-4 w-px bg-[rgba(158,212,255,0.35)]" aria-hidden="true" />
+        <LanguageToggle current={locale} showGlowDot />
 
-          {/* The horizon itself — one continuous thin line under the whole
-              bar (nav items AND JA/EN, not just the nav items), fading to
-              transparent at both ends. Lives here rather than inside
-              HorizonNav so it spans the divider and JA/EN too. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px]"
-            style={{
-              background:
-                "linear-gradient(to right, transparent, rgba(158,212,255,0.35) 12%, rgba(158,212,255,0.35) 88%, transparent)",
-            }}
-          />
-        </div>
+        {/* The horizon itself — one continuous thin line under the whole
+            bar (nav items AND JA/EN, not just the nav items), fading to
+            transparent at both ends. Lives here rather than inside
+            HorizonNav so it spans the divider and JA/EN too. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px]"
+          style={{
+            background:
+              "linear-gradient(to right, transparent, rgba(158,212,255,0.35) 12%, rgba(158,212,255,0.35) 88%, transparent)",
+          }}
+        />
       </div>
       <div aria-hidden="true" />
 
