@@ -42,7 +42,7 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
   }, [pathname]);
 
   return (
-    <nav className="relative hidden items-center gap-6 whitespace-nowrap pb-4 lg:flex">
+    <nav className="relative hidden items-center gap-6 whitespace-nowrap lg:flex">
       {links.map((link) => {
         const active = isActiveLink(pathname, hash, link.href);
         const hashIndex = link.href.indexOf("#");
@@ -71,17 +71,6 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
           </div>
         );
       })}
-
-      {/* The horizon itself — one continuous thin line under the whole nav,
-          fading to transparent at both ends. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px]"
-        style={{
-          background:
-            "linear-gradient(to right, transparent, rgba(158,212,255,0.35) 12%, rgba(158,212,255,0.35) 88%, transparent)",
-        }}
-      />
     </nav>
   );
 }

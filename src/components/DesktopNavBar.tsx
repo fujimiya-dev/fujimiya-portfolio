@@ -49,10 +49,23 @@ export default function DesktopNavBar({
         <span className={`${LOGO_CLASS} invisible`} aria-hidden="true">
           Fujimiya.dev
         </span>
-        <div ref={barRef} className="flex items-center gap-7 whitespace-nowrap">
+        <div ref={barRef} className="relative flex items-center gap-7 whitespace-nowrap pb-4">
           <HorizonNav links={links} />
           <span className="h-4 w-px bg-[rgba(158,212,255,0.35)]" aria-hidden="true" />
-          <LanguageToggle current={locale} />
+          <LanguageToggle current={locale} showGlowDot />
+
+          {/* The horizon itself — one continuous thin line under the whole
+              bar (nav items AND JA/EN, not just the nav items), fading to
+              transparent at both ends. Lives here rather than inside
+              HorizonNav so it spans the divider and JA/EN too. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[1.5px]"
+            style={{
+              background:
+                "linear-gradient(to right, transparent, rgba(158,212,255,0.35) 12%, rgba(158,212,255,0.35) 88%, transparent)",
+            }}
+          />
         </div>
       </div>
       <div aria-hidden="true" />

@@ -2,10 +2,26 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { setLocale } from "@/actions/locale";
 import type { Locale } from "@/i18n/types";
 
-export default function LanguageToggle({ current }: { current: Locale }) {
+// Same text treatment as HorizonNav's page items, so JA/EN reads as part
+// of the same row rather than a visually distinct control bolted on.
+const ACTIVE_TEXT = "text-[#eaf6ff] [text-shadow:0_0_12px_rgba(127,183,255,0.65)]";
+const INACTIVE_TEXT = "text-[#93a3c2] hover:text-[#eaf6ff]";
+
+export default function LanguageToggle({
+  current,
+  showGlowDot = false,
+}: {
+  current: Locale;
+  // Renders the same sliding-glow dot HorizonNav's page items use under
+  // the active language. Only meaningful where there's an actual horizon
+  // line for it to sit on (the desktop bar) — the mobile menu has no such
+  // line, so it keeps the plain active/inactive text treatment only.
+  showGlowDot?: boolean;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -17,27 +33,35 @@ export default function LanguageToggle({ current }: { current: Locale }) {
     });
   }
 
-  // Same neon palette as the horizon nav's active-item glow: core #eaf6ff,
-  // halo #7FB7FF / #1E40FF.
-  const activeClass = "text-[#eaf6ff] [text-shadow:0_0_4px_#eaf6ff,0_0_10px_#7FB7FF,0_0_18px_#1E40FF]";
-
   return (
-    <div className="flex items-center gap-1 text-sm" aria-busy={isPending}>
-      <button
-        onClick={() => choose("ja")}
-        className={`px-2 py-1 transition-all duration-300 ${current === "ja" ? activeClass : "text-ink-faint hover:text-ink"}`}
-        aria-current={current === "ja"}
-      >
-        JA
-      </button>
-      <span className="text-ink-faint">/</span>
-      <button
-        onClick={() => choose("en")}
-        className={`px-2 py-1 transition-all duration-300 ${current === "en" ? activeClass : "text-ink-faint hover:text-ink"}`}
-        aria-current={current === "en"}
-      >
-        EN
-      </button>
+    <div className="relative flex items-center gap-1.5" aria-busy={isPending}>
+      {(["ja", "en"] as const).map((locale, i) => {
+        const active = current === locale;
+        return (
+          <div key={locale} className="relative flex items-center">
+            {i === 1 && <span className="mr-1.5 text-[15px] text-[#93a3c2]">/</span>}
+            <button
+              onClick={() => choose(locale)}
+              className={`relative text-[15px] transition-colors ${active ? ACTIVE_TEXT : INACTIVE_TEXT}`}
+              aria-current={active}
+            >
+              {locale.toUpperCase()}
+            </button>
+            {/* Same glow recipe as HorizonNav's page-item dot, but its own
+                layoutId group — JA/EN's active state is independent of
+                (and visible at the same time as) whichever page item is
+                active, so it can't share that group's single instance. */}
+            {showGlowDot && active && (
+              <motion.div
+                layoutId="lang-horizon-glow"
+                className="pointer-events-none absolute -bottom-4 left-0 right-0 h-[4px] rounded-full"
+                style={{ background: "#eaf6ff", boxShadow: "0 0 7px 1px #7FB7FF, 0 0 19px 4px #1E40FF" }}
+                transition={{ duration: 0.45, ease: [0.65, 0, 0.35, 1] }}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
