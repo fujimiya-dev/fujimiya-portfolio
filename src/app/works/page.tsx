@@ -25,7 +25,7 @@ export default async function WorksPage() {
       <div className="mt-12 flex justify-center">
         <Link
           href="/experience"
-          className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-colors hover:bg-accent-teal hover:text-sky-deep"
+          className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)]"
         >
           Experienceへ
         </Link>

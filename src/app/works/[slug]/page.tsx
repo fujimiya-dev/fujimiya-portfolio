@@ -17,7 +17,7 @@ export default async function WorkDetailPage({
 
   return (
     <section className="mx-auto max-w-3xl px-6 pb-24 pt-28">
-      <Link href="/works" className="mb-10 inline-block text-sm text-accent-blue hover:text-accent-teal">
+      <Link href="/works" className="neon-link mb-10 inline-block text-sm text-accent-blue hover:text-accent-teal">
         ← Works 一覧に戻る
       </Link>
 
@@ -57,14 +57,14 @@ export default async function WorkDetailPage({
 
         <div className="mb-8 space-y-4">
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="mb-3 font-label text-sm tracking-wide text-accent-teal">作品詳細</h2>
+            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">作品詳細</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
               {work.description}
             </p>
           </div>
 
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="mb-3 font-label text-sm tracking-wide text-accent-teal">製作者コメント</h2>
+            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">製作者コメント</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
               {work.comment}
             </p>
@@ -72,11 +72,11 @@ export default async function WorkDetailPage({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="mb-3 font-label text-sm tracking-wide text-accent-teal">担当人数</h2>
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">担当人数</h2>
               <p className="text-[15px] text-ink-soft">{work.teamSize}人</p>
             </div>
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="mb-3 font-label text-sm tracking-wide text-accent-teal">担当部分</h2>
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">担当部分</h2>
               <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
                 {work.role}
               </p>
@@ -85,12 +85,12 @@ export default async function WorkDetailPage({
 
           <div className="glass-panel space-y-4 rounded-sm p-6">
             <div>
-              <h2 className="mb-2 font-label text-sm tracking-wide text-accent-teal">カテゴリ</h2>
+              <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">カテゴリ</h2>
               <div className="flex flex-wrap gap-2">
                 {work.category.map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
+                    className="neon-tag rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
                   >
                     {tag}
                   </span>
@@ -98,7 +98,7 @@ export default async function WorkDetailPage({
               </div>
             </div>
             <div>
-              <h2 className="mb-2 font-label text-sm tracking-wide text-accent-teal">使用技術</h2>
+              <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">使用技術</h2>
               <div className="flex flex-wrap gap-2">
                 {work.techStack.map((tag) => (
                   <span
@@ -118,7 +118,7 @@ export default async function WorkDetailPage({
             href={work.demoUrl}
             target="_blank"
             rel="noopener"
-            className="border-b border-accent-blue/50 text-sm text-accent-blue transition-colors hover:border-accent-teal hover:text-accent-teal"
+            className="neon-link border-b border-accent-blue/50 text-sm text-accent-blue transition-colors hover:border-accent-teal hover:text-accent-teal"
           >
             デモ動画を見る ↗
           </a>
@@ -127,7 +127,7 @@ export default async function WorkDetailPage({
         <div className="mt-12 flex justify-center">
           <Link
             href="/works"
-            className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-colors hover:bg-accent-teal hover:text-sky-deep"
+            className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)]"
           >
             ほかの作品もみる
           </Link>

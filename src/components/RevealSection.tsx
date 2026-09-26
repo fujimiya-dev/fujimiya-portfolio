@@ -21,8 +21,11 @@ export function RevealGlow({
       <motion.div
         className="pointer-events-none absolute -inset-16 -z-10 rounded-full"
         style={{
+          // Same blue-neon recipe as the header (core #eaf6ff, halo
+          // #7FB7FF/#1E40FF) — this used to be a green+blue two-tone
+          // bloom, which read as a different palette from the nav.
           background:
-            "radial-gradient(circle at 25% 40%, rgba(72,224,176,.55), transparent 60%), radial-gradient(circle at 75% 60%, rgba(94,160,255,.45), transparent 60%)",
+            "radial-gradient(circle at 25% 40%, rgba(30,64,255,.35), transparent 60%), radial-gradient(circle at 75% 60%, rgba(127,183,255,.45), transparent 60%)",
           filter: "blur(46px)",
         }}
         initial={{ opacity: 0, scale: 0.7 }}

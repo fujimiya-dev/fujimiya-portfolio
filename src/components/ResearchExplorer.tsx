@@ -42,7 +42,7 @@ export default function ResearchExplorer({ items }: { items: ResearchItem[] }) {
       {items.map((item) => (
         <RevealFade key={item.id}>
           <Link href={`/research/${item.slug}`} className="group block">
-            <div className="glass-panel grid grid-cols-1 gap-10 rounded-sm p-7 transition-colors group-hover:border-accent-teal/50 md:grid-cols-[280px_1fr]">
+            <div className="glass-panel grid grid-cols-1 gap-10 rounded-sm p-7 transition-all group-hover:border-accent-teal/50 group-hover:shadow-[0_0_24px_rgba(30,64,255,0.18)] md:grid-cols-[280px_1fr]">
               <figure className="relative aspect-video border border-white/15 bg-white/[0.02] p-2">
                 {item.imageUrl ? (
                   <Image
@@ -66,7 +66,7 @@ export default function ResearchExplorer({ items }: { items: ResearchItem[] }) {
                   {item.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
+                      className="neon-tag rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
                     >
                       {tag}
                     </span>

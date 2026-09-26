@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import IntroTriggerLink from "@/components/IntroTriggerLink";
+import { isActiveLink } from "@/components/HorizonNav";
 
 export default function MobileMenu({
   links,
@@ -11,6 +13,18 @@ export default function MobileMenu({
   links: { href: string; label: string }[];
 }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  // Mirrors HorizonNav's own hash tracking — the desktop nav's glowing
+  // dot has never had a mobile equivalent, so there was previously no way
+  // to tell which page you're on from this menu at all.
+  const [hash, setHash] = useState(() => (typeof window !== "undefined" ? window.location.hash : ""));
+
+  useEffect(() => {
+    const sync = () => setHash(window.location.hash);
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, [pathname]);
 
   return (
     <div className="lg:hidden">
@@ -46,12 +60,22 @@ export default function MobileMenu({
             <ul className="flex flex-col items-center gap-2">
               {links.map((link) => {
                 const LinkComponent = link.href === "/" ? IntroTriggerLink : Link;
+                const active = isActiveLink(pathname, hash, link.href);
+                const hashIndex = link.href.indexOf("#");
+                const linkHash = hashIndex !== -1 ? link.href.slice(hashIndex) : "";
                 return (
                   <li key={link.href}>
                     <LinkComponent
                       href={link.href}
-                      onClick={() => setOpen(false)}
-                      className="px-5 py-2 font-serif text-3xl text-ink-soft transition-colors hover:text-accent-teal"
+                      onClick={() => {
+                        setHash(linkHash);
+                        setOpen(false);
+                      }}
+                      className={`px-5 py-2 font-serif text-3xl transition-colors ${
+                        active
+                          ? "text-[#eaf6ff] [text-shadow:0_0_16px_rgba(127,183,255,0.7)]"
+                          : "text-ink-soft hover:text-accent-teal"
+                      }`}
                     >
                       {link.label}
                     </LinkComponent>

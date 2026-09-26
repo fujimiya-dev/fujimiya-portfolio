@@ -80,7 +80,7 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
             {chips.map((chip) => (
               <span
                 key={chip}
-                className="flex items-center gap-1.5 rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
+                className="neon-tag flex items-center gap-1.5 rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
               >
                 {chip}
                 <button
@@ -134,9 +134,9 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
             <button
               key={tag}
               onClick={() => toggleCategoryChip(tag)}
-              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+              className={`rounded-full border px-3 py-1 text-xs transition-all ${
                 chips.includes(tag)
-                  ? "border-accent-teal bg-accent-teal text-sky-deep"
+                  ? "border-accent-teal bg-accent-teal/10 text-[#eaf6ff] shadow-[0_0_10px_rgba(30,64,255,0.35)] [text-shadow:0_0_8px_rgba(127,183,255,0.7)]"
                   : "border-white/20 text-ink-soft hover:border-accent-teal"
               }`}
             >
@@ -150,7 +150,7 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
         )}
       </div>
 
-      <div className="relative space-y-6 before:absolute before:bottom-1 before:left-[97px] before:top-1 before:w-px before:bg-white/10">
+      <div className="relative space-y-6 before:absolute before:bottom-1 before:left-[97px] before:top-1 before:w-px before:bg-[linear-gradient(to_bottom,transparent,rgba(127,183,255,0.4)_12%,rgba(127,183,255,0.4)_88%,transparent)]">
         {filtered.map((item) => (
           <RevealFade key={item.id}>
             <div className="glass-panel grid grid-cols-[98px_1fr] gap-8 rounded-sm p-5">
@@ -162,7 +162,7 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
                   {item.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
+                      className="neon-tag rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
                     >
                       {tag}
                     </span>

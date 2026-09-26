@@ -102,7 +102,7 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
             {chips.map((chip) => (
               <span
                 key={chip}
-                className="flex items-center gap-1.5 rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
+                className="neon-tag flex items-center gap-1.5 rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
               >
                 {chip}
                 <button
@@ -155,9 +155,9 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
             <button
               key={tag}
               onClick={() => toggleCategoryChip(tag)}
-              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+              className={`rounded-full border px-3 py-1 text-xs transition-all ${
                 chips.includes(tag)
-                  ? "border-accent-teal bg-accent-teal text-sky-deep"
+                  ? "border-accent-teal bg-accent-teal/10 text-[#eaf6ff] shadow-[0_0_10px_rgba(30,64,255,0.35)] [text-shadow:0_0_8px_rgba(127,183,255,0.7)]"
                   : "border-white/20 text-ink-soft hover:border-accent-teal"
               }`}
             >
@@ -175,7 +175,7 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
         {filtered.map((work) => (
           <RevealFade key={work.id}>
             <Link href={`/works/${work.slug}`} className="group block h-full">
-              <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition-colors group-hover:border-accent-teal/50">
+              <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition-all group-hover:border-accent-teal/50 group-hover:shadow-[0_0_24px_rgba(30,64,255,0.18)]">
                 <div className="relative aspect-video border-b border-white/10 bg-white/[0.02]">
                   {work.imageUrl ? (
                     <Image
@@ -203,7 +203,7 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
                       {work.category.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
+                          className="neon-tag rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
                         >
                           {tag}
                         </span>

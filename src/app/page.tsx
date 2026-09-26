@@ -86,8 +86,8 @@ export default async function HomePage() {
             <p className="mb-3 font-label text-xs tracking-widest text-ink-faint">勉強している技術</p>
             <div className="mb-6 grid grid-cols-4 gap-x-2 gap-y-4 sm:grid-cols-7">
               {techStack.map(({ label, Icon }) => (
-                <div key={label} className="flex flex-col items-center gap-2">
-                  <Icon className="h-6 w-6 text-ink-soft" />
+                <div key={label} className="group flex flex-col items-center gap-2">
+                  <Icon className="h-6 w-6 text-ink-soft transition-all group-hover:text-[#93c5ff] group-hover:drop-shadow-[0_0_6px_rgba(127,183,255,0.6)]" />
                   <span className="text-[11px] text-ink-faint">{label}</span>
                 </div>
               ))}
@@ -124,7 +124,7 @@ export default async function HomePage() {
         <div className="mt-12 flex justify-center">
           <Link
             href="/works"
-            className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-colors hover:bg-accent-teal hover:text-sky-deep"
+            className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)]"
           >
             {dict.home.goToWorks}
           </Link>

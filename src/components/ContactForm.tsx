@@ -6,7 +6,7 @@ import { sendContactMessage } from "@/actions/contact";
 type Status = { type: "idle" } | { type: "success" } | { type: "error"; message: string };
 
 const fieldClass =
-  "w-full border-b border-white/20 bg-transparent py-2 text-sm outline-none placeholder:text-ink-faint focus:border-accent-teal";
+  "w-full border-b border-white/20 bg-transparent py-2 text-sm outline-none placeholder:text-ink-faint transition-shadow focus:border-accent-teal focus:shadow-[0_4px_10px_-4px_rgba(30,64,255,0.5)]";
 
 export default function ContactForm() {
   const formRef = useRef<HTMLFormElement>(null);
@@ -48,13 +48,13 @@ export default function ContactForm() {
         <textarea name="message" required rows={5} className={fieldClass} placeholder="お問い合わせ内容をご記入ください" />
       </div>
 
-      {status.type === "error" && <p className="text-xs text-red-400">{status.message}</p>}
+      {status.type === "error" && <p className="text-xs text-[#ff8a8a]">{status.message}</p>}
 
       <div className="flex justify-center">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-sm border border-accent-teal px-6 py-2 text-sm text-accent-teal transition-colors hover:bg-accent-teal hover:text-sky-deep disabled:opacity-50"
+          className="rounded-sm border border-accent-teal px-6 py-2 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)] disabled:opacity-50"
         >
           {isPending ? "送信中…" : "送信する"}
         </button>

@@ -12,7 +12,7 @@ type NavLink = { href: string; label: string };
 // home route ("/#about"). usePathname() never includes the hash, so "Top"
 // and "About me" both resolve to pathname "/" — the hash has to be tracked
 // separately to tell them apart.
-function isActiveLink(pathname: string, hash: string, href: string) {
+export function isActiveLink(pathname: string, hash: string, href: string) {
   const hashIndex = href.indexOf("#");
   if (hashIndex !== -1) {
     const hrefPath = href.slice(0, hashIndex) || "/";

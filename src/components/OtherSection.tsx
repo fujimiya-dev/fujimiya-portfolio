@@ -29,7 +29,7 @@ function LinkCard({
   imageUrl: string | null;
 }) {
   const content = (
-    <div className="group flex h-full flex-col overflow-hidden border border-white/15 bg-white/[0.02] transition-colors hover:border-accent-teal/50">
+    <div className="group flex h-full flex-col overflow-hidden border border-white/15 bg-white/[0.02] transition-all hover:border-accent-teal/50 hover:shadow-[0_0_20px_rgba(30,64,255,0.18)]">
       <div className="flex aspect-[16/10] items-center justify-center overflow-hidden bg-white/[0.03]">
         {imageUrl ? (
           <Image
@@ -131,7 +131,7 @@ export default function OtherSection({
                   href={v.videoUrl}
                   target="_blank"
                   rel="noopener"
-                  className="text-xs text-accent-blue hover:text-accent-teal"
+                  className="neon-link text-xs text-accent-blue hover:text-accent-teal"
                 >
                   動画を見る ↗
                 </a>
