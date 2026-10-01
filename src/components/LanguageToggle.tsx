@@ -54,9 +54,10 @@ export default function LanguageToggle({
             {showGlowDot && active && (
               <motion.div
                 layoutId="lang-horizon-glow"
+                initial={false}
                 className="pointer-events-none absolute -bottom-4 left-0 right-0 h-[4px] rounded-full"
                 style={{ background: "#eaf6ff", boxShadow: "0 0 7px 1px #7FB7FF, 0 0 19px 4px #1E40FF" }}
-                transition={{ duration: 0.45, ease: [0.65, 0, 0.35, 1] }}
+                transition={{ duration: 0.4, ease: [0.65, 0, 0.35, 1] }}
               />
             )}
           </div>
