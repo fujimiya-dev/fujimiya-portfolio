@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import IntroTriggerLink from "@/components/IntroTriggerLink";
 import { isActiveLink } from "@/components/HorizonNav";
+import { useTrackedHash } from "@/components/useTrackedHash";
 
 export default function MobileMenu({
   links,
@@ -14,17 +15,10 @@ export default function MobileMenu({
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  // Mirrors HorizonNav's own hash tracking — the desktop nav's glowing
-  // dot has never had a mobile equivalent, so there was previously no way
-  // to tell which page you're on from this menu at all.
-  const [hash, setHash] = useState(() => (typeof window !== "undefined" ? window.location.hash : ""));
-
-  useEffect(() => {
-    const sync = () => setHash(window.location.hash);
-    sync();
-    window.addEventListener("hashchange", sync);
-    return () => window.removeEventListener("hashchange", sync);
-  }, [pathname]);
+  // Mirrors HorizonNav's own (race-free) hash tracking — the desktop
+  // nav's glowing dot has never had a mobile equivalent, so there was
+  // previously no way to tell which page you're on from this menu at all.
+  const [hash, setHash] = useTrackedHash();
 
   return (
     <div className="lg:hidden">

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import IntroTriggerLink from "@/components/IntroTriggerLink";
+import { useTrackedHash } from "@/components/useTrackedHash";
 
 type NavLink = { href: string; label: string };
 
@@ -27,19 +27,7 @@ export function isActiveLink(pathname: string, hash: string, href: string) {
 
 export default function HorizonNav({ links }: { links: NavLink[] }) {
   const pathname = usePathname();
-  const [hash, setHash] = useState(() => (typeof window !== "undefined" ? window.location.hash : ""));
-
-  useEffect(() => {
-    // Covers direct loads and browser back/forward (which fire a native
-    // hashchange event). Client-side <Link> navigation to a hash updates
-    // window.location.hash slightly after this component's own re-render,
-    // so that case is instead handled optimistically by each link's own
-    // onClick below, not by this effect.
-    const sync = () => setHash(window.location.hash);
-    sync();
-    window.addEventListener("hashchange", sync);
-    return () => window.removeEventListener("hashchange", sync);
-  }, [pathname]);
+  const [hash, setHash] = useTrackedHash();
 
   return (
     <nav className="relative hidden items-center gap-6 whitespace-nowrap lg:flex">
@@ -63,9 +51,10 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
             {active && (
               <motion.div
                 layoutId="nav-horizon-glow"
+                initial={false}
                 className="pointer-events-none absolute -bottom-4 left-0 right-0 h-[4px] rounded-full"
                 style={{ background: "#eaf6ff", boxShadow: "0 0 7px 1px #7FB7FF, 0 0 19px 4px #1E40FF" }}
-                transition={{ duration: 0.45, ease: [0.65, 0, 0.35, 1] }}
+                transition={{ duration: 0.4, ease: [0.65, 0, 0.35, 1] }}
               />
             )}
           </div>
