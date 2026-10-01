@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const fontPath = path.join(__dirname, "../src/fonts/nothing-you-could-do/NothingYouCouldDo-Regular.ttf");
-const text = "Welcome to the Moonlit Dream";
+const text = "Welcome to Fujimiya's Portfolio";
 const fontSize = 120;
 
 // opentype.loadSync is deprecated (and broken as of opentype.js 2.0.0 — it
