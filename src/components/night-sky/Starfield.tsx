@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { milkyWayBandMask } from "./milkyWayBand";
+import { STAR_COOL, STAR_WHITE, STAR_WARM, STAR_NEUTRAL } from "./palette";
 
 // How strongly star placement is pulled toward the Milky Way band: 0 would
 // be a uniform sky, larger values concentrate more stars into the band.
@@ -86,10 +87,10 @@ const TWINKLE_CALM = 0.35;
 // saturated emerald per follow-up feedback — WHITE and NEUTRAL in particular
 // were close enough to true white/pale mint that dim and "white-blended"
 // stars barely read as green at all.
-const COOL = new THREE.Color("#3ecf8e");
-const WHITE = new THREE.Color("#a8f5c8");
-const WARM = new THREE.Color("#8ef0a0");
-const NEUTRAL = new THREE.Color("#4fd896");
+const COOL = new THREE.Color(STAR_COOL);
+const WHITE = new THREE.Color(STAR_WHITE);
+const WARM = new THREE.Color(STAR_WARM);
+const NEUTRAL = new THREE.Color(STAR_NEUTRAL);
 
 function starHueFor(t: number): THREE.Color {
   if (t < 0.62) {

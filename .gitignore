@@ -5,3 +5,8 @@ node_modules
 next-env.d.ts
 .vercel
 *.log
+
+# Licensed font files that may not be redistributed/uploaded (e.g. Cappuccino
+# Letter free version) — only the vector paths extracted at build time by
+# scripts/generate-hero-title-path.js are committed, never the font itself.
+scripts/fonts/

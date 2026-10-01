@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { RevealGlow, RevealFade } from "@/components/RevealSection";
+import { STAR_WHITE, STAR_NEUTRAL } from "@/components/night-sky/palette";
+import heroTitlePathData from "@/components/heroTitlePathData.json";
 import IntroOverlayHost from "@/components/IntroOverlayHost";
 import { getDictionary } from "@/i18n/server";
 import { TbBrandPython, TbBrandTypescript, TbBrandCSharp, TbBrandCpp, TbBrandUnity } from "react-icons/tb";
@@ -28,7 +30,19 @@ export default async function HomePage() {
     <>
       <IntroOverlayHost />
 
-      <section className="flex min-h-screen flex-col items-center justify-end px-5 pb-20 text-center" />
+      <section className="relative flex min-h-screen flex-col items-center justify-center px-5 text-center">
+        <svg
+          role="img"
+          aria-label="A Moonlit Dream"
+          viewBox={heroTitlePathData.viewBox}
+          className="h-auto w-[min(60vw,190px)] opacity-[0.88] sm:w-[233px] md:w-[309px]"
+          style={{
+            filter: `drop-shadow(0 0 15px ${STAR_WHITE}) drop-shadow(0 0 38px ${STAR_NEUTRAL}) drop-shadow(0 0 69px rgba(79, 216, 150, 0.6))`,
+          }}
+        >
+          <path d={heroTitlePathData.path} fill="#eaf6ff" />
+        </svg>
+      </section>
 
       <section id="about" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-24 pt-16">
         <RevealGlow className="mb-16 border-b border-white/10 pb-16 text-center">
