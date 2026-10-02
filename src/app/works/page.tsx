@@ -16,7 +16,7 @@ export default async function WorksPage() {
   return (
     <section className="mx-auto max-w-4xl px-6 pb-24 pt-32">
       <RevealGlow className="text-center">
-        <span className="mb-4 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
+        <span className="mb-7 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           作ったもの
         </span>
         <SectionHeading textKey="works" label={dict.nav.works} className="mx-auto mb-14 h-10 w-auto" />
