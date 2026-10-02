@@ -1,4 +1,5 @@
 import { RevealGlow, RevealFade } from "@/components/RevealSection";
+import SectionHeading from "@/components/SectionHeading";
 import { getDictionary } from "@/i18n/server";
 import ContactForm from "@/components/ContactForm";
 
@@ -13,7 +14,7 @@ export default async function ContactPage() {
         <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           連絡先
         </span>
-        <h2 className="font-display text-4xl font-bold">{dict.nav.contact}</h2>
+        <SectionHeading textKey="contact" label={dict.nav.contact} />
       </RevealGlow>
       <RevealFade>
         <ContactForm />

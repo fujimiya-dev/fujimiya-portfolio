@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import ResearchExplorer from "@/components/ResearchExplorer";
 import { RevealGlow } from "@/components/RevealSection";
+import SectionHeading from "@/components/SectionHeading";
 import { getDictionary } from "@/i18n/server";
 
 export const revalidate = 0;
@@ -18,7 +19,7 @@ export default async function ResearchPage() {
         <span className="mb-4 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           研究
         </span>
-        <h2 className="mb-10 font-display text-4xl font-bold">{dict.nav.research}</h2>
+        <SectionHeading textKey="research" label={dict.nav.research} className="mx-auto mb-10 h-10 w-auto" />
       </RevealGlow>
       <ResearchExplorer items={items} />
 

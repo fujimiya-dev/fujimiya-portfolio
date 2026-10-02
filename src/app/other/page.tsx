@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import OtherSection from "@/components/OtherSection";
 import { RevealGlow } from "@/components/RevealSection";
+import SectionHeading from "@/components/SectionHeading";
 import { getDictionary } from "@/i18n/server";
 
 export const revalidate = 0;
@@ -23,7 +24,7 @@ export default async function OtherPage() {
         <span className="mb-4 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           その他趣味など
         </span>
-        <h2 className="mb-10 font-display text-4xl font-bold">{dict.nav.other}</h2>
+        <SectionHeading textKey="other" label={dict.nav.other} className="mx-auto mb-10 h-10 w-auto" />
       </RevealGlow>
       <OtherSection
         pianoHistory={pianoHistory}
