@@ -50,16 +50,12 @@ body {
   border: 1px solid rgba(127, 183, 255, 0.15);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 0 24px rgba(30, 64, 255, 0.08);
-}
-
-/* Scoped to the About-page profile card only (not folded into .glass-panel
-   itself, which is reused site-wide for Works cards, search panels, etc.)
-   — a soft-edged outer glow (border-color left at .glass-panel's own
-   0.15), so the card reads as floating in the night sky rather than a flat
-   panel. Kept deliberately subtle: alpha values stay low so label/value
-   text contrast is untouched. */
-.profile-card-glow {
+  /* Originally weaker (just the 0.08-alpha layer); the stronger outer glow
+     (the 0.4-alpha edge highlight + 0.16-alpha halo) was first tried only
+     on the About-page profile card, then rolled out here so every
+     .glass-panel card site-wide (Works/Experience/Research/Other/Contact
+     cards, admin cards, etc.) reads the same "floating in the night sky"
+     way instead of just that one card. */
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 0 1px rgba(234, 246, 255, 0.4), 0 0 32px rgba(30, 64, 255, 0.16);
 }
 

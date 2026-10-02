@@ -43,14 +43,14 @@ export default function ResearchExplorer({ items }: { items: ResearchItem[] }) {
         <RevealFade key={item.id}>
           <Link href={`/research/${item.slug}`} className="group block">
             <div className="glass-panel grid grid-cols-1 gap-10 rounded-sm p-7 transition-all group-hover:border-accent-teal/50 group-hover:shadow-[0_0_24px_rgba(30,64,255,0.18)] md:grid-cols-[280px_1fr]">
-              <figure className="relative aspect-video border border-white/15 bg-white/[0.02] p-2">
+              <figure className="relative aspect-video overflow-hidden rounded-sm border border-white/15 bg-white/[0.02]">
                 {item.imageUrl ? (
                   <Image
                     src={item.imageUrl}
                     alt={item.title}
                     fill
                     sizes="(min-width: 768px) 280px, 100vw"
-                    className="object-contain p-2"
+                    className="object-contain"
                   />
                 ) : (
                   <NoImage />

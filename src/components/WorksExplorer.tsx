@@ -183,7 +183,7 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
                       alt={work.title}
                       fill
                       sizes="(min-width: 640px) 50vw, 100vw"
-                      className="object-contain px-6 py-2"
+                      className="object-contain"
                     />
                   ) : (
                     <NoImage />

@@ -25,14 +25,14 @@ export default async function ResearchDetailPage({
         <span className="mb-2 block text-xs tracking-wide text-accent-blue">{item.stage}</span>
         <h1 className="mb-8 font-label text-4xl font-bold leading-relaxed">{item.title}</h1>
 
-        <div className="glass-panel relative mb-2 aspect-video border border-white/15 bg-white/[0.02]">
+        <div className="glass-panel relative mb-2 aspect-video overflow-hidden rounded-sm border border-white/15 bg-white/[0.02]">
           {item.imageUrl ? (
             <Image
               src={item.imageUrl}
               alt={item.title}
               fill
               sizes="(min-width: 768px) 768px, 100vw"
-              className="object-contain px-8 py-2"
+              className="object-contain"
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-ink-faint">

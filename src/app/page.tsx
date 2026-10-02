@@ -7,13 +7,14 @@ import IntroOverlayHost from "@/components/IntroOverlayHost";
 import AboutScrollSpy from "@/components/AboutScrollSpy";
 import SectionHeading from "@/components/SectionHeading";
 import { getDictionary } from "@/i18n/server";
-import { TbBrandPython, TbBrandTypescript, TbBrandCSharp, TbBrandCpp, TbBrandUnity } from "react-icons/tb";
+import { TbBrandPython, TbBrandTypescript, TbBrandJavascript, TbBrandCSharp, TbBrandCpp, TbBrandUnity } from "react-icons/tb";
 import { FaJava } from "react-icons/fa";
 import { SiUnrealengine } from "react-icons/si";
 
 const techStack = [
   { label: "Python", Icon: TbBrandPython },
   { label: "TypeScript", Icon: TbBrandTypescript },
+  { label: "JavaScript", Icon: TbBrandJavascript },
   { label: "Java", Icon: FaJava },
   { label: "C#", Icon: TbBrandCSharp },
   { label: "C++", Icon: TbBrandCpp },
@@ -50,14 +51,14 @@ export default async function HomePage() {
       <section id="about" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-24 pt-16">
         <RevealGlow className="mb-12 text-center">
           <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
-            私について
+            自身について
           </span>
           <SectionHeading textKey="aboutMe" label={dict.nav.aboutMe} />
         </RevealGlow>
 
-        <div className="glass-panel profile-card-glow rounded-sm px-6 py-10 sm:px-8 sm:py-12">
+        <div className="glass-panel rounded-sm px-6 py-10 sm:px-8 sm:py-12">
         <RevealFade className="grid grid-cols-1 gap-10 md:grid-cols-[230px_1fr] md:items-start">
-          <div className="glass-panel profile-photo-frame w-full p-2">
+          <div className="glass-panel profile-photo-frame w-full overflow-hidden rounded-sm">
             <Image
               src="/profile.png"
               alt="藤田都"

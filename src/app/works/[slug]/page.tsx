@@ -25,14 +25,14 @@ export default async function WorkDetailPage({
         <h1 className="mb-2 font-label text-4xl font-bold">{work.title}</h1>
         <span className="mb-8 block text-xs text-ink-faint">{work.dateLabel}</span>
 
-        <div className="glass-panel relative mb-8 aspect-video border border-white/15 bg-white/[0.02]">
+        <div className="glass-panel relative mb-8 aspect-video overflow-hidden rounded-sm border border-white/15 bg-white/[0.02]">
           {work.imageUrl ? (
             <Image
               src={work.imageUrl}
               alt={work.title}
               fill
               sizes="(min-width: 768px) 768px, 100vw"
-              className="object-contain px-8 py-2"
+              className="object-contain"
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-ink-faint">
