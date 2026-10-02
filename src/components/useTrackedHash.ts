@@ -21,6 +21,32 @@ import { usePathname } from "next/navigation";
 // with this exact race, while every other nav item's pathname change
 // alone is enough to resolve correctly regardless of hash.
 //
+// A same-page scroll-spy (see AboutScrollSpy) needs to flip the active nav
+// item between "Top" and "About me" without a real navigation or hash
+// change — there's nothing for hashchange/pathname to fire on. Every
+// useTrackedHash instance (HorizonNav, MobileMenu) listens for this custom
+// event instead, so scroll-driven updates land on the exact same `hash`
+// state a click already uses, rather than a second parallel mechanism that
+// could drift out of sync with it (which is exactly how the original
+// About-me glow bug happened).
+const SCROLL_SPY_EVENT = "app:scrollspy-hash";
+
+// Click navigation and the scroll-spy observer can briefly disagree about
+// which section is active while a click's scroll-into-view is still in
+// flight. Suppressing scroll-spy-driven updates for a short window after a
+// Top/About-me click lets the click's own optimistic value win outright
+// instead of being fought over mid-scroll.
+let scrollSpySuppressedUntil = 0;
+
+export function suppressScrollSpyHash(durationMs: number) {
+  scrollSpySuppressedUntil = Date.now() + durationMs;
+}
+
+export function setScrollSpyHash(hash: string) {
+  if (Date.now() < scrollSpySuppressedUntil) return;
+  window.dispatchEvent(new CustomEvent<string>(SCROLL_SPY_EVENT, { detail: hash }));
+}
+
 // markPendingHash flags that the upcoming pathname change was caused by
 // one of our own tracked clicks (whose target hash is already known for
 // certain), so the pathname-triggered resync is skipped exactly once for
@@ -37,6 +63,12 @@ export function useTrackedHash() {
     const onHashChange = () => setHashState(window.location.hash);
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  useEffect(() => {
+    const onScrollSpyHash = (e: Event) => setHashState((e as CustomEvent<string>).detail);
+    window.addEventListener(SCROLL_SPY_EVENT, onScrollSpyHash);
+    return () => window.removeEventListener(SCROLL_SPY_EVENT, onScrollSpyHash);
   }, []);
 
   useEffect(() => {

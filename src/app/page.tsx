@@ -4,6 +4,7 @@ import { RevealGlow, RevealFade } from "@/components/RevealSection";
 import { STAR_WHITE, STAR_NEUTRAL } from "@/components/night-sky/palette";
 import heroTitlePathData from "@/components/heroTitlePathData.json";
 import IntroOverlayHost from "@/components/IntroOverlayHost";
+import AboutScrollSpy from "@/components/AboutScrollSpy";
 import { getDictionary } from "@/i18n/server";
 import { TbBrandPython, TbBrandTypescript, TbBrandCSharp, TbBrandCpp, TbBrandUnity } from "react-icons/tb";
 import { FaJava } from "react-icons/fa";
@@ -29,6 +30,7 @@ export default async function HomePage() {
   return (
     <>
       <IntroOverlayHost />
+      <AboutScrollSpy targetId="about" />
 
       <section className="relative flex min-h-screen flex-col items-center justify-center px-5 text-center">
         <svg

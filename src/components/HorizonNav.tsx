@@ -4,7 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import IntroTriggerLink from "@/components/IntroTriggerLink";
-import { useTrackedHash } from "@/components/useTrackedHash";
+import { useTrackedHash, suppressScrollSpyHash } from "@/components/useTrackedHash";
+
+// How long a Top/About-me click suppresses scroll-spy-driven updates for,
+// so its own scroll-into-view doesn't fight the click's optimistic value
+// mid-transit. Generous relative to a typical smooth-scroll duration.
+const SCROLL_SPY_SUPPRESS_MS = 1000;
 
 type NavLink = { href: string; label: string };
 
@@ -41,7 +46,10 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
           <div key={link.href} className="relative">
             <LinkComponent
               href={link.href}
-              onClick={() => setHash(linkHash)}
+              onClick={() => {
+                if (link.href === "/" || linkHash === "#about") suppressScrollSpyHash(SCROLL_SPY_SUPPRESS_MS);
+                setHash(linkHash);
+              }}
               className={`relative text-[15px] transition-colors ${
                 active ? "text-[#eaf6ff] [text-shadow:0_0_12px_rgba(127,183,255,0.65)]" : "text-[#93a3c2] hover:text-[#eaf6ff]"
               }`}

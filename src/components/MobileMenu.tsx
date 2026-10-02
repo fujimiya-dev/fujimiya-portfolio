@@ -6,7 +6,10 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import IntroTriggerLink from "@/components/IntroTriggerLink";
 import { isActiveLink } from "@/components/HorizonNav";
-import { useTrackedHash } from "@/components/useTrackedHash";
+import { useTrackedHash, suppressScrollSpyHash } from "@/components/useTrackedHash";
+
+// Mirrors HorizonNav's own suppression window — see useTrackedHash.ts.
+const SCROLL_SPY_SUPPRESS_MS = 1000;
 
 export default function MobileMenu({
   links,
@@ -62,6 +65,7 @@ export default function MobileMenu({
                     <LinkComponent
                       href={link.href}
                       onClick={() => {
+                        if (link.href === "/" || linkHash === "#about") suppressScrollSpyHash(SCROLL_SPY_SUPPRESS_MS);
                         setHash(linkHash);
                         setOpen(false);
                       }}
