@@ -65,8 +65,15 @@ export default function MobileMenu({
                     <LinkComponent
                       href={link.href}
                       onClick={() => {
-                        if (link.href === "/" || linkHash === "#about") suppressScrollSpyHash(SCROLL_SPY_SUPPRESS_MS);
-                        setHash(linkHash);
+                        // See HorizonNav.tsx's onClick for why this is gated —
+                        // setting hash eagerly for a cross-route click lets a
+                        // stale pathname="/" + reset hash="" combination
+                        // transiently (and wrongly) read as "Top" active.
+                        const staysOnHomeRoute = link.href === "/" || linkHash === "#about";
+                        if (staysOnHomeRoute) {
+                          suppressScrollSpyHash(SCROLL_SPY_SUPPRESS_MS);
+                          setHash(linkHash);
+                        }
                         setOpen(false);
                       }}
                       className={`px-5 py-2 font-serif text-3xl transition-colors ${

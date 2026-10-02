@@ -53,7 +53,19 @@ export function setScrollSpyHash(hash: string) {
 // it instead of racing Next's own update.
 export function useTrackedHash() {
   const pathname = usePathname();
-  const [hash, setHashState] = useState(() => (typeof window !== "undefined" ? window.location.hash : ""));
+  // Always starts at "" — never reads window.location.hash here. The hash
+  // fragment is never sent to the server, so SSR can only ever render "".
+  // Reading the real hash in this initializer (the previous version did)
+  // meant the client's very first render — the one React diffs against the
+  // server HTML during hydration — disagreed with the server on any hard
+  // load of a hash URL (confirmed: loading "/#about" directly threw "Hydration
+  // failed... this tree will be regenerated on the client", discarding and
+  // rebuilding the whole nav). Starting at "" here matches the server
+  // exactly; the pathname-effect below already runs once on mount regardless
+  // of its dependency array and immediately corrects this to the real value,
+  // same match-first-correct-second pattern React expects for anything only
+  // knowable client-side.
+  const [hash, setHashState] = useState("");
   const pendingRef = useRef(false);
 
   useEffect(() => {
@@ -83,7 +95,18 @@ export function useTrackedHash() {
   }, [pathname]);
 
   function markPendingHash(nextHash: string) {
-    pendingRef.current = true;
+    // pendingRef only needs to be set when this click is ALSO about to
+    // change pathname (arriving at "/" from elsewhere) — that's the only
+    // case where the pathname-effect above is about to fire and would
+    // otherwise race this value. A Top<->About-me click while pathname is
+    // already "/" doesn't change pathname at all, so that effect never
+    // re-fires as a result of it — if pendingRef were set here anyway, it
+    // would sit there unconsumed and wrongly skip the *next*, unrelated
+    // pathname change instead (confirmed: About me -> Works left this
+    // instance's hash permanently stuck at "#about", since the Works
+    // navigation's pathname-effect saw a stale pendingRef=true left over
+    // from the earlier same-page About-me click and skipped resyncing).
+    if (pathname !== "/") pendingRef.current = true;
     setHashState(nextHash);
   }
 
