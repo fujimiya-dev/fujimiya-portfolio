@@ -25,8 +25,20 @@ const glyphPaths = font.getPaths(text, 0, 0, fontSize);
 const combined = font.getPath(text, 0, 0, fontSize);
 const bbox = combined.getBoundingBox();
 
+const glyphs = glyphPaths.map((p) => p.toPathData(2)).filter((d) => d.length > 0);
+
+// Some fonts (seen with Cappuccino Letter's kerning/GPOS tables on the Hero
+// title) emit literal "NaN" coordinates inside specific glyphs when drawn
+// via the string API — fail loudly here rather than silently shipping a
+// broken trace. If this trips, switch to per-glyph manual positioning
+// (charToGlyph + accumulated advanceWidth) the way
+// generate-hero-title-path.js does.
+if (glyphs.some((d) => d.includes("NaN")) || combined.toPathData(2).includes("NaN")) {
+  throw new Error("Generated glyph path data contains NaN — this font's string-based layout is producing bad coordinates.");
+}
+
 const output = {
-  glyphs: glyphPaths.map((p) => p.toPathData(2)).filter((d) => d.length > 0),
+  glyphs,
   viewBox: `${bbox.x1} ${bbox.y1} ${bbox.x2 - bbox.x1} ${bbox.y2 - bbox.y1}`,
 };
 
