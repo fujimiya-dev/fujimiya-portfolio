@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import ExperienceExplorer from "@/components/ExperienceExplorer";
 import { RevealGlow } from "@/components/RevealSection";
@@ -20,6 +21,15 @@ export default async function ExperiencePage() {
         <h2 className="mb-10 font-display text-4xl font-bold">{dict.nav.experience}</h2>
       </RevealGlow>
       <ExperienceExplorer items={items} />
+
+      <div className="mt-12 flex justify-center">
+        <Link
+          href="/research"
+          className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)]"
+        >
+          Researchへ
+        </Link>
+      </div>
     </section>
   );
 }
