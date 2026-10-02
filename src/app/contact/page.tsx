@@ -9,8 +9,8 @@ export default async function ContactPage() {
   const dict = await getDictionary();
 
   return (
-    <section className="mx-auto max-w-xl px-6 pb-24 pt-28">
-      <RevealGlow className="mb-10 text-center">
+    <section className="mx-auto max-w-xl px-6 pb-24 pt-32">
+      <RevealGlow className="mb-14 text-center">
         <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           連絡先
         </span>

@@ -48,8 +48,8 @@ export default async function HomePage() {
         </svg>
       </section>
 
-      <section id="about" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-24 pt-16">
-        <RevealGlow className="mb-12 text-center">
+      <section id="about" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-24 pt-20">
+        <RevealGlow className="mb-16 text-center">
           <span className="mb-3 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
             自身について
           </span>

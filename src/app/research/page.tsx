@@ -14,12 +14,12 @@ export default async function ResearchPage() {
   ]);
 
   return (
-    <section className="mx-auto max-w-4xl px-6 pb-24 pt-28">
+    <section className="mx-auto max-w-4xl px-6 pb-24 pt-32">
       <RevealGlow className="text-center">
         <span className="mb-4 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           研究
         </span>
-        <SectionHeading textKey="research" label={dict.nav.research} className="mx-auto mb-10 h-10 w-auto" />
+        <SectionHeading textKey="research" label={dict.nav.research} className="mx-auto mb-14 h-10 w-auto" />
       </RevealGlow>
       <ResearchExplorer items={items} />
 
