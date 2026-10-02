@@ -1,6 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="moonGrad" x1="6" y1="8" x2="22" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7FB7FF"/>
+      <stop offset="1" stop-color="#CFE8FF"/>
+    </linearGradient>
+  </defs>
   <rect width="32" height="32" rx="7" fill="#0a1730"/>
-  <circle cx="14.5" cy="16" r="8.5" fill="#cdeedd"/>
+  <circle cx="14.5" cy="16" r="8.5" fill="url(#moonGrad)"/>
   <circle cx="18" cy="12.5" r="8" fill="#0a1730"/>
-  <path d="M21 8 L21.8 10.5 L24.3 11.3 L21.8 12.1 L21 14.6 L20.2 12.1 L17.7 11.3 L20.2 10.5 Z" fill="#a8f5c8"/>
+  <path d="M21 8 L21.8 10.5 L24.3 11.3 L21.8 12.1 L21 14.6 L20.2 12.1 L17.7 11.3 L20.2 10.5 Z" fill="#CFE8FF"/>
 </svg>
