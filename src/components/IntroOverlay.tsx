@@ -42,9 +42,9 @@ const PER_GLYPH_FRACTION = 0.35;
 const PARTICLE_COLORS = ["#3ecf8e", "#a8f5c8", "#8ef0a0"];
 
 const NEON_STROKE = "#eaf6ff";
-const NEON_FILTER = "drop-shadow(0 0 8px #1E40FF) drop-shadow(0 0 20px #7FB7FF)";
+const NEON_FILTER = "drop-shadow(0 0 6px #1E40FF) drop-shadow(0 0 15px #7FB7FF)";
 const MINT_STROKE = "#a8f5c8";
-const MINT_FILTER = "drop-shadow(0 0 8px #3ecf8e) drop-shadow(0 0 20px #8ef0a0)";
+const MINT_FILTER = "drop-shadow(0 0 6px #3ecf8e) drop-shadow(0 0 15px #8ef0a0)";
 
 type Phase = "drawing" | "sweeping" | "done";
 
@@ -343,7 +343,7 @@ export default function IntroOverlay() {
           left: "50%",
           transform: "translate(-50%, -50%)",
           zIndex: 101,
-          width: "min(90vw, 900px)",
+          width: "min(70vw, 700px)",
           height: "auto",
           pointerEvents: "none",
           // The ambient glow drifts blue->mint smoothly across the whole
