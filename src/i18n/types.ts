@@ -22,4 +22,7 @@ export type Dictionary = {
   home: {
     goToWorks: string;
   };
+  footer: {
+    privacyPolicy: string;
+  };
 };

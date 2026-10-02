@@ -14,4 +14,7 @@ export const en: Dictionary = {
   home: {
     goToWorks: "See Works",
   },
+  footer: {
+    privacyPolicy: "Privacy Policy",
+  },
 };

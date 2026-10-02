@@ -14,4 +14,7 @@ export const ja: Dictionary = {
   home: {
     goToWorks: "Worksへ",
   },
+  footer: {
+    privacyPolicy: "プライバシーポリシー",
+  },
 };
