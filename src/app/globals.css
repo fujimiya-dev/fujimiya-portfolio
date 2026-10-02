@@ -53,6 +53,23 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 0 24px rgba(30, 64, 255, 0.08);
 }
 
+/* Scoped to the About-page profile card only (not folded into .glass-panel
+   itself, which is reused site-wide for Works cards, search panels, etc.)
+   — a soft-edged outer glow (border-color left at .glass-panel's own
+   0.15), so the card reads as floating in the night sky rather than a flat
+   panel. Kept deliberately subtle: alpha values stay low so label/value
+   text contrast is untouched. */
+.profile-card-glow {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 0 1px rgba(234, 246, 255, 0.4), 0 0 32px rgba(30, 64, 255, 0.16);
+}
+
+/* Drops .glass-panel's own border specifically on the profile photo's
+   wrapper — the photo sits inside the already-bordered profile card, so a
+   second border framing just the photo read as redundant/boxy. */
+.profile-photo-frame {
+  border: none;
+}
+
 .search-sticky {
   position: sticky;
   top: 0;
@@ -76,6 +93,20 @@ body {
 
 .neon-link:hover {
   text-shadow: 0 0 10px rgba(127, 183, 255, 0.6);
+}
+
+/* A row divider recolored into the same blue family instead of plain white,
+   with a faint glow blurred beneath it. Used by the About-page profile
+   card's table rows. */
+.neon-divider {
+  border-bottom: 1px solid rgba(127, 183, 255, 0.18);
+  /* A plain box-shadow radiates around all four sides of the element (just
+     shifted by the y-offset) — on a row-height element that reads as a
+     faint box outlining the whole row, not a glow under the line. The
+     negative spread shrinks the shadow's source rect inward on every side
+     before the offset pushes it down, so what's left visible is only the
+     sliver that pokes out past the bottom edge. */
+  box-shadow: 0 4px 6px -6px rgba(30, 64, 255, 0.5);
 }
 
 @media (prefers-reduced-motion: reduce) {
