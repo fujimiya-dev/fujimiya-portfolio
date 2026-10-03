@@ -50,11 +50,11 @@ type Phase = "drawing" | "sweeping" | "done";
 
 // Decides once, at mount, whether this playthrough should actually run.
 // The force-play flag (set by IntroTriggerLink — the "Fujimiya.dev" logo
-// and "Top" nav link only) always wins. Otherwise this only plays once,
-// and only if the true hard page load that started this session landed
-// directly on bare "/" (no hash) — see peekInitialAutoPlayIntro. Every
-// later client-side arrival at "/" (e.g. "About me", or "Top" without an
-// explicit click) skips straight to "done" instead of replaying the trace.
+// only) always wins. Otherwise this only plays once, and only if the true
+// hard page load that started this session landed directly on bare "/"
+// (no hash) — see peekInitialAutoPlayIntro. Every later client-side
+// arrival at "/" (e.g. "About me", or clicking "Top") skips straight to
+// "done" instead of replaying the trace.
 //
 // Deliberately does NOT read window.location.hash itself here: IntroOverlay
 // can mount for the first time well after the actual page load (e.g. the

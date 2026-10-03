@@ -32,9 +32,9 @@ const SetHeroReadyContext = createContext<Dispatch<SetStateAction<boolean>> | nu
 const IntroEpochContext = createContext(0);
 const BumpIntroEpochContext = createContext<(() => void) | null>(null);
 
-// Set by IntroTriggerLink's onClick (the "Fujimiya.dev" logo / "Top" nav
-// link — the only two things that should ever replay the intro) right
-// before navigating. IntroOverlay consumes it once, on its own mount, to
+// Set by IntroTriggerLink's onClick (the "Fujimiya.dev" logo — the only
+// thing that should ever replay the intro) right before navigating.
+// IntroOverlay consumes it once, on its own mount, to
 // decide whether to actually play. A plain module-level flag survives a
 // client-side route change (same JS runtime, no reload) but not a full
 // page load, which is exactly the scope we want it to have.
@@ -87,9 +87,10 @@ export function clearInitialAutoPlayIntro() {
 }
 
 // The intro should play when landing directly on "/" (first visit, or the
-// "Fujimiya.dev"/"Top" links, which point at bare "/" and also set the
+// "Fujimiya.dev" logo, which points at bare "/" and also sets the
 // force-play flag above) but NOT when arriving via a hash link such as
-// "About me" ("/#about") — that should land straight on the section.
+// "About me" ("/#about"), and not via the "Top" nav link either — that
+// should land straight on the section/top without replaying the intro.
 function willIntroPlay(pathname: string) {
   if (pathname !== "/") return false;
   return peekForcePlayIntro() || peekInitialAutoPlayIntro();

@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import IntroTriggerLink from "@/components/IntroTriggerLink";
 import { isActiveLink } from "@/components/HorizonNav";
 import { useTrackedHash, suppressScrollSpyHash } from "@/components/useTrackedHash";
 
@@ -56,13 +55,12 @@ export default function MobileMenu({
           >
             <ul className="flex flex-col items-center gap-2">
               {links.map((link) => {
-                const LinkComponent = link.href === "/" ? IntroTriggerLink : Link;
                 const active = isActiveLink(pathname, hash, link.href);
                 const hashIndex = link.href.indexOf("#");
                 const linkHash = hashIndex !== -1 ? link.href.slice(hashIndex) : "";
                 return (
                   <li key={link.href}>
-                    <LinkComponent
+                    <Link
                       href={link.href}
                       onClick={() => {
                         // See HorizonNav.tsx's onClick for why this is gated —
@@ -83,7 +81,7 @@ export default function MobileMenu({
                       }`}
                     >
                       {link.label}
-                    </LinkComponent>
+                    </Link>
                   </li>
                 );
               })}

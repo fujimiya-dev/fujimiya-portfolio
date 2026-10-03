@@ -4,7 +4,6 @@ import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import IntroTriggerLink from "@/components/IntroTriggerLink";
 import { useTrackedHash, suppressScrollSpyHash } from "@/components/useTrackedHash";
 
 // How long a Top/About-me click suppresses scroll-spy-driven updates for,
@@ -67,11 +66,10 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
         const active = isActiveLink(pathname, hash, link.href);
         const hashIndex = link.href.indexOf("#");
         const linkHash = hashIndex !== -1 ? link.href.slice(hashIndex) : "";
-        const LinkComponent = link.href === "/" ? IntroTriggerLink : Link;
 
         return (
           <div key={link.href} className="relative">
-            <LinkComponent
+            <Link
               href={link.href}
               onClick={() => {
                 const staysOnHomeRoute = link.href === "/" || linkHash === "#about";
@@ -103,7 +101,7 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
               }`}
             >
               {link.label}
-            </LinkComponent>
+            </Link>
             {active && (
               <motion.div
                 layoutId={skipFlipRef.current ? undefined : "nav-horizon-glow"}
