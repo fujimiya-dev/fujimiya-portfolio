@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { RevealFade, RevealGlow } from "@/components/RevealSection";
 import { getLocale } from "@/i18n/server";
+
+const backToTopClass =
+  "rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)]";
 
 export const revalidate = 0;
 
@@ -110,6 +114,12 @@ function PrivacyJa() {
           <p className="mt-8 text-xs text-ink-faint">制定日:2026年10月2日</p>
         </div>
       </RevealFade>
+
+      <div className="mt-12 flex justify-center">
+        <Link href="/" className={backToTopClass}>
+          Topへ戻る
+        </Link>
+      </div>
     </>
   );
 }
@@ -223,6 +233,12 @@ function PrivacyEn() {
           <p className="mt-2 text-xs text-ink-faint">Effective date: October 2, 2026</p>
         </div>
       </RevealFade>
+
+      <div className="mt-12 flex justify-center">
+        <Link href="/" className={backToTopClass}>
+          Back to Top
+        </Link>
+      </div>
     </>
   );
 }
