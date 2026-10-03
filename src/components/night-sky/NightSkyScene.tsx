@@ -54,7 +54,14 @@ export default function NightSkyScene() {
   const grassCount = tier === "high" ? 1380 : tier === "mid" ? 890 : 460;
   // もや、一時非表示
   // const mistPlaneCount = tier === "low" ? 2 : 3;
-  const dprCeiling = tier === "high" ? (dprBoost ? 2 : 1.3) : tier === "mid" ? 1.5 : 1;
+  // "low" (mobile) used to sit flat at 1 regardless of the device's actual
+  // devicePixelRatio — on a typical 2-3x phone screen that's the canvas
+  // rendering at a third (or less) of native resolution and then being
+  // upscaled, which read as blurry/low-res grass (and everything else in
+  // the scene). Still responds to PerformanceMonitor like the high tier
+  // does, but with a floor (1.5) that stays well above the old flat 1
+  // instead of matching high tier's low-power floor.
+  const dprCeiling = tier === "high" ? (dprBoost ? 2 : 1.3) : tier === "mid" ? 1.5 : dprBoost ? 2 : 1.5;
   const bloomIntensity = tier === "low" ? 0.18 : 0.3;
   const glowBloomIntensity = tier === "low" ? 1.15 : tier === "mid" ? 1.5 : 1.8;
   const multisampling = tier === "high" ? 4 : 0;
