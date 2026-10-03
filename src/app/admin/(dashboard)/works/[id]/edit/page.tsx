@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import WorkForm from "@/components/WorkForm";
 import { updateWork } from "@/actions/works";
-import AdminBackLink from "@/components/AdminBackLink";
 import AdminListBackButton from "@/components/AdminListBackButton";
 
 export default async function EditWorkPage({
@@ -18,7 +17,6 @@ export default async function EditWorkPage({
 
   return (
     <div>
-      <AdminBackLink />
       <div className="glass-panel rounded-sm p-6 sm:p-8">
         <WorkForm action={boundUpdate} defaultValues={work} submitLabel="更新する" />
       </div>
