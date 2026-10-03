@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import introPathData from "./introPathData.json";
+import introPathDataMobile from "./introPathDataMobile.json";
 import {
   useSetIntroPlaying,
   useSetHeroReady,
@@ -90,6 +91,14 @@ export default function IntroOverlay() {
   // portal straight onto <body> instead, where our z-index is compared
   // directly against TopNav's.
   const [mounted, setMounted] = useState(false);
+  // Same breakpoint TopNav/DesktopNavBar switch on (Tailwind's `lg`, 1024px).
+  // Below it the single-line trace below has to shrink to its ~12:1
+  // width:height ratio to fit one line, reading as tiny — introPathDataMobile
+  // pre-wraps the same text onto two shorter, much-less-extreme-ratio rows
+  // instead. The trace/sweep effects below only ever reason about each
+  // glyph's X position, never which dataset/row it came from, so swapping
+  // which JSON `data` points to is the only change those effects need.
+  const [isMobile, setIsMobile] = useState(false);
   const [minted, setMinted] = useState(false);
   const [bgFading, setBgFading] = useState(false);
   const pathRefs = useRef<(SVGPathElement | null)[]>([]);
@@ -106,8 +115,14 @@ export default function IntroOverlay() {
   // here instead.
   const glyphLengthsRef = useRef<number[]>([]);
   const glyphCTMsRef = useRef<(DOMMatrix | null)[]>([]);
+  const data = isMobile ? introPathDataMobile : introPathData;
 
   useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    setIsMobile(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", onChange);
+
     setMounted(true);
     // The pathname-keyed effect in IntroPlayingContext only fires on an
     // actual route change, so it won't notice a same-route replay
@@ -121,6 +136,8 @@ export default function IntroOverlay() {
     // the flag on StrictMode's first (discarded) initializer call.
     clearForcePlayIntro();
     clearInitialAutoPlayIntro();
+
+    return () => mq.removeEventListener("change", onChange);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -186,7 +203,7 @@ export default function IntroOverlay() {
     const els = pathRefs.current.filter((el): el is SVGPathElement => el !== null);
     if (els.length === 0) return;
 
-    const [vbX, , vbWidth] = introPathData.viewBox.split(" ").map(Number);
+    const [vbX, , vbWidth] = data.viewBox.split(" ").map(Number);
     const positions = els.map((el) => (el.getBBox().x - vbX) / vbWidth);
     // Snapshot every glyph's screen transform once, before the tick loop
     // starts — calling getScreenCTM() lazily as each glyph gets triggered
@@ -264,7 +281,7 @@ export default function IntroOverlay() {
       cancelAnimationFrame(raf);
       for (const tm of timers) clearTimeout(tm);
     };
-  }, [phase]);
+  }, [phase, data]);
 
   // Canvas particle renderer — a single element instead of 60-120 divs.
   // Runs only during "sweeping" and is torn down (canceled + cleared) the
@@ -336,14 +353,19 @@ export default function IntroOverlay() {
 
       <svg
         ref={svgRef}
-        viewBox={introPathData.viewBox}
+        viewBox={data.viewBox}
         style={{
           position: "fixed",
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
           zIndex: 101,
-          width: "min(70vw, 700px)",
+          // Mobile's two-row layout has a far less extreme width:height
+          // ratio than desktop's single line, so the same width budget
+          // alone already renders noticeably bigger text — widened a bit
+          // further on top of that since there's no longer one long line to
+          // fit edge to edge.
+          width: isMobile ? "min(85vw, 480px)" : "min(70vw, 700px)",
           height: "auto",
           pointerEvents: "none",
           // The ambient glow drifts blue->mint smoothly across the whole
@@ -357,7 +379,7 @@ export default function IntroOverlay() {
         }}
         aria-hidden="true"
       >
-        {introPathData.glyphs.map((d, i) => (
+        {data.glyphs.map((d, i) => (
           <path
             key={i}
             ref={(el) => {

@@ -46,3 +46,61 @@ const outPath = path.join(__dirname, "../src/components/introPathData.json");
 fs.writeFileSync(outPath, JSON.stringify(output));
 console.log("Generated:", outPath);
 console.log("glyphs:", output.glyphs.length, "viewBox:", output.viewBox);
+
+// --- Mobile two-line variant -------------------------------------------
+// On narrow viewports the single-line trace above has to shrink to such an
+// extreme width:height ratio (~12:1) to fit on one line that the text reads
+// as tiny. Desktop keeps the single-line animation above untouched; mobile
+// instead gets "Welcome to" / "Fujimiya's Portfolio" pre-laid-out as two
+// rows baked into one combined glyph list + viewBox, each row horizontally
+// centered on the other — IntroOverlay's trace/sweep logic only reasons
+// about each glyph's X position (never Y), so it animates this exactly the
+// same way as the single-line data with no component changes needed: row 1
+// traces left-to-right, then row 2, and the sweep reveals by X-column
+// regardless of which row a glyph is on.
+const LINE_GAP = fontSize * 1.05; // baseline-to-baseline spacing between the two rows
+
+function measureLineWidth(text) {
+  const b = font.getPath(text, 0, 0, fontSize).getBoundingBox();
+  return b.x2 - b.x1;
+}
+
+const line1Width = measureLineWidth("Welcome to");
+const line2Width = measureLineWidth("Fujimiya's Portfolio");
+const maxWidth = Math.max(line1Width, line2Width);
+
+// Re-layout each line shifted so it's horizontally centered against the
+// wider of the two, instead of both sharing a flush-left x=0 start.
+function centeredLine(text, yOffset, ownWidth) {
+  const xOffset = (maxWidth - ownWidth) / 2;
+  const glyphs = font
+    .getPaths(text, xOffset, yOffset, fontSize)
+    .map((gp) => gp.toPathData(2))
+    .filter((s) => s.length > 0);
+  const b = font.getPath(text, xOffset, yOffset, fontSize).getBoundingBox();
+  if (glyphs.some((s) => s.includes("NaN")) || JSON.stringify(b).includes("NaN")) {
+    throw new Error(`Centered mobile line layout for ${JSON.stringify(text)} produced NaN coordinates.`);
+  }
+  return { glyphs, bbox: b };
+}
+
+const centered1 = centeredLine("Welcome to", 0, line1Width);
+const centered2 = centeredLine("Fujimiya's Portfolio", LINE_GAP, line2Width);
+
+const mobileGlyphs = [...centered1.glyphs, ...centered2.glyphs];
+const mobileBbox = {
+  x1: Math.min(centered1.bbox.x1, centered2.bbox.x1),
+  y1: Math.min(centered1.bbox.y1, centered2.bbox.y1),
+  x2: Math.max(centered1.bbox.x2, centered2.bbox.x2),
+  y2: Math.max(centered1.bbox.y2, centered2.bbox.y2),
+};
+
+const mobileOutput = {
+  glyphs: mobileGlyphs,
+  viewBox: `${mobileBbox.x1} ${mobileBbox.y1} ${mobileBbox.x2 - mobileBbox.x1} ${mobileBbox.y2 - mobileBbox.y1}`,
+};
+
+const mobileOutPath = path.join(__dirname, "../src/components/introPathDataMobile.json");
+fs.writeFileSync(mobileOutPath, JSON.stringify(mobileOutput));
+console.log("Generated:", mobileOutPath);
+console.log("glyphs:", mobileOutput.glyphs.length, "viewBox:", mobileOutput.viewBox);
