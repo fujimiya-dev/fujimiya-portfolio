@@ -1,6 +1,8 @@
 import { signIn } from "@/lib/auth";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
+import { RevealGlow } from "@/components/RevealSection";
+import SectionHeading from "@/components/SectionHeading";
 
 async function login() {
   "use server";
@@ -22,7 +24,9 @@ export default async function LoginPage({
   const { error } = await searchParams;
   return (
     <div className="mx-auto max-w-sm px-6 pb-24 pt-28">
-      <h1 className="mb-8 text-center font-label text-2xl font-bold neon-label">ログイン</h1>
+      <RevealGlow className="text-center">
+        <SectionHeading textKey="login" label="Login" className="mx-auto mb-8 h-10 w-auto" />
+      </RevealGlow>
       <div className="glass-panel rounded-sm p-6 sm:p-8">
         <form action={login}>
           {error && (

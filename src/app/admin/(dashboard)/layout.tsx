@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
+import SectionHeading from "@/components/SectionHeading";
 
 export default function AdminDashboardLayout({
   children,
@@ -9,11 +10,9 @@ export default function AdminDashboardLayout({
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-24">
       <div className="relative mb-10 border-b border-white/10 pb-6">
-        <h1 className="text-center font-label text-2xl font-bold">
-          <Link href="/admin" className="neon-label neon-link">
-            管理画面
-          </Link>
-        </h1>
+        <Link href="/admin" className="flex justify-center">
+          <SectionHeading textKey="management" label="Management" className="h-10 w-auto" />
+        </Link>
         <form
           action={async () => {
             "use server";

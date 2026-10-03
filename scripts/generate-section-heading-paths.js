@@ -2,9 +2,10 @@ const opentype = require("opentype.js");
 const fs = require("fs");
 const path = require("path");
 
-// The six section <h2> headings, keyed to match src/i18n's nav labels
+// The section <h2> headings, keyed to match src/i18n's nav labels
 // (identical text in both ja/en dictionaries, so one path per heading
-// covers both locales).
+// covers both locales) plus the admin-only login/management titles
+// (English-only, no i18n key — the admin UI isn't localized).
 const HEADINGS = {
   aboutMe: "About me",
   works: "Works",
@@ -12,6 +13,8 @@ const HEADINGS = {
   research: "Research",
   other: "Other",
   contact: "Contact",
+  login: "Login",
+  management: "Management",
 };
 const fontSize = 120;
 
