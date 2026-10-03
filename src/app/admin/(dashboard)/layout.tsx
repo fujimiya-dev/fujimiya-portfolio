@@ -6,7 +6,7 @@ export default function AdminDashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto max-w-4xl px-6 pb-24 pt-20">
+    <div className="mx-auto max-w-4xl px-6 pb-24 pt-32">
       {children}
 
       <div className="mt-8 flex justify-center">
