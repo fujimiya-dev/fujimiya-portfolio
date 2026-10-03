@@ -23,7 +23,7 @@ export default async function LoginPage({
 }) {
   const { error } = await searchParams;
   return (
-    <div className="flex min-h-full flex-col items-center justify-center px-6 py-16">
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
         <RevealGlow className="text-center">
           <SectionHeading textKey="login" label="Login" className="mx-auto mb-8 h-10 w-auto" />
