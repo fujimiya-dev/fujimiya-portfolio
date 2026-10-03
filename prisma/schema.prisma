@@ -8,12 +8,6 @@ datasource db {
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
-model Admin {
-  id           String @id @default(cuid())
-  email        String @unique
-  passwordHash String
-}
-
 model Work {
   id          String   @id @default(cuid())
   slug        String   @unique

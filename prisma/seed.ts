@@ -1,23 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (adminEmail && adminPassword) {
-    const passwordHash = await bcrypt.hash(adminPassword, 10);
-    await prisma.admin.upsert({
-      where: { email: adminEmail },
-      update: { passwordHash },
-      create: { email: adminEmail, passwordHash },
-    });
-    console.log(`admin user ready: ${adminEmail}`);
-  } else {
-    console.warn("ADMIN_EMAIL / ADMIN_PASSWORD not set — skipping admin seed");
-  }
-
   // Workも再実行のたびに古いデータを消してから入れ直す（重複防止）
   await prisma.work.deleteMany();
   await prisma.work.createMany({

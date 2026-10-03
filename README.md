@@ -26,13 +26,13 @@ Vercelダッシュボード → Storage → Create Database → Postgres。作�
 Storage → Create → Blob。発行された `BLOB_READ_WRITE_TOKEN` を `.env` に追加します。
 ※ 現バージョンの管理フォームは画像URLを直接貼り付ける形です。Blobへのアップロードボタンを追加する場合は `@vercel/blob` の `upload()` をクライアントコンポーネントから呼び出してください。
 
-### 3. Auth.js の秘密鍵と管理者アカウント
+### 3. Auth.js の秘密鍵と GitHub OAuth
 
 ```bash
 openssl rand -base64 32   # → AUTH_SECRET に貼り付け
 ```
 
-`.env` の `ADMIN_EMAIL` / `ADMIN_PASSWORD` に自分のログイン情報を設定してください。
+管理画面へのログインはGitHub OAuthのみで行います。[GitHub Developer Settings](https://github.com/settings/developers) でOAuth Appを作成し（Authorization callback URLは `https://<ドメイン>/api/auth/callback/github`）、発行された値を `.env` の `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` に設定してください。また `ALLOWED_GITHUB_USERNAME` にログインを許可するGitHubアカウントのユーザー名（例: `fujita-miyako`）、`NEXTAUTH_URL` にサイトのURLを設定してください。このユーザー名と一致しないGitHubアカウントはログインできません。
 
 ### 4. DBスキーマを反映 & 初期データを投入
 
@@ -41,7 +41,7 @@ npm run db:push
 npm run db:seed
 ```
 
-`seed.ts` は既存のポートフォリオPDFの内容（Works 3件、Experience 5件、Research 2件、その他の活動、趣味）をそのまま投入します。管理者アカウントも同時に作成されます。
+`seed.ts` は既存のポートフォリオPDFの内容（Works 3件、Experience 5件、Research 2件、その他の活動、趣味）をそのまま投入します。
 
 ### 5. ローカルで起動
 
@@ -49,13 +49,13 @@ npm run db:seed
 npm run dev
 ```
 
-`http://localhost:3000/admin/login` から先ほどの `ADMIN_EMAIL` / `ADMIN_PASSWORD` でログインできます。
+`http://localhost:3000/admin/login` から「GitHubでログイン」ボタンで、`ALLOWED_GITHUB_USERNAME` に設定したアカウントでログインできます。
 
 ## Vercelへのデプロイ
 
 1. このフォルダをGitHubリポジトリにpush
 2. Vercelでリポジトリをインポート
-3. 上記の環境変数（`POSTGRES_*` `BLOB_READ_WRITE_TOKEN` `AUTH_SECRET` `ADMIN_EMAIL` `ADMIN_PASSWORD`）をVercelのProject Settings → Environment Variablesに設定
+3. 上記の環境変数（`POSTGRES_*` `BLOB_READ_WRITE_TOKEN` `AUTH_SECRET` `GITHUB_CLIENT_ID` `GITHUB_CLIENT_SECRET` `ALLOWED_GITHUB_USERNAME` `NEXTAUTH_URL`）をVercelのProject Settings → Environment Variablesに設定
 4. デプロイ後、初回のみ `vercel env pull && npm run db:push && npm run db:seed` をローカルから実行（またはVercelのビルドフックにdb pushを組み込む）
 
 ## 次にやるとよいこと
