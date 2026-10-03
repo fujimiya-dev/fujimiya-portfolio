@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AdminSectionTitle from "@/components/AdminSectionTitle";
+import { signOut } from "@/lib/auth";
 
 const sections = [
   { href: "/admin/works", label: "Works", note: "制作物の追加・編集・削除" },
@@ -22,6 +23,19 @@ export default function AdminHome() {
             <p className="mt-1 text-xs text-ink-faint">{s.note}</p>
           </Link>
         ))}
+      </div>
+
+      <div className="mt-8 flex justify-center">
+        <form
+          action={async () => {
+            "use server";
+            await signOut({ redirectTo: "/admin/login" });
+          }}
+        >
+          <button className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)]">
+            ログアウト
+          </button>
+        </form>
       </div>
     </div>
   );

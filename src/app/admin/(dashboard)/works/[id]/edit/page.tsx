@@ -20,7 +20,7 @@ export default async function EditWorkPage({
       <div className="glass-panel rounded-sm p-6 sm:p-8">
         <WorkForm action={boundUpdate} defaultValues={work} submitLabel="更新する" />
       </div>
-      <AdminListBackButton href="/admin/works" label="Works編集一覧に戻る" />
+      <AdminListBackButton href="/admin/works" label="Works編集一覧へ" />
     </div>
   );
 }

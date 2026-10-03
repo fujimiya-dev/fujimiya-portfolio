@@ -20,7 +20,7 @@ export default async function EditExperiencePage({
       <div className="glass-panel rounded-sm p-6 sm:p-8">
         <ExperienceForm action={boundUpdate} defaultValues={item} submitLabel="更新する" />
       </div>
-      <AdminListBackButton href="/admin/experience" label="Experience編集一覧に戻る" />
+      <AdminListBackButton href="/admin/experience" label="Experience編集一覧へ" />
     </div>
   );
 }

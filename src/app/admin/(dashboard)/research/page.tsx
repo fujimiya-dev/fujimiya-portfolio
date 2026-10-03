@@ -48,7 +48,7 @@ export default async function AdminResearchPage() {
           <p className="py-6 text-sm text-ink-faint">まだ研究が登録されていません。</p>
         )}
       </div>
-      <AdminListBackButton href="/admin" label="管理TOPへ戻る" />
+      <AdminListBackButton href="/admin" label="管理TOPへ" />
     </div>
   );
 }
