@@ -78,6 +78,10 @@ function createBladeGeometry(segments: number, width: number, height: number, cu
 }
 
 type LayerConfig = {
+  // Seeds this layer's scatter so the exact same instance placement comes
+  // out every time scatterInstances runs for it, instead of a fresh
+  // Math.random() shuffle — see the comment on mulberry32 below for why.
+  seed: number;
   count: number;
   nearZ: number;
   farZ: number;
@@ -138,8 +142,33 @@ type LayerConfig = {
   cameraZ?: number;
 };
 
+// Deterministic PRNG (mulberry32) so a given layer's scatter is reproducible
+// instead of reshuffling on every call. scatterInstances used to draw straight
+// from Math.random(), and GrassField's layers useMemo was keyed on
+// size.height — on mobile, the browser chrome (address bar) showing/hiding on
+// scroll changes the viewport height without the width ever changing, which
+// R3F reports as a resize, which recomputed layers, which built new cfg
+// object references, which invalidated GrassLayer's own useMemo([cfg]) and
+// re-ran scatterInstances with fresh randomness: the entire field visibly
+// re-shuffled mid-scroll. Seeding makes that specific recomputation a no-op
+// (same cfg values in, byte-identical arrays out) as a second line of
+// defense — the primary fix is layers no longer depending on height at all,
+// below — and keeps any other future recompute (a real width resize, count
+// changing, etc.) from being visually jarring either.
+function mulberry32(seed: number) {
+  let a = seed;
+  return function rng() {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 function scatterInstances(cfg: LayerConfig) {
   const { count, widthRange } = cfg;
+  const rng = mulberry32(cfg.seed);
   const zStart = Math.min(cfg.nearZ, cfg.farZ);
   const zEnd = Math.max(cfg.nearZ, cfg.farZ);
   const depthRange = zEnd - zStart;
@@ -161,11 +190,11 @@ function scatterInstances(cfg: LayerConfig) {
     if (cfg.stratified) {
       const gx = i % gridX;
       const gz = Math.floor(i / gridX) % gridZ;
-      x = -widthRange / 2 + (gx + Math.random()) * cellW;
-      zFrac = (gz + Math.random()) / gridZ;
+      x = -widthRange / 2 + (gx + rng()) * cellW;
+      zFrac = (gz + rng()) / gridZ;
     } else {
-      x = (Math.random() - 0.5) * widthRange;
-      zFrac = Math.random();
+      x = (rng() - 0.5) * widthRange;
+      zFrac = rng();
     }
 
     // e: 0(左端)〜1(右端)。rampStart までは0固定(完全にバイアスなし)、
@@ -185,7 +214,7 @@ function scatterInstances(cfg: LayerConfig) {
         0,
         1
       );
-      if (Math.random() < cullChance) {
+      if (rng() < cullChance) {
         continue; // このインスタンスは配置しない（posRot/scaleVarは0のまま=非表示）
       }
     }
@@ -221,20 +250,20 @@ function scatterInstances(cfg: LayerConfig) {
     // to communicate "farther away", not an unwanted upward drift.
     const yBeforeBias = terrainHeightAt(x, zBeforeBias);
     const y = (cfg.cameraY ?? 0) + (yBeforeBias - (cfg.cameraY ?? 0)) * depthRatio;
-    const rotation = Math.random() * Math.PI * 2;
-    const scaleX = THREE.MathUtils.lerp(cfg.scaleXRange[0], cfg.scaleXRange[1], Math.random()) * xBiasScaleMul;
+    const rotation = rng() * Math.PI * 2;
+    const scaleX = THREE.MathUtils.lerp(cfg.scaleXRange[0], cfg.scaleXRange[1], rng()) * xBiasScaleMul;
     // A minority of "hero" fronds sweep much taller, giving the field a
     // dramatic reaching silhouette rather than a uniform short lawn line —
     // dialed back as xBias strengthens, since a sparse, shrunk cluster of
     // mostly-short blades with the occasional full-height hero towering
     // over them reads as scattered outliers rather than a coherent distant
     // patch.
-    const isHero = Math.random() < cfg.heroChance * (1 - e * 0.9);
+    const isHero = rng() < cfg.heroChance * (1 - e * 0.9);
     const scaleY = (isHero
-      ? THREE.MathUtils.lerp(cfg.heroScaleYRange[0], cfg.heroScaleYRange[1], Math.random())
-      : THREE.MathUtils.lerp(cfg.scaleYRange[0], cfg.scaleYRange[1], Math.random())) * xBiasScaleMul;
-    const tilt = (Math.random() - 0.5) * cfg.tiltRange;
-    const colorVar = Math.random();
+      ? THREE.MathUtils.lerp(cfg.heroScaleYRange[0], cfg.heroScaleYRange[1], rng())
+      : THREE.MathUtils.lerp(cfg.scaleYRange[0], cfg.scaleYRange[1], rng())) * xBiasScaleMul;
+    const tilt = (rng() - 0.5) * cfg.tiltRange;
+    const colorVar = rng();
 
     posRot[i * 4] = x;
     posRot[i * 4 + 1] = y;
@@ -485,6 +514,7 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
       // and sway is meant to actually read. Now also carries the left-near/
       // right-far xBias asymmetry; mid/far stay full-width/uniform for now.
       {
+        seed: 1,
         count: Math.round(count * nearRatio),
         nearZ: -1.7,
         farZ: -6,
@@ -515,6 +545,7 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
       // Mid — noticeably smaller/sparser and a touch dimmer/less saturated
       // than the near layer, but still clearly grass-shaped up close.
       {
+        seed: 2,
         count: Math.round(count * midRatio),
         nearZ: -6,
         farZ: -14,
@@ -546,6 +577,7 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
       // haze uses, per the atmospheric-extinction reasoning applied
       // everywhere else in this scene. Left exactly as it was.
       {
+        seed: 3,
         count: Math.round(count * 0.32),
         nearZ: -14,
         farZ: -48,
@@ -573,8 +605,11 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
         cameraZ,
       },
     ];
+    // size.height deliberately left out — see the mulberry32 comment above
+    // scatterInstances for why a height-only viewport change (mobile browser
+    // chrome showing/hiding on scroll) must not recompute this.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, lowTier, camera, size.width, size.height]);
+  }, [count, lowTier, camera, size.width]);
 
   return (
     <>
