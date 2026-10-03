@@ -69,11 +69,11 @@ export default function RootLayout({
       lang="ja"
       className={`${zenOldMincho.variable} ${zenKaku.variable} ${hinaMincho.variable} ${hinaMinchoLabel.variable} ${nothingYouCouldDo.variable}`}
     >
-      <body className="flex min-h-screen flex-col font-sans">
+      <body className="grid min-h-screen grid-rows-[1fr_auto] font-sans">
         <IntroPlayingProvider>
           <NightSky />
           <TopNav />
-          <main className="relative z-[2] flex-1">{children}</main>
+          <main className="relative z-[2]">{children}</main>
           <Footer />
         </IntroPlayingProvider>
       </body>
