@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import ExperienceForm from "@/components/ExperienceForm";
 import { updateExperience } from "@/actions/experience";
+import AdminBackLink from "@/components/AdminBackLink";
 
 export default async function EditExperiencePage({
   params,
@@ -16,8 +17,13 @@ export default async function EditExperiencePage({
 
   return (
     <div>
-      <h1 className="mb-6 font-serif text-2xl">「{item.org}」を編集</h1>
-      <ExperienceForm action={boundUpdate} defaultValues={item} submitLabel="更新する" />
+      <AdminBackLink />
+      <h2 className="mb-6 text-center font-label text-2xl font-bold neon-label">
+        「{item.org}」を編集
+      </h2>
+      <div className="glass-panel rounded-sm p-6 sm:p-8">
+        <ExperienceForm action={boundUpdate} defaultValues={item} submitLabel="更新する" />
+      </div>
     </div>
   );
 }

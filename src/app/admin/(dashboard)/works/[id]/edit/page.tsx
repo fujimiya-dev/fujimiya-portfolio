@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import WorkForm from "@/components/WorkForm";
 import { updateWork } from "@/actions/works";
+import AdminBackLink from "@/components/AdminBackLink";
 
 export default async function EditWorkPage({
   params,
@@ -16,8 +17,13 @@ export default async function EditWorkPage({
 
   return (
     <div>
-      <h1 className="mb-6 font-serif text-2xl">「{work.title}」を編集</h1>
-      <WorkForm action={boundUpdate} defaultValues={work} submitLabel="更新する" />
+      <AdminBackLink />
+      <h2 className="mb-6 text-center font-label text-2xl font-bold neon-label">
+        「{work.title}」を編集
+      </h2>
+      <div className="glass-panel rounded-sm p-6 sm:p-8">
+        <WorkForm action={boundUpdate} defaultValues={work} submitLabel="更新する" />
+      </div>
     </div>
   );
 }

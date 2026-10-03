@@ -15,7 +15,7 @@ export default function AdminHome() {
           href={s.href}
           className="glass-panel block rounded-sm p-6 transition-colors hover:border-accent-teal/60"
         >
-          <p className="font-serif text-lg">{s.label}</p>
+          <p className="neon-link font-label text-lg">{s.label}</p>
           <p className="mt-1 text-xs text-ink-faint">{s.note}</p>
         </Link>
       ))}
