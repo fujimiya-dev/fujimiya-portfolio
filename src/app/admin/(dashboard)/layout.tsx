@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
 import SectionHeading from "@/components/SectionHeading";
+import { RevealGlow } from "@/components/RevealSection";
 
 export default function AdminDashboardLayout({
   children,
@@ -9,23 +10,26 @@ export default function AdminDashboardLayout({
 }) {
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-24">
-      <div className="relative mb-10 border-b border-white/10 pb-6">
-        <Link href="/admin" className="flex justify-center">
-          <SectionHeading textKey="management" label="Management" className="h-10 w-auto" />
+      <RevealGlow className="mb-10 text-center">
+        <Link href="/admin" className="inline-block">
+          <SectionHeading textKey="management" label="Management" className="mx-auto h-10 w-auto" />
         </Link>
+      </RevealGlow>
+
+      {children}
+
+      <div className="mt-8 flex justify-center">
         <form
           action={async () => {
             "use server";
             await signOut({ redirectTo: "/admin/login" });
           }}
-          className="absolute right-0 top-1/2 -translate-y-1/2"
         >
-          <button className="neon-link text-xs text-ink-faint hover:text-accent-teal">
+          <button className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)]">
             ログアウト
           </button>
         </form>
       </div>
-      {children}
     </div>
   );
 }
