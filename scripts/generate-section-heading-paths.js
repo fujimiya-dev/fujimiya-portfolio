@@ -14,7 +14,10 @@ const HEADINGS = {
   other: "Other",
   contact: "Contact",
   login: "Login",
-  management: "Management",
+  admin: "Admin",
+  worksAdmin: "Works Admin",
+  experienceAdmin: "Experience Admin",
+  researchAdmin: "Research Admin",
 };
 const fontSize = 120;
 

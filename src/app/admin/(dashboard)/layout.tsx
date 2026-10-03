@@ -1,7 +1,4 @@
-import Link from "next/link";
 import { signOut } from "@/lib/auth";
-import SectionHeading from "@/components/SectionHeading";
-import { RevealGlow } from "@/components/RevealSection";
 
 export default function AdminDashboardLayout({
   children,
@@ -10,12 +7,6 @@ export default function AdminDashboardLayout({
 }) {
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-20">
-      <RevealGlow className="mb-16 text-center">
-        <Link href="/admin" className="inline-block">
-          <SectionHeading textKey="management" label="Management" className="mx-auto h-10 w-auto" />
-        </Link>
-      </RevealGlow>
-
       {children}
 
       <div className="mt-8 flex justify-center">

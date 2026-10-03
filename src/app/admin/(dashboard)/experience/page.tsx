@@ -10,11 +10,10 @@ export default async function AdminExperiencePage() {
 
   return (
     <div>
-      <div className="relative mb-6">
-        <h2 className="text-center font-label text-2xl font-bold neon-label">Experience の管理</h2>
+      <div className="mb-6 flex justify-end">
         <Link
           href="/admin/experience/new"
-          className="neon-link absolute right-0 top-1/2 -translate-y-1/2 rounded-sm border border-accent-teal px-4 py-2 text-sm text-accent-teal hover:bg-accent-teal hover:text-sky-deep"
+          className="neon-link rounded-sm border border-accent-teal px-4 py-2 text-sm text-accent-teal hover:bg-accent-teal hover:text-sky-deep"
         >
           + 新規作成
         </Link>
