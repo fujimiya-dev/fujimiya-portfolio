@@ -55,8 +55,19 @@ const nothingYouCouldDo = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://portfolio.fujimiya.dev"),
   title: "Fujimiya",
   description: "北陸先端科学技術大学院大学 修士1年 藤田都のポートフォリオ",
+  openGraph: {
+    title: "Fujimiya Portfolio",
+    description: "Welcome to Fujimiya's Portfolio!",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Fujimiya Portfolio",
+    description: "Welcome to Fujimiya's Portfolio!",
+  },
 };
 
 export default function RootLayout({
