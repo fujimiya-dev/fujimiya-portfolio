@@ -6,8 +6,7 @@ Next.js 15 (App Router) / TypeScript / Tailwind / Framer Motion / Prisma / Verce
 
 - `/` `/works` `/experience` `/research` … 公開ページ。内容はすべてDBから取得
 - `/works` `/experience` `/research` … 上部固定の検索バー＋タグ絞り込み（クライアント側フィルタ）
-- `/admin` … ログイン保護された管理画面。**現時点ではWorksのみ**作成・編集・削除が実装済み
-  - Experience / Research も同じパターン（`src/actions/works.ts` と `src/app/admin/works/*` をコピーして名前を変えるだけ）で追加できます。次に着手するならここがおすすめです。
+- `/admin` … ログイン保護された管理画面。Works / Experience / Research の作成・編集・削除が実装済み
 - スクロールで要素がグラデーションの光とともに浮かび上がるモーション（`RevealSection.tsx`）
 
 ## セットアップ
@@ -60,7 +59,6 @@ npm run dev
 
 ## 次にやるとよいこと
 
-- Experience / Research 用の admin CRUD（Worksをコピーして展開）
 - 画像アップロードをURL貼り付けから `@vercel/blob` の直接アップロードに変更
 - タグを独立したテーブルにして、タグ一覧ページやタグごとのカウント表示を追加
 - 前回作成した静的デモ（グラデーション夜空・星のまたたき・オーバーレイナビ）の演出をTailwind/Framer Motionで再現し切る（現状は簡略版）

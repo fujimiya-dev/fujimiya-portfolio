@@ -2,8 +2,8 @@ import Link from "next/link";
 
 const sections = [
   { href: "/admin/works", label: "Works", note: "制作物の追加・編集・削除" },
-  { href: "/admin/experience", label: "Experience", note: "（未実装：Worksと同じパターンで追加できます）" },
-  { href: "/admin/research", label: "Research", note: "（未実装：Worksと同じパターンで追加できます）" },
+  { href: "/admin/experience", label: "Experience", note: "経歴の追加・編集・削除" },
+  { href: "/admin/research", label: "Research", note: "研究内容の追加・編集・削除" },
 ];
 
 export default function AdminHome() {
