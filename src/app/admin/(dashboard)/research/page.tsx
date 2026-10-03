@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { deleteResearchItem } from "@/actions/research";
-import AdminBackLink from "@/components/AdminBackLink";
+import AdminListBackButton from "@/components/AdminListBackButton";
 
 export const revalidate = 0;
 
@@ -10,7 +10,6 @@ export default async function AdminResearchPage() {
 
   return (
     <div>
-      <AdminBackLink />
       <div className="relative mb-6">
         <h2 className="text-center font-label text-2xl font-bold neon-label">Research の管理</h2>
         <Link
@@ -50,6 +49,7 @@ export default async function AdminResearchPage() {
           <p className="py-6 text-sm text-ink-faint">まだ研究が登録されていません。</p>
         )}
       </div>
+      <AdminListBackButton href="/admin" label="管理TOPへ戻る" />
     </div>
   );
 }
