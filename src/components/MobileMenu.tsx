@@ -29,7 +29,7 @@ export default function MobileMenu({
         aria-label={open ? "メニューを閉じる" : "メニューを開く"}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 w-10 items-center justify-center"
+        className="relative z-[80] flex h-10 w-10 items-center justify-center"
       >
         <span className="relative block h-px w-4 bg-ink">
           <span
