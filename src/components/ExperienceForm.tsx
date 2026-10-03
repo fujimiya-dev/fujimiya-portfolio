@@ -50,12 +50,14 @@ export default function ExperienceForm({
           className={fieldClass}
         />
       </div>
-      <button
-        type="submit"
-        className="rounded-sm border border-accent-teal px-5 py-2 text-sm text-accent-teal hover:bg-accent-teal hover:text-sky-deep"
-      >
-        {submitLabel}
-      </button>
+      <div className="flex justify-center">
+        <button
+          type="submit"
+          className="rounded-sm border border-accent-teal px-5 py-2 text-sm text-accent-teal hover:bg-accent-teal hover:text-sky-deep"
+        >
+          {submitLabel}
+        </button>
+      </div>
     </form>
   );
 }
