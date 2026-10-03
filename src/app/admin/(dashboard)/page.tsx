@@ -10,7 +10,7 @@ const sections = [
 export default function AdminHome() {
   return (
     <div>
-      <AdminSectionTitle textKey="admin" label="Admin" />
+      <AdminSectionTitle textKey="admin" label="Admin" eyebrow="管理" />
       <div className="grid gap-4">
         {sections.map((s) => (
           <Link

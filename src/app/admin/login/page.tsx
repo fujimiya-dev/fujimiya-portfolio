@@ -26,6 +26,9 @@ export default async function LoginPage({
     <div className="flex h-full flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
         <RevealGlow className="text-center">
+          <span className="mb-7 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
+            ログイン
+          </span>
           <SectionHeading textKey="login" label="Login" className="mx-auto mb-8 h-10 w-auto" />
         </RevealGlow>
         <div className="glass-panel rounded-sm p-6 sm:p-8">
