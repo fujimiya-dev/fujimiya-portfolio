@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import ResearchForm from "@/components/ResearchForm";
 import { updateResearchItem } from "@/actions/research";
 import AdminBackLink from "@/components/AdminBackLink";
+import AdminListBackButton from "@/components/AdminListBackButton";
 
 export default async function EditResearchPage({
   params,
@@ -24,6 +25,7 @@ export default async function EditResearchPage({
       <div className="glass-panel rounded-sm p-6 sm:p-8">
         <ResearchForm action={boundUpdate} defaultValues={item} submitLabel="更新する" />
       </div>
+      <AdminListBackButton href="/admin/research" label="Research編集一覧に戻る" />
     </div>
   );
 }

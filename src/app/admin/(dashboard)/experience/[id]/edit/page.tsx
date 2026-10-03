@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import ExperienceForm from "@/components/ExperienceForm";
 import { updateExperience } from "@/actions/experience";
 import AdminBackLink from "@/components/AdminBackLink";
+import AdminListBackButton from "@/components/AdminListBackButton";
 
 export default async function EditExperiencePage({
   params,
@@ -24,6 +25,7 @@ export default async function EditExperiencePage({
       <div className="glass-panel rounded-sm p-6 sm:p-8">
         <ExperienceForm action={boundUpdate} defaultValues={item} submitLabel="更新する" />
       </div>
+      <AdminListBackButton href="/admin/experience" label="Experience編集一覧に戻る" />
     </div>
   );
 }
