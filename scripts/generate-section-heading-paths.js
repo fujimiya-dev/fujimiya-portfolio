@@ -14,6 +14,7 @@ const HEADINGS = {
   other: "Other",
   contact: "Contact",
   login: "Login",
+  privacyPolicy: "Privacy Policy",
   admin: "Admin",
   worksAdmin: "Works Admin",
   experienceAdmin: "Experience Admin",

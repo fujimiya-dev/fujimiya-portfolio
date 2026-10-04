@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { RevealFade, RevealGlow } from "@/components/RevealSection";
+import SectionHeading from "@/components/SectionHeading";
 import { getLocale } from "@/i18n/server";
 
 const backToTopClass =
@@ -27,8 +28,11 @@ const linkClass = "neon-link text-accent-blue underline underline-offset-2 hover
 function PrivacyJa() {
   return (
     <>
-      <RevealGlow className="mb-10 text-center">
-        <h1 className="font-label text-4xl font-bold">プライバシーポリシー</h1>
+      <RevealGlow className="text-center">
+        <span className="mb-7 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
+          プライバシーポリシー
+        </span>
+        <SectionHeading textKey="privacyPolicy" label="Privacy Policy" className="mx-auto mb-14 h-10 w-auto" />
       </RevealGlow>
 
       <RevealFade>
@@ -127,8 +131,11 @@ function PrivacyJa() {
 function PrivacyEn() {
   return (
     <>
-      <RevealGlow className="mb-10 text-center">
-        <h1 className="font-label text-4xl font-bold">Privacy Policy</h1>
+      <RevealGlow className="text-center">
+        <span className="mb-7 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
+          プライバシーポリシー
+        </span>
+        <SectionHeading textKey="privacyPolicy" label="Privacy Policy" className="mx-auto mb-14 h-10 w-auto" />
       </RevealGlow>
 
       <RevealFade>
