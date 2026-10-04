@@ -10,7 +10,6 @@ import YouTubeThumbnail from "@/components/YouTubeThumbnail";
 type Work = {
   id: string;
   slug: string;
-  numberLabel: string;
   title: string;
   dateLabel: string;
   award: string | null;

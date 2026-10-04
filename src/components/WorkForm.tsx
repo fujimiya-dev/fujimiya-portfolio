@@ -3,7 +3,6 @@ import ImageUrlField from "@/components/ImageUrlField";
 
 type WorkFormValues = {
   slug?: string;
-  numberLabel?: string;
   title?: string;
   dateLabel?: string;
   award?: string | null;
@@ -17,7 +16,6 @@ type WorkFormValues = {
   screenshots?: string[];
   category?: string[];
   techStack?: string[];
-  order?: number;
 };
 
 const fieldClass =
@@ -37,10 +35,6 @@ export default function WorkForm({
       <div>
         <label className="mb-1 block text-xs text-ink-faint">スラッグ (URL用の英数字)</label>
         <input name="slug" defaultValue={defaultValues?.slug} required className={fieldClass} />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">番号ラベル（例：制作物 一）</label>
-        <input name="numberLabel" defaultValue={defaultValues?.numberLabel} className={fieldClass} />
       </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">タイトル</label>
@@ -111,7 +105,7 @@ export default function WorkForm({
       </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">
-          画像（任意、YouTube動画が無い場合のサムネイルとして使用）
+          サムネイル（任意、YouTube動画が無い場合に表示されます）
         </label>
         <ImageUrlField name="imageUrl" defaultValue={defaultValues?.imageUrl} />
       </div>
@@ -128,15 +122,6 @@ export default function WorkForm({
       <div>
         <label className="mb-1 block text-xs text-ink-faint">使用技術（カンマ区切り。例：Python, Django）</label>
         <input name="techStack" defaultValue={defaultValues?.techStack?.join(", ")} className={fieldClass} />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">並び順（数字が小さいほど先に表示）</label>
-        <input
-          name="order"
-          type="number"
-          defaultValue={defaultValues?.order ?? 0}
-          className={fieldClass}
-        />
       </div>
       <div className="flex justify-center">
         <button

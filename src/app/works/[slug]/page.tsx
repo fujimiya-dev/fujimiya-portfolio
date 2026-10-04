@@ -26,7 +26,7 @@ export default async function WorkDetailPage({
 
       <RevealFade>
         <h1 className="mb-2 font-label text-4xl font-bold">{work.title}</h1>
-        <span className="mb-8 block text-xs text-ink-faint">{work.dateLabel}</span>
+        <span className="mb-8 block text-sm text-ink-faint">{work.dateLabel}</span>
 
         <div className="glass-panel relative mb-8 aspect-video overflow-hidden rounded-sm border border-white/15 bg-white/[0.02]">
           {work.youtubeId ? (
@@ -54,6 +54,13 @@ export default async function WorkDetailPage({
         <WorkGallery images={work.screenshots} alt={work.title} />
 
         <div className="mb-8 space-y-4">
+          {work.award && (
+            <div className="glass-panel rounded-sm p-6">
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">受賞歴</h2>
+              <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">{work.award}</p>
+            </div>
+          )}
+
           <div className="glass-panel rounded-sm p-6">
             <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">作品詳細</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">

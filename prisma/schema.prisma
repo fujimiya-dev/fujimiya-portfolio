@@ -11,7 +11,7 @@ datasource db {
 model Work {
   id          String   @id @default(cuid())
   slug        String   @unique
-  numberLabel String // e.g. "制作物 一"
+  numberLabel String? // e.g. "制作物 一" — no longer editable from the admin UI; kept nullable so existing rows aren't lost
   title       String
   dateLabel   String // e.g. "2024.12.20 – 2025.1.17"
   award       String? // e.g. "優勝"
