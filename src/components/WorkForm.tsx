@@ -1,4 +1,5 @@
 import ScreenshotsField from "@/components/ScreenshotsField";
+import ImageUrlField from "@/components/ImageUrlField";
 
 type WorkFormValues = {
   slug?: string;
@@ -110,9 +111,9 @@ export default function WorkForm({
       </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">
-          画像URL（任意、YouTube動画が無い場合のサムネイルとして使用）
+          画像（任意、YouTube動画が無い場合のサムネイルとして使用）
         </label>
-        <input name="imageUrl" defaultValue={defaultValues?.imageUrl ?? ""} className={fieldClass} />
+        <ImageUrlField name="imageUrl" defaultValue={defaultValues?.imageUrl} />
       </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">
