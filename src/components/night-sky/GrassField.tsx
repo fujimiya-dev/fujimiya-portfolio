@@ -481,11 +481,40 @@ function GrassLayer({ cfg }: { cfg: LayerConfig }) {
   );
 }
 
+// Below this many px of difference, a reported size.width change is treated
+// as noise rather than a real resize — see the cache block in GrassField
+// for what this guards against.
+const WIDTH_CHANGE_THRESHOLD_PX = 20;
+
 export default function GrassField({ count, lowTier = false }: { count: number; lowTier?: boolean }) {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const size = useThree((s) => s.size);
 
-  const layers = useMemo<LayerConfig[]>(() => {
+  // Manual ref-cache instead of useMemo(..., [count, lowTier, camera,
+  // size.width]) — that dependency array was still letting the field
+  // regenerate specifically crossing Hero -> About me on real mobile
+  // browsers. Confirmed it isn't a remount (canvas DOM node identity and
+  // childList mutations watched across repeated Hero<->About scrolls: zero
+  // remounts) and isn't anything scroll/IntersectionObserver-driven
+  // reaching this tree (AboutScrollSpy's hash state has no subscriber here
+  // at all). Instrumenting size.width/height/the canvas's own backing
+  // dimensions during a programmatic scroll over the same range shows zero
+  // change too — but that can only probe what a *headless* browser does;
+  // real iOS/Android browsers are known to report brief, small
+  // (sub-~10-15px) fluctuations in the visual viewport width while their
+  // address bar collapses on scroll, not just height, which a plain
+  // dependency array has no way to tell apart from an intentional resize.
+  // Gating on a minimum delta (instead of any change at all) absorbs that
+  // noise while still regenerating for a real resize/orientation change.
+  const cacheRef = useRef<{ width: number; count: number; lowTier: boolean; layers: LayerConfig[] } | null>(null);
+  const cache = cacheRef.current;
+  const needsRecompute =
+    !cache ||
+    cache.count !== count ||
+    cache.lowTier !== lowTier ||
+    Math.abs(cache.width - size.width) > WIDTH_CHANGE_THRESHOLD_PX;
+
+  if (needsRecompute) {
     const vFov = THREE.MathUtils.degToRad(camera.fov);
     const widthAt = (z: number) => {
       const depth = camera.position.z - z;
@@ -509,7 +538,7 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
     const cameraY = camera.position.y;
     const cameraZ = camera.position.z;
 
-    return [
+    const newLayers: LayerConfig[] = [
       // Near — large, thick, dense, the layer whose individual blade shape
       // and sway is meant to actually read. Now also carries the left-near/
       // right-far xBias asymmetry; mid/far stay full-width/uniform for now.
@@ -605,11 +634,11 @@ export default function GrassField({ count, lowTier = false }: { count: number; 
         cameraZ,
       },
     ];
-    // size.height deliberately left out — see the mulberry32 comment above
-    // scatterInstances for why a height-only viewport change (mobile browser
-    // chrome showing/hiding on scroll) must not recompute this.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, lowTier, camera, size.width]);
+
+    cacheRef.current = { width: size.width, count, lowTier, layers: newLayers };
+  }
+
+  const layers = cacheRef.current!.layers;
 
   return (
     <>
