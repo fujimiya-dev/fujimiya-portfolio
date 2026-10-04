@@ -40,6 +40,7 @@ function buildWorkData(formData: FormData) {
       .filter(Boolean),
     category: parseTags(String(formData.get("category") ?? "")),
     techStack: parseTags(String(formData.get("techStack") ?? "")),
+    credits: (formData.get("credits") as string) || null,
   };
 }
 

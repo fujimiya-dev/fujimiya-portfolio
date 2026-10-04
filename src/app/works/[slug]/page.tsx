@@ -9,6 +9,28 @@ import { youtubeEmbedUrl } from "@/lib/youtube";
 
 export const revalidate = 0;
 
+// Credits text is free-form, admin-entered multiline text that may contain
+// URLs (e.g. "楽曲:曲名 https://..."). whitespace-pre-line on the
+// containing element preserves the line breaks already in the string; this
+// only needs to additionally turn the URL segments into actual links.
+function renderWithLinks(text: string) {
+  return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="neon-link text-accent-blue underline underline-offset-2 hover:text-accent-teal"
+      >
+        {part}
+      </a>
+    ) : (
+      part
+    )
+  );
+}
+
 export default async function WorkDetailPage({
   params,
 }: {
@@ -116,6 +138,15 @@ export default async function WorkDetailPage({
               </div>
             </div>
           </div>
+
+          {work.credits && (
+            <div className="glass-panel rounded-sm p-6">
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">クレジット</h2>
+              <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
+                {renderWithLinks(work.credits)}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="mt-12 flex justify-center">

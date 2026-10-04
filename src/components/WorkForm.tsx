@@ -16,6 +16,7 @@ type WorkFormValues = {
   screenshots?: string[];
   category?: string[];
   techStack?: string[];
+  credits?: string | null;
 };
 
 const fieldClass =
@@ -122,6 +123,17 @@ export default function WorkForm({
       <div>
         <label className="mb-1 block text-xs text-ink-faint">使用技術（カンマ区切り。例：Python, Django）</label>
         <input name="techStack" defaultValue={defaultValues?.techStack?.join(", ")} className={fieldClass} />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">
+          クレジット（任意、複数行可。例：楽曲:曲名 / アーティスト名 https://...）
+        </label>
+        <textarea
+          name="credits"
+          defaultValue={defaultValues?.credits ?? ""}
+          rows={5}
+          className={fieldClass}
+        />
       </div>
       <div className="flex justify-center">
         <button
