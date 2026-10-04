@@ -31,6 +31,23 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
       subject: `【ポートフォリオ】${name}様からお問い合わせ`,
       text: `名前: ${name}\nメール: ${email}\n\n${message}`,
     });
+
+    // 送信者本人への控えメール — あくまでベストエフォート。ここで失敗
+    // しても(Resendのドメイン未認証の間は、サンドボックス送信元からは
+    // アカウント所有者以外の任意アドレスへの送信が拒否されるため、
+    // ドメイン未認証の間は実質ここで失敗し続けます)、上の管理者宛通知
+    // は既に成功しているため、フォーム送信自体の成功扱いは変えない。
+    try {
+      await resend.emails.send({
+        from: "Portfolio Contact <onboarding@resend.dev>",
+        to: email,
+        subject: "【Fujimiya.dev】お問い合わせを受け付けました",
+        text: `${name} 様\n\n以下の内容でお問い合わせを受け付けました。内容をご確認ください。\n\n----------\n${message}\n----------\n\n※このメールは送信確認のための自動返信です。このメールに直接返信いただいても対応できませんので、あらかじめご了承ください。\n\n--\nFujimiya.dev`,
+      });
+    } catch (err) {
+      console.error("contact confirmation email send failed:", err);
+    }
+
     return { ok: true };
   } catch (err) {
     console.error("contact form send failed:", err);
