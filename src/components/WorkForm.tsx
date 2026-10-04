@@ -1,3 +1,5 @@
+import ScreenshotsField from "@/components/ScreenshotsField";
+
 type WorkFormValues = {
   slug?: string;
   numberLabel?: string;
@@ -11,6 +13,7 @@ type WorkFormValues = {
   role?: string;
   youtubeId?: string | null;
   imageUrl?: string | null;
+  screenshots?: string[];
   category?: string[];
   techStack?: string[];
   order?: number;
@@ -110,6 +113,12 @@ export default function WorkForm({
           画像URL（任意、YouTube動画が無い場合のサムネイルとして使用）
         </label>
         <input name="imageUrl" defaultValue={defaultValues?.imageUrl ?? ""} className={fieldClass} />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">
+          スクリーンショットギャラリー（任意、複数枚登録可・並び替え可）
+        </label>
+        <ScreenshotsField name="screenshots" defaultValue={defaultValues?.screenshots} />
       </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">カテゴリ（カンマ区切り。例：チーム開発, ハッカソン）</label>

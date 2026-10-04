@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { RevealFade } from "@/components/RevealSection";
 import NoImage from "@/components/NoImage";
+import WorkGallery from "@/components/WorkGallery";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 
 export const revalidate = 0;
@@ -49,6 +50,8 @@ export default async function WorkDetailPage({
             <NoImage />
           )}
         </div>
+
+        <WorkGallery images={work.screenshots} alt={work.title} />
 
         <div className="mb-8 space-y-4">
           <div className="glass-panel rounded-sm p-6">

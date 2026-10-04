@@ -11,3 +11,4 @@ next-env.d.ts
 # Letter free version) — only the vector paths extracted at build time by
 # scripts/generate-hero-title-path.js are committed, never the font itself.
 scripts/fonts/
+.env*

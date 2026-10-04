@@ -32,6 +32,10 @@ function buildWorkData(formData: FormData) {
     role: String(formData.get("role") || "準備中"),
     youtubeId: extractYouTubeId(String(formData.get("youtubeUrl") ?? "")),
     imageUrl: (formData.get("imageUrl") as string) || null,
+    screenshots: formData
+      .getAll("screenshots")
+      .map((v) => String(v).trim())
+      .filter(Boolean),
     category: parseTags(String(formData.get("category") ?? "")),
     techStack: parseTags(String(formData.get("techStack") ?? "")),
     order: Number(formData.get("order") ?? 0),

@@ -22,6 +22,7 @@ model Work {
   role        String   @default("準備中") // 担当部分
   youtubeId   String? // 抽出済みのYouTube動画ID(URLそのものではない)
   imageUrl    String? // YouTube動画が無い作品向けのフォールバック表示用
+  screenshots String[] // 詳細ページのスクリーンショットギャラリー用(配列の順番=表示順)
   category    String[] // 例: チーム開発, ハッカソン, ビジネス
   techStack   String[] // 例: Python, Django, Unity
   order       Int      @default(0)
