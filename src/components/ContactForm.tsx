@@ -29,6 +29,31 @@ const fieldClass =
 
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
+// Server-side error strings (src/actions/contact.ts) are plain text, but the
+// recaptcha failure message's "X(@fujimiya_dev)" fallback-contact mention
+// should read as a link — split it out of the string here rather than
+// having the server action return markup.
+const X_LINK_MARKER = "X(@fujimiya_dev)";
+
+function renderErrorMessage(message: string) {
+  const idx = message.indexOf(X_LINK_MARKER);
+  if (idx === -1) return message;
+  return (
+    <>
+      {message.slice(0, idx)}
+      <a
+        href="https://x.com/fujimiya_dev"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="neon-link text-accent-blue underline underline-offset-2 hover:text-accent-teal"
+      >
+        {X_LINK_MARKER}
+      </a>
+      {message.slice(idx + X_LINK_MARKER.length)}
+    </>
+  );
+}
+
 export default function ContactForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const captchaContainerRef = useRef<HTMLDivElement>(null);
@@ -130,7 +155,7 @@ export default function ContactForm() {
         <div ref={captchaContainerRef} />
       </div>
 
-      {status.type === "error" && <p className="text-xs text-[#ff8a8a]">{status.message}</p>}
+      {status.type === "error" && <p className="text-xs text-[#ff8a8a]">{renderErrorMessage(status.message)}</p>}
 
       <div className="flex justify-center">
         <button
