@@ -156,9 +156,7 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
             <Link href={`/works/${work.slug}`} className="group block h-full">
               <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition-all group-hover:border-accent-teal/50 group-hover:shadow-[0_0_24px_rgba(30,64,255,0.18)]">
                 <div className="relative aspect-video border-b border-white/10 bg-white/[0.02]">
-                  {work.youtubeId ? (
-                    <YouTubeThumbnail videoId={work.youtubeId} alt={work.title} />
-                  ) : work.imageUrl ? (
+                  {work.imageUrl ? (
                     <Image
                       src={work.imageUrl}
                       alt={work.title}
@@ -166,6 +164,8 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
                       sizes="(min-width: 640px) 50vw, 100vw"
                       className="object-contain"
                     />
+                  ) : work.youtubeId ? (
+                    <YouTubeThumbnail videoId={work.youtubeId} alt={work.title} />
                   ) : (
                     <NoImage />
                   )}
