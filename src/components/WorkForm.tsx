@@ -116,7 +116,7 @@ export default function WorkForm({
       </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">
-          スクリーンショットギャラリー（任意、複数枚登録可・並び替え可）
+          ギャラリー（任意、複数枚登録可・並び替え可）
         </label>
         <ScreenshotsField name="screenshots" defaultValue={defaultValues?.screenshots} />
       </div>

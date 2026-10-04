@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function WorkGallery({ images, alt }: { images: string[]; alt: string }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (openIndex === null) return;
@@ -16,11 +20,23 @@ export default function WorkGallery({ images, alt }: { images: string[]; alt: st
     return () => window.removeEventListener("keydown", onKey);
   }, [openIndex, images.length]);
 
+  // Scroll lock while the lightbox is open — restores whatever was there
+  // before (not forced back to "") only via cleanup, so this never fights
+  // with anything else that might set body overflow.
+  useEffect(() => {
+    if (openIndex === null) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [openIndex]);
+
   if (images.length === 0) return null;
 
   return (
     <div className="glass-panel mb-8 rounded-sm p-6">
-      <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">スクリーンショット</h2>
+      <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">ギャラリー</h2>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {images.map((src, i) => (
           <button
@@ -33,72 +49,83 @@ export default function WorkGallery({ images, alt }: { images: string[]; alt: st
                 external URLs, not limited to the configured image domain */}
             <img
               src={src}
-              alt={`${alt} スクリーンショット ${i + 1}`}
+              alt={`${alt} ギャラリー画像 ${i + 1}`}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           </button>
         ))}
       </div>
 
-      {openIndex !== null && (
-        <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-sky-deep/95 p-6 backdrop-blur-sm"
-          onClick={() => setOpenIndex(null)}
-        >
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenIndex(null);
-            }}
-            className="neon-link absolute right-6 top-6 text-2xl text-ink-faint hover:text-accent-teal"
-            aria-label="閉じる"
+      {/* Portaled to <body> — this card sits inside the detail page's
+          RevealFade (a framer-motion element, which applies a CSS
+          transform), and position:fixed descendants of a transformed
+          ancestor are positioned/stacked relative to *that* ancestor
+          instead of the viewport. Without the portal the lightbox rendered
+          behind later-painted siblings like the "作品詳細" card, despite
+          its own z-index, for exactly that reason — same category of fix
+          as IntroOverlay's own portal. */}
+      {mounted &&
+        openIndex !== null &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-sky-deep/95 p-6 backdrop-blur-sm"
+            onClick={() => setOpenIndex(null)}
           >
-            ✕
-          </button>
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenIndex((i) => (i === null ? i : (i - 1 + images.length) % images.length));
+                  }}
+                  className="neon-link absolute left-2 top-1/2 -translate-y-1/2 px-3 py-6 text-3xl text-ink-faint hover:text-accent-teal sm:left-6"
+                  aria-label="前の画像"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenIndex((i) => (i === null ? i : (i + 1) % images.length));
+                  }}
+                  className="neon-link absolute right-2 top-1/2 -translate-y-1/2 px-3 py-6 text-3xl text-ink-faint hover:text-accent-teal sm:right-6"
+                  aria-label="次の画像"
+                >
+                  ›
+                </button>
+              </>
+            )}
 
-          {images.length > 1 && (
-            <>
+            {/* Shrink-wrapped to the rendered image size so the close
+                button (positioned relative to this wrapper) sits at the
+                image's own top-right corner rather than the screen's. */}
+            <div className="relative inline-block" onClick={(e) => e.stopPropagation()}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- see above */}
+              <img
+                src={images[openIndex]}
+                alt={`${alt} ギャラリー画像 ${openIndex + 1}`}
+                className="block max-h-[85vh] max-w-[90vw] rounded-sm object-contain shadow-[0_0_40px_rgba(0,0,0,0.6)]"
+              />
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpenIndex((i) => (i === null ? i : (i - 1 + images.length) % images.length));
-                }}
-                className="neon-link absolute left-2 top-1/2 -translate-y-1/2 px-3 py-6 text-3xl text-ink-faint hover:text-accent-teal sm:left-6"
-                aria-label="前の画像"
+                onClick={() => setOpenIndex(null)}
+                className="neon-link absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-sky-deep text-sm text-ink-faint hover:border-accent-teal hover:text-accent-teal"
+                aria-label="閉じる"
               >
-                ‹
+                ✕
               </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpenIndex((i) => (i === null ? i : (i + 1) % images.length));
-                }}
-                className="neon-link absolute right-2 top-1/2 -translate-y-1/2 px-3 py-6 text-3xl text-ink-faint hover:text-accent-teal sm:right-6"
-                aria-label="次の画像"
-              >
-                ›
-              </button>
-            </>
-          )}
-
-          {/* eslint-disable-next-line @next/next/no-img-element -- see above */}
-          <img
-            src={images[openIndex]}
-            alt={`${alt} スクリーンショット ${openIndex + 1}`}
-            className="max-h-[85vh] max-w-[90vw] rounded-sm object-contain shadow-[0_0_40px_rgba(0,0,0,0.6)]"
-            onClick={(e) => e.stopPropagation()}
-          />
-
-          {images.length > 1 && (
-            <div className="absolute bottom-6 text-xs text-ink-faint">
-              {openIndex + 1} / {images.length}
             </div>
-          )}
-        </div>
-      )}
+
+            {images.length > 1 && (
+              <div className="absolute bottom-6 text-xs text-ink-faint">
+                {openIndex + 1} / {images.length}
+              </div>
+            )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
