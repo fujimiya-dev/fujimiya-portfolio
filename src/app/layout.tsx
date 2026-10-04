@@ -62,11 +62,13 @@ export const metadata: Metadata = {
     title: "Fujimiya Portfolio",
     description: "Welcome to Fujimiya's Portfolio!",
     type: "website",
+    images: [{ url: "/ogp-image.png", width: 1200, height: 630, alt: "Fujimiya.dev" }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Fujimiya Portfolio",
     description: "Welcome to Fujimiya's Portfolio!",
+    images: ["/ogp-image.png"],
   },
 };
 
