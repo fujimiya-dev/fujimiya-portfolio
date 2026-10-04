@@ -1,16 +1,72 @@
 "use server";
 
 import { Resend } from "resend";
+import { headers } from "next/headers";
 
 export type ContactResult = { ok: true } | { ok: false; error: string };
 
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 3;
+
+// Per-warm-instance, in-memory, best-effort limiter — no external store, so
+// it doesn't coordinate across concurrent serverless instances and resets
+// on a cold start. Combined with the honeypot below, that's enough to blunt
+// a basic bot/script hammering this endpoint without an external
+// dependency; a distributed limiter (Vercel KV/Upstash) would be the next
+// step if abuse ever outgrows this.
+const recentSubmissions = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = (recentSubmissions.get(ip) ?? []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+
+  if (timestamps.length >= RATE_LIMIT_MAX) {
+    recentSubmissions.set(ip, timestamps);
+    return true;
+  }
+
+  timestamps.push(now);
+  recentSubmissions.set(ip, timestamps);
+
+  // Opportunistic sweep of IPs with no recent activity, piggybacked on
+  // normal request traffic instead of a background job, so the map doesn't
+  // grow unbounded over the process's lifetime.
+  if (recentSubmissions.size > 1000) {
+    for (const [key, times] of recentSubmissions) {
+      if (times.every((t) => now - t >= RATE_LIMIT_WINDOW_MS)) recentSubmissions.delete(key);
+    }
+  }
+
+  return false;
+}
+
+async function getClientIp(): Promise<string> {
+  const h = await headers();
+  const forwardedFor = h.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0].trim();
+  return h.get("x-real-ip") ?? "unknown";
+}
+
 export async function sendContactMessage(formData: FormData): Promise<ContactResult> {
+  // Honeypot — see ContactForm.tsx's hidden "company" field. A real user
+  // never sees or fills it; a naive bot that fills every input it finds
+  // trips this. Fake success instead of an error so it doesn't learn the
+  // submission was caught.
+  if (String(formData.get("company") ?? "").trim() !== "") {
+    return { ok: true };
+  }
+
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const message = String(formData.get("message") ?? "").trim();
 
   if (!name || !email || !message) {
     return { ok: false, error: "すべての項目を入力してください。" };
+  }
+
+  const ip = await getClientIp();
+  if (isRateLimited(ip)) {
+    return { ok: false, error: "短時間に多くのお問い合わせを受け付けました。しばらく時間をおいて再度お試しください。" };
   }
 
   const apiKey = process.env.RESEND_API_KEY;

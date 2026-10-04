@@ -48,6 +48,20 @@ export default function ContactForm() {
         <textarea name="message" required rows={5} className={fieldClass} placeholder="お問い合わせ内容をご記入ください" />
       </div>
 
+      {/* Honeypot — invisible to sighted users (off-screen, not display:none
+          or visibility:hidden, since some bots skip filling those) and to
+          screen readers (aria-hidden + tabIndex=-1 + unreachable), but still
+          present in the DOM and form submission for a naive bot that fills
+          every input it finds. A non-empty value here means the submission
+          didn't come from the real form UI; the server action treats it as
+          spam and silently no-ops instead of sending mail. The name avoids
+          "honeypot"/"bot" so it doesn't advertise itself to anything smarter
+          than a naive autofill bot. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] top-auto h-0 w-0 overflow-hidden">
+        <label htmlFor="contact-hp-field">Company</label>
+        <input id="contact-hp-field" name="company" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
+
       {status.type === "error" && <p className="text-xs text-[#ff8a8a]">{status.message}</p>}
 
       <div className="flex justify-center">
