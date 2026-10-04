@@ -76,6 +76,20 @@ export default async function WorkDetailPage({
         <WorkGallery images={work.screenshots} alt={work.title} />
 
         <div className="mb-8 space-y-4">
+          {work.demoUrl && (
+            <div className="glass-panel rounded-sm p-6">
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">デモURL</h2>
+              <a
+                href={work.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="neon-link break-all text-[15px] text-accent-blue underline underline-offset-2 hover:text-accent-teal"
+              >
+                {work.demoUrl}
+              </a>
+            </div>
+          )}
+
           {work.award && (
             <div className="glass-panel rounded-sm p-6">
               <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">受賞歴</h2>

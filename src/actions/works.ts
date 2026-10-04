@@ -27,6 +27,7 @@ function buildWorkData(formData: FormData) {
     title: String(formData.get("title")),
     dateLabel: String(formData.get("dateLabel")),
     award: (formData.get("award") as string) || null,
+    demoUrl: (formData.get("demoUrl") as string) || null,
     summary: String(formData.get("summary")),
     description: String(formData.get("description")),
     comment: String(formData.get("comment") || "準備中"),

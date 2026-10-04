@@ -6,6 +6,7 @@ type WorkFormValues = {
   title?: string;
   dateLabel?: string;
   award?: string | null;
+  demoUrl?: string | null;
   summary?: string;
   description?: string;
   comment?: string;
@@ -48,6 +49,16 @@ export default function WorkForm({
       <div>
         <label className="mb-1 block text-xs text-ink-faint">受賞など（任意）</label>
         <input name="award" defaultValue={defaultValues?.award ?? ""} className={fieldClass} />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">デモURL（任意）</label>
+        <input
+          name="demoUrl"
+          type="url"
+          defaultValue={defaultValues?.demoUrl ?? ""}
+          placeholder="https://..."
+          className={fieldClass}
+        />
       </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">概要（一覧用の短い説明）</label>

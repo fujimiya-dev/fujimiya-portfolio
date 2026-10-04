@@ -15,6 +15,7 @@ model Work {
   title       String
   dateLabel   String // e.g. "2024.12.20 – 2025.1.17"
   award       String? // e.g. "優勝"
+  demoUrl     String? // 実際に試せるデモへのリンク
   summary     String
   description String
   comment     String   @default("準備中") // 製作者コメント
