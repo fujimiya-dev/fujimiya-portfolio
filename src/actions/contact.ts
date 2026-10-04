@@ -23,23 +23,19 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
   try {
     const resend = new Resend(apiKey);
     await resend.emails.send({
-      // Resendのドメイン未認証の間はこのアドレスからのみ送信できます。
-      // 自分のドメインを認証したら、ここを独自ドメインのアドレスに変更してください。
-      from: "Portfolio Contact <onboarding@resend.dev>",
+      from: "Fujimiya.dev <noreply@fujimiya.dev>",
       to,
       replyTo: email,
       subject: `【ポートフォリオ】${name}様からお問い合わせ`,
       text: `名前: ${name}\nメール: ${email}\n\n${message}`,
     });
 
-    // 送信者本人への控えメール — あくまでベストエフォート。ここで失敗
-    // しても(Resendのドメイン未認証の間は、サンドボックス送信元からは
-    // アカウント所有者以外の任意アドレスへの送信が拒否されるため、
-    // ドメイン未認証の間は実質ここで失敗し続けます)、上の管理者宛通知
-    // は既に成功しているため、フォーム送信自体の成功扱いは変えない。
+    // 送信者本人への控えメール — あくまでベストエフォート。失敗しても
+    // (SMTP一時エラー等)上の管理者宛通知は既に成功しているため、
+    // フォーム送信自体の成功扱いは変えない。
     try {
       await resend.emails.send({
-        from: "Portfolio Contact <onboarding@resend.dev>",
+        from: "Fujimiya.dev <noreply@fujimiya.dev>",
         to: email,
         subject: "【Fujimiya.dev】お問い合わせを受け付けました",
         text: `${name} 様\n\n以下の内容でお問い合わせを受け付けました。内容をご確認ください。\n\n----------\n${message}\n----------\n\n※このメールは送信確認のための自動返信です。このメールに直接返信いただいても対応できませんので、あらかじめご了承ください。\n\n--\nFujimiya.dev`,
