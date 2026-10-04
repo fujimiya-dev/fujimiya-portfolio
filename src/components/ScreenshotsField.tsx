@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { uploadScreenshot } from "@/actions/upload";
+import RetryImage from "@/components/RetryImage";
 
 const inputClass =
   "w-full border-b border-white/20 bg-transparent py-2 text-sm outline-none focus:border-accent-teal";
@@ -82,9 +83,7 @@ export default function ScreenshotsField({
           {urls.map((url, i) => (
             <div key={i} className="flex items-center gap-2 rounded-sm border border-white/10 p-2">
               <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded-sm border border-white/10 bg-white/[0.03]">
-                {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary
-                    external URLs, not limited to the configured image domain */}
-                <img src={url} alt="" className="h-full w-full object-cover" />
+                <RetryImage src={url} alt="" className="h-full w-full object-cover" compact />
               </div>
               <span className="min-w-0 flex-1 truncate text-xs text-ink-soft">{url}</span>
               <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className={iconButtonClass} aria-label="上へ">

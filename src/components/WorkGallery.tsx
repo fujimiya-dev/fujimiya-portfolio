@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import RetryImage from "@/components/RetryImage";
 
 export default function WorkGallery({ images, alt }: { images: string[]; alt: string }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -45,9 +46,7 @@ export default function WorkGallery({ images, alt }: { images: string[]; alt: st
             onClick={() => setOpenIndex(i)}
             className="group relative aspect-video overflow-hidden rounded-sm border border-white/10 bg-white/[0.02] transition-all hover:border-accent-teal/50 hover:shadow-[0_0_16px_rgba(30,64,255,0.25)]"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary
-                external URLs, not limited to the configured image domain */}
-            <img
+            <RetryImage
               src={src}
               alt={`${alt} ギャラリー画像 ${i + 1}`}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -102,11 +101,11 @@ export default function WorkGallery({ images, alt }: { images: string[]; alt: st
                 button (positioned relative to this wrapper) sits at the
                 image's own top-right corner rather than the screen's. */}
             <div className="relative inline-block" onClick={(e) => e.stopPropagation()}>
-              {/* eslint-disable-next-line @next/next/no-img-element -- see above */}
-              <img
+              <RetryImage
                 src={images[openIndex]}
                 alt={`${alt} ギャラリー画像 ${openIndex + 1}`}
                 className="block max-h-[85vh] max-w-[90vw] rounded-sm object-contain shadow-[0_0_40px_rgba(0,0,0,0.6)]"
+                fallbackClassName="h-[220px] w-[320px] max-w-[90vw] rounded-sm"
               />
               <button
                 type="button"
