@@ -9,7 +9,7 @@ type WorkFormValues = {
   comment?: string;
   teamSize?: number;
   role?: string;
-  demoUrl?: string | null;
+  youtubeId?: string | null;
   imageUrl?: string | null;
   category?: string[];
   techStack?: string[];
@@ -92,11 +92,23 @@ export default function WorkForm({
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">デモ動画URL（任意）</label>
-        <input name="demoUrl" defaultValue={defaultValues?.demoUrl ?? ""} className={fieldClass} />
+        <label className="mb-1 block text-xs text-ink-faint">
+          YouTube動画のURL（またはID）（任意）
+        </label>
+        <input
+          name="youtubeUrl"
+          defaultValue={defaultValues?.youtubeId ?? ""}
+          placeholder="https://www.youtube.com/watch?v=..."
+          className={fieldClass}
+        />
+        <p className="mt-1 text-[11px] text-ink-faint">
+          入力すると一覧・詳細ページでサムネイル表示と埋め込み再生に使われます。サムネイル画像の別途アップロードは不要です。
+        </p>
       </div>
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">画像URL（Vercel Blobにアップロード後のURL）</label>
+        <label className="mb-1 block text-xs text-ink-faint">
+          画像URL（任意、YouTube動画が無い場合のサムネイルとして使用）
+        </label>
         <input name="imageUrl" defaultValue={defaultValues?.imageUrl ?? ""} className={fieldClass} />
       </div>
       <div>

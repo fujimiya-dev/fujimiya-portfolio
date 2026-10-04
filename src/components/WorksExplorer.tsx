@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { RevealFade } from "@/components/RevealSection";
+import NoImage from "@/components/NoImage";
+import YouTubeThumbnail from "@/components/YouTubeThumbnail";
 
 type Work = {
   id: string;
@@ -14,35 +16,13 @@ type Work = {
   award: string | null;
   summary: string;
   description: string;
-  demoUrl: string | null;
+  youtubeId: string | null;
   imageUrl: string | null;
   category: string[];
   techStack: string[];
 };
 
 const CATEGORY_FILTERS = ["個人開発", "チーム開発", "ハッカソン", "インターン", "ビジネス"];
-
-function NoImage() {
-  return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-ink-faint">
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <circle cx="8.5" cy="8.5" r="1.5" />
-        <path d="M21 15l-5-5L5 21" />
-      </svg>
-      <span className="text-[10px] tracking-wide">No Image</span>
-    </div>
-  );
-}
 
 export default function WorksExplorer({ works }: { works: Work[] }) {
   const [chips, setChips] = useState<string[]>([]);
@@ -177,7 +157,9 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
             <Link href={`/works/${work.slug}`} className="group block h-full">
               <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition-all group-hover:border-accent-teal/50 group-hover:shadow-[0_0_24px_rgba(30,64,255,0.18)]">
                 <div className="relative aspect-video border-b border-white/10 bg-white/[0.02]">
-                  {work.imageUrl ? (
+                  {work.youtubeId ? (
+                    <YouTubeThumbnail videoId={work.youtubeId} alt={work.title} />
+                  ) : work.imageUrl ? (
                     <Image
                       src={work.imageUrl}
                       alt={work.title}

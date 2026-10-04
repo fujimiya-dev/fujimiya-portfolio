@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { RevealFade } from "@/components/RevealSection";
+import NoImage from "@/components/NoImage";
+import { youtubeEmbedUrl } from "@/lib/youtube";
 
 export const revalidate = 0;
 
@@ -26,7 +28,16 @@ export default async function WorkDetailPage({
         <span className="mb-8 block text-xs text-ink-faint">{work.dateLabel}</span>
 
         <div className="glass-panel relative mb-8 aspect-video overflow-hidden rounded-sm border border-white/15 bg-white/[0.02]">
-          {work.imageUrl ? (
+          {work.youtubeId ? (
+            <iframe
+              src={youtubeEmbedUrl(work.youtubeId)}
+              title={work.title}
+              className="absolute inset-0 h-full w-full"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          ) : work.imageUrl ? (
             <Image
               src={work.imageUrl}
               alt={work.title}
@@ -35,23 +46,7 @@ export default async function WorkDetailPage({
               className="object-contain"
             />
           ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-ink-faint">
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <path d="M21 15l-5-5L5 21" />
-              </svg>
-              <span className="text-[10px] tracking-wide">No Image</span>
-            </div>
+            <NoImage />
           )}
         </div>
 
@@ -112,17 +107,6 @@ export default async function WorkDetailPage({
             </div>
           </div>
         </div>
-
-        {work.demoUrl && (
-          <a
-            href={work.demoUrl}
-            target="_blank"
-            rel="noopener"
-            className="neon-link border-b border-accent-blue/50 text-sm text-accent-blue transition-colors hover:border-accent-teal hover:text-accent-teal"
-          >
-            デモ動画を見る ↗
-          </a>
-        )}
 
         <div className="mt-12 flex justify-center">
           <Link

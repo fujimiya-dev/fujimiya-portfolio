@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { extractYouTubeId } from "@/lib/youtube";
 
 async function requireAdmin() {
   const session = await auth();
@@ -17,28 +18,30 @@ function parseTags(raw: string): string[] {
     .filter(Boolean);
 }
 
+function buildWorkData(formData: FormData) {
+  return {
+    slug: String(formData.get("slug")),
+    numberLabel: String(formData.get("numberLabel")),
+    title: String(formData.get("title")),
+    dateLabel: String(formData.get("dateLabel")),
+    award: (formData.get("award") as string) || null,
+    summary: String(formData.get("summary")),
+    description: String(formData.get("description")),
+    comment: String(formData.get("comment") || "準備中"),
+    teamSize: Number(formData.get("teamSize") ?? 1),
+    role: String(formData.get("role") || "準備中"),
+    youtubeId: extractYouTubeId(String(formData.get("youtubeUrl") ?? "")),
+    imageUrl: (formData.get("imageUrl") as string) || null,
+    category: parseTags(String(formData.get("category") ?? "")),
+    techStack: parseTags(String(formData.get("techStack") ?? "")),
+    order: Number(formData.get("order") ?? 0),
+  };
+}
+
 export async function createWork(formData: FormData) {
   await requireAdmin();
 
-  await prisma.work.create({
-    data: {
-      slug: String(formData.get("slug")),
-      numberLabel: String(formData.get("numberLabel")),
-      title: String(formData.get("title")),
-      dateLabel: String(formData.get("dateLabel")),
-      award: (formData.get("award") as string) || null,
-      summary: String(formData.get("summary")),
-      description: String(formData.get("description")),
-      comment: String(formData.get("comment") || "準備中"),
-      teamSize: Number(formData.get("teamSize") ?? 1),
-      role: String(formData.get("role") || "準備中"),
-      demoUrl: (formData.get("demoUrl") as string) || null,
-      imageUrl: (formData.get("imageUrl") as string) || null,
-      category: parseTags(String(formData.get("category") ?? "")),
-      techStack: parseTags(String(formData.get("techStack") ?? "")),
-      order: Number(formData.get("order") ?? 0),
-    },
-  });
+  await prisma.work.create({ data: buildWorkData(formData) });
 
   revalidatePath("/works");
   revalidatePath("/admin/works");
@@ -50,23 +53,7 @@ export async function updateWork(id: string, formData: FormData) {
 
   await prisma.work.update({
     where: { id },
-    data: {
-      slug: String(formData.get("slug")),
-      numberLabel: String(formData.get("numberLabel")),
-      title: String(formData.get("title")),
-      dateLabel: String(formData.get("dateLabel")),
-      award: (formData.get("award") as string) || null,
-      summary: String(formData.get("summary")),
-      description: String(formData.get("description")),
-      comment: String(formData.get("comment") || "準備中"),
-      teamSize: Number(formData.get("teamSize") ?? 1),
-      role: String(formData.get("role") || "準備中"),
-      demoUrl: (formData.get("demoUrl") as string) || null,
-      imageUrl: (formData.get("imageUrl") as string) || null,
-      category: parseTags(String(formData.get("category") ?? "")),
-      techStack: parseTags(String(formData.get("techStack") ?? "")),
-      order: Number(formData.get("order") ?? 0),
-    },
+    data: buildWorkData(formData),
   });
 
   revalidatePath("/works");

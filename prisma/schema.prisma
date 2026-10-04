@@ -20,8 +20,8 @@ model Work {
   comment     String   @default("準備中") // 製作者コメント
   teamSize    Int      @default(1) // 担当人数
   role        String   @default("準備中") // 担当部分
-  demoUrl     String?
-  imageUrl    String?
+  youtubeId   String? // 抽出済みのYouTube動画ID(URLそのものではない)
+  imageUrl    String? // YouTube動画が無い作品向けのフォールバック表示用
   category    String[] // 例: チーム開発, ハッカソン, ビジネス
   techStack   String[] // 例: Python, Django, Unity
   order       Int      @default(0)
