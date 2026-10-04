@@ -4,9 +4,14 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import RetryImage from "@/components/RetryImage";
 
+const VISIBLE_COUNT = 3;
+
 export default function WorkGallery({ images, alt }: { images: string[]; alt: string }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [startIndex, setStartIndex] = useState(0);
+  const maxStart = Math.max(0, images.length - VISIBLE_COUNT);
+  const canSlide = images.length > VISIBLE_COUNT;
 
   useEffect(() => setMounted(true), []);
 
@@ -38,21 +43,60 @@ export default function WorkGallery({ images, alt }: { images: string[]; alt: st
   return (
     <div className="glass-panel mb-8 rounded-sm p-6">
       <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">ギャラリー</h2>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {images.map((src, i) => (
+      <div className="flex items-center gap-2">
+        {canSlide && (
           <button
-            key={i}
             type="button"
-            onClick={() => setOpenIndex(i)}
-            className="group relative aspect-video overflow-hidden rounded-sm border border-white/10 bg-white/[0.02] transition-all hover:border-accent-teal/50 hover:shadow-[0_0_16px_rgba(30,64,255,0.25)]"
+            onClick={() => setStartIndex((i) => Math.max(0, i - 1))}
+            disabled={startIndex === 0}
+            className="neon-link shrink-0 px-1 text-2xl text-ink-faint hover:text-accent-teal disabled:pointer-events-none disabled:opacity-20"
+            aria-label="前の画像を表示"
           >
-            <RetryImage
-              src={src}
-              alt={`${alt} ギャラリー画像 ${i + 1}`}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
+            ‹
           </button>
-        ))}
+        )}
+
+        {/* Sliding window: the track holds all thumbnails at a fixed width of
+            1/3 the viewport each (however many images there are), and shifts
+            by one item-width per step — so exactly 3 are visible at a time
+            regardless of total count. */}
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <div
+            className="flex gap-3 transition-transform duration-300 ease-out"
+            style={{
+              width: `${(images.length / VISIBLE_COUNT) * 100}%`,
+              transform: `translateX(-${(startIndex * 100) / images.length}%)`,
+            }}
+          >
+            {images.map((src, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setOpenIndex(i)}
+                style={{ width: `${100 / images.length}%` }}
+                className="group relative aspect-video shrink-0 overflow-hidden rounded-sm border border-white/10 bg-white/[0.02] transition-all hover:border-accent-teal/50 hover:shadow-[0_0_16px_rgba(30,64,255,0.25)]"
+              >
+                <RetryImage
+                  src={src}
+                  alt={`${alt} ギャラリー画像 ${i + 1}`}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {canSlide && (
+          <button
+            type="button"
+            onClick={() => setStartIndex((i) => Math.min(maxStart, i + 1))}
+            disabled={startIndex >= maxStart}
+            className="neon-link shrink-0 px-1 text-2xl text-ink-faint hover:text-accent-teal disabled:pointer-events-none disabled:opacity-20"
+            aria-label="次の画像を表示"
+          >
+            ›
+          </button>
+        )}
       </div>
 
       {/* Portaled to <body> — this card sits inside the detail page's
