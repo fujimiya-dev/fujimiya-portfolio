@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Script from "next/script";
 import { sendContactMessage } from "@/actions/contact";
 
@@ -35,6 +35,15 @@ const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 // having the server action return markup.
 const X_LINK_MARKER = "X(@fujimiya_dev)";
 
+// How long to wait after mount before assuming the widget isn't coming —
+// an ad blocker or privacy extension can block Google's script/iframe
+// outright, which otherwise leaves the form stuck forever with a disabled
+// button and zero explanation of why.
+const WIDGET_LOAD_TIMEOUT_MS = 6000;
+
+const WIDGET_LOAD_FAIL_MESSAGE =
+  "ロボット確認の読み込みに失敗しました。広告ブロッカーなどの拡張機能を一時的に無効にするか、直接X(@fujimiya_dev)までご連絡ください。";
+
 function renderErrorMessage(message: string) {
   const idx = message.indexOf(X_LINK_MARKER);
   if (idx === -1) return message;
@@ -58,9 +67,25 @@ export default function ContactForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const captchaContainerRef = useRef<HTMLDivElement>(null);
   const captchaWidgetId = useRef<number | null>(null);
+  const loadTimeoutRef = useRef<number | null>(null);
   const [status, setStatus] = useState<Status>({ type: "idle" });
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [widgetLoadFailed, setWidgetLoadFailed] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // If the widget hasn't rendered by this deadline — script blocked
+  // entirely by an extension, or loaded but failed partway through —
+  // surface that instead of leaving a disabled button with no explanation.
+  // Cleared/cancelled the moment rendering actually succeeds (below), and
+  // self-corrects back to hidden if a late, slow-network render comes in
+  // after the message already showed.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (captchaWidgetId.current === null) setWidgetLoadFailed(true);
+    }, WIDGET_LOAD_TIMEOUT_MS);
+    loadTimeoutRef.current = timer;
+    return () => window.clearTimeout(timer);
+  }, []);
 
   function renderCaptcha() {
     if (!window.grecaptcha || !captchaContainerRef.current) return;
@@ -84,6 +109,11 @@ export default function ContactForm() {
         "expired-callback": () => setCaptchaToken(null),
         "error-callback": () => setCaptchaToken(null),
       });
+      if (loadTimeoutRef.current !== null) {
+        window.clearTimeout(loadTimeoutRef.current);
+        loadTimeoutRef.current = null;
+      }
+      setWidgetLoadFailed(false);
     });
   }
 
@@ -122,7 +152,12 @@ export default function ContactForm() {
           is already cached from an earlier visit, whereas onLoad only ever
           fires once for the script's own load event. Without it, navigating
           away from /contact and back would leave the checkbox unrendered. */}
-      <Script src="https://www.google.com/recaptcha/api.js?render=explicit" strategy="afterInteractive" onReady={renderCaptcha} />
+      <Script
+        src="https://www.google.com/recaptcha/api.js?render=explicit"
+        strategy="afterInteractive"
+        onReady={renderCaptcha}
+        onError={() => setWidgetLoadFailed(true)}
+      />
 
       <div>
         <label className="mb-1 block text-xs text-ink-faint">お名前</label>
@@ -154,6 +189,10 @@ export default function ContactForm() {
       <div className="flex justify-center">
         <div ref={captchaContainerRef} />
       </div>
+
+      {widgetLoadFailed && (
+        <p className="text-center text-xs text-[#ff8a8a]">{renderErrorMessage(WIDGET_LOAD_FAIL_MESSAGE)}</p>
+      )}
 
       {status.type === "error" && <p className="text-xs text-[#ff8a8a]">{renderErrorMessage(status.message)}</p>}
 
