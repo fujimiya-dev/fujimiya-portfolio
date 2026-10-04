@@ -52,6 +52,7 @@ export default function ScreenshotsField({
     if (!files || files.length === 0) return;
     setError(null);
     setUploading(true);
+    const failures: string[] = [];
     try {
       // Sequential, not Promise.all — keeps upload order == drop order in
       // the resulting list instead of racing, and avoids hammering the
@@ -59,17 +60,27 @@ export default function ScreenshotsField({
       for (const file of Array.from(files)) {
         const fd = new FormData();
         fd.set("file", file);
-        const result = await uploadScreenshot(fd);
-        if ("error" in result) {
-          setError(`${file.name}: ${result.error}`);
-          continue;
+        try {
+          const result = await uploadScreenshot(fd);
+          if ("error" in result) {
+            failures.push(`${file.name}: ${result.error}`);
+            continue;
+          }
+          setUrls((prev) => [...prev, result.url]);
+        } catch {
+          // A framework-level rejection (e.g. the request body exceeding
+          // Next.js's Server Action size limit) throws instead of resolving
+          // to our { error } shape, and never reaches uploadScreenshot's own
+          // checks — without this catch it surfaced as nothing, silently
+          // reverting the UI with no indication of what went wrong.
+          failures.push(`${file.name}: アップロードに失敗しました(ファイルサイズが大きすぎる可能性があります)`);
         }
-        setUrls((prev) => [...prev, result.url]);
       }
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+    if (failures.length > 0) setError(failures.join("\n"));
   }
 
   return (
@@ -148,7 +159,7 @@ export default function ScreenshotsField({
         </button>
       </div>
 
-      {error && <p className="mt-2 text-[11px] text-red-400">{error}</p>}
+      {error && <p className="mt-2 whitespace-pre-line text-[11px] text-red-400">{error}</p>}
     </div>
   );
 }
