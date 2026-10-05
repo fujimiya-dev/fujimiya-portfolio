@@ -11,16 +11,7 @@ type Experience = {
   tags: string[];
 };
 
-const CATEGORY_FILTERS = [
-  "個人開発",
-  "チーム開発",
-  "ハッカソン",
-  "インターン",
-  "ビジネス",
-  "史学",
-  "教育",
-  "地域活動",
-];
+const CATEGORY_FILTERS = ["個人開発", "チーム開発", "ハッカソン", "インターン"];
 
 export default function ExperienceExplorer({ items }: { items: Experience[] }) {
   const [chips, setChips] = useState<string[]>([]);
