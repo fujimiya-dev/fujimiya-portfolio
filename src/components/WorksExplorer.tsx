@@ -21,7 +21,7 @@ type Work = {
   techStack: string[];
 };
 
-const CATEGORY_FILTERS = ["個人開発", "チーム開発", "ハッカソン", "インターン", "ビジネス"];
+const CATEGORY_FILTERS = ["公開作品", "個人開発", "チーム開発", "ハッカソン", "インターン"];
 
 export default function WorksExplorer({ works }: { works: Work[] }) {
   const [chips, setChips] = useState<string[]>([]);
