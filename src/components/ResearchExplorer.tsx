@@ -10,6 +10,7 @@ type ResearchItem = {
   stage: string;
   title: string;
   summary: string;
+  cardSummary: string | null;
   imageUrl: string | null;
   tags: string[];
 };
@@ -61,7 +62,7 @@ export default function ResearchExplorer({ items }: { items: ResearchItem[] }) {
                 <h3 className="mb-4 font-label text-xl font-bold leading-relaxed transition-colors group-hover:text-accent-teal">
                   {item.title}
                 </h3>
-                <p className="mb-4 whitespace-pre-line text-sm text-ink-soft">{item.summary}</p>
+                <p className="mb-4 whitespace-pre-line text-sm text-ink-soft">{item.cardSummary || item.summary}</p>
                 <div className="flex flex-wrap gap-2">
                   {item.tags.map((tag) => (
                     <span

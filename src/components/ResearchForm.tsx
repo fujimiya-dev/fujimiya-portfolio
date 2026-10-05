@@ -5,6 +5,7 @@ type ResearchFormValues = {
   stage?: string;
   title?: string;
   summary?: string;
+  cardSummary?: string | null;
   imageUrl?: string | null;
   caption?: string | null;
   tags?: string[];
@@ -44,7 +45,18 @@ export default function ResearchForm({
         <input name="title" defaultValue={defaultValues?.title} required className={fieldClass} />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">概要</label>
+        <label className="mb-1 block text-xs text-ink-faint">
+          概要（一覧カード用・短め、任意。未入力の場合は詳細ページ用の概要が代わりに表示されます）
+        </label>
+        <textarea
+          name="cardSummary"
+          defaultValue={defaultValues?.cardSummary ?? ""}
+          rows={2}
+          className={fieldClass}
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">概要（詳細ページ用）</label>
         <textarea
           name="summary"
           defaultValue={defaultValues?.summary}

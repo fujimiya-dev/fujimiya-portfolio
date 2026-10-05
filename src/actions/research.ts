@@ -34,6 +34,7 @@ function buildResearchData(formData: FormData) {
     stage: String(formData.get("stage")),
     title: String(formData.get("title")),
     summary: String(formData.get("summary")),
+    cardSummary: (formData.get("cardSummary") as string) || null,
     imageUrl: (formData.get("imageUrl") as string) || null,
     caption: (formData.get("caption") as string) || null,
     tags: parseTags(String(formData.get("tags") ?? "")),
