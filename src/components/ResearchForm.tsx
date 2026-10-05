@@ -1,3 +1,5 @@
+import ImageUrlField from "@/components/ImageUrlField";
+
 type ResearchFormValues = {
   slug?: string;
   stage?: string;
@@ -51,8 +53,8 @@ export default function ResearchForm({
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">画像URL（任意）</label>
-        <input name="imageUrl" defaultValue={defaultValues?.imageUrl ?? ""} className={fieldClass} />
+        <label className="mb-1 block text-xs text-ink-faint">画像（任意）</label>
+        <ImageUrlField name="imageUrl" defaultValue={defaultValues?.imageUrl} />
       </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">画像キャプション（任意）</label>
