@@ -7,6 +7,7 @@ type WorkFormValues = {
   dateLabel?: string;
   award?: string | null;
   demoUrl?: string | null;
+  githubUrl?: string | null;
   summary?: string;
   description?: string;
   comment?: string;
@@ -57,6 +58,16 @@ export default function WorkForm({
           type="url"
           defaultValue={defaultValues?.demoUrl ?? ""}
           placeholder="https://..."
+          className={fieldClass}
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">GitHub URL（任意）</label>
+        <input
+          name="githubUrl"
+          type="url"
+          defaultValue={defaultValues?.githubUrl ?? ""}
+          placeholder="https://github.com/..."
           className={fieldClass}
         />
       </div>
@@ -116,10 +127,11 @@ export default function WorkForm({
         </p>
       </div>
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">
-          サムネイル（任意、YouTube動画が無い場合に表示されます）
-        </label>
+        <label className="mb-1 block text-xs text-ink-faint">サムネイル（任意）</label>
         <ImageUrlField name="imageUrl" defaultValue={defaultValues?.imageUrl} />
+        <p className="mt-1 text-[11px] text-ink-faint">
+          一覧ページではサムネイル画像が優先、作品詳細ページではYouTube動画が優先して表示されます。
+        </p>
       </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">
