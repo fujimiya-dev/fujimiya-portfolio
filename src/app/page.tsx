@@ -87,14 +87,6 @@ export default async function HomePage() {
                   <td className="py-3">修士1年</td>
                 </tr>
                 <tr className="neon-divider">
-                  <td className="w-24 py-3 font-label text-ink-faint">出身大学</td>
-                  <td className="py-3">昭和女子大学</td>
-                </tr>
-                <tr className="neon-divider">
-                  <td className="w-24 py-3 font-label text-ink-faint">学部・学科</td>
-                  <td className="py-3">人間文化学部 歴史文化学科</td>
-                </tr>
-                <tr className="neon-divider">
                   <td className="w-24 py-3 font-label text-ink-faint">資格</td>
                   <td className="py-3">中学校・高校教諭一種免許状(社会)、温泉ソムリエ</td>
                 </tr>
