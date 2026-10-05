@@ -176,9 +176,9 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
                   </h3>
                   <span className="mb-3 mt-1 block text-xs text-ink-faint">
                     <span className="block">{work.dateLabel}</span>
-                    {work.award && <span className="block">{work.award}</span>}
+                    {work.award && <span className="block whitespace-pre-line">{work.award}</span>}
                   </span>
-                  <p className="mb-4 line-clamp-2 text-sm text-ink-soft">{work.summary}</p>
+                  <p className="mb-4 line-clamp-2 whitespace-pre-line text-sm text-ink-soft">{work.summary}</p>
                   <div className="mt-auto space-y-2">
                     <div className="flex flex-wrap gap-2">
                       {work.category.map((tag) => (

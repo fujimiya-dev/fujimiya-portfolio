@@ -157,7 +157,7 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
               <div className="pt-1 font-serif text-sm text-ink-faint">{item.dateLabel}</div>
               <div>
                 <h3 className="mb-1 font-label text-base">{item.org}</h3>
-                <p className="mb-3 text-sm text-ink-soft">{item.summary}</p>
+                <p className="mb-3 whitespace-pre-line text-sm text-ink-soft">{item.summary}</p>
                 <div className="flex flex-wrap gap-2">
                   {item.tags.map((tag) => (
                     <span
