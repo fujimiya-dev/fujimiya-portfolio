@@ -7,7 +7,6 @@ export const en: Dictionary = {
     works: "Works",
     experience: "Experience",
     research: "Research",
-    other: "Other",
     contact: "Contact",
     langToggleLabel: "Language",
   },

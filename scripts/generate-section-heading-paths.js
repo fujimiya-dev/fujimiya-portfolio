@@ -11,7 +11,6 @@ const HEADINGS = {
   works: "Works",
   experience: "Experience",
   research: "Research",
-  other: "Other",
   contact: "Contact",
   login: "Login",
   privacyPolicy: "Privacy Policy",

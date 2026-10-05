@@ -7,7 +7,6 @@ export const ja: Dictionary = {
     works: "Works",
     experience: "Experience",
     research: "Research",
-    other: "Other",
     contact: "Contact",
     langToggleLabel: "言語",
   },

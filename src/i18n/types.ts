@@ -15,7 +15,6 @@ export type Dictionary = {
     works: string;
     experience: string;
     research: string;
-    other: string;
     contact: string;
     langToggleLabel: string;
   };
