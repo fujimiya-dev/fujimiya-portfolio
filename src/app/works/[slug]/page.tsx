@@ -9,6 +9,36 @@ import { youtubeEmbedUrl } from "@/lib/youtube";
 
 export const revalidate = 0;
 
+const FETCH_RETRY_ATTEMPTS = 3;
+const FETCH_RETRY_DELAY_MS = 500;
+
+// A single unguarded prisma call here meant any transient connection
+// failure (e.g. Neon's compute waking from auto-suspend — the first query
+// after a period of no traffic — taking longer than Prisma's default
+// connect_timeout) surfaced as an uncaught exception, with nothing in the
+// Vercel logs to point at *why*. Retries a few times with a short backoff
+// before giving up; every failed attempt is logged with the slug so a
+// recurrence is diagnosable from the logs alone.
+async function fetchWorkBySlug(slug: string) {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= FETCH_RETRY_ATTEMPTS; attempt++) {
+    try {
+      return await prisma.work.findUnique({ where: { slug } });
+    } catch (err) {
+      lastError = err;
+      console.error(`[works/${slug}] prisma.work.findUnique failed (attempt ${attempt}/${FETCH_RETRY_ATTEMPTS}):`, err);
+      if (attempt < FETCH_RETRY_ATTEMPTS) {
+        await new Promise((resolve) => setTimeout(resolve, FETCH_RETRY_DELAY_MS * attempt));
+      }
+    }
+  }
+  // Exhausted retries — rethrow rather than treating this as "not found".
+  // A genuinely missing slug and a DB the app couldn't reach are different
+  // situations: the former is a 404, the latter should surface as an error
+  // (caught by error.tsx) so it isn't mistaken for the page being deleted.
+  throw lastError;
+}
+
 // Credits text is free-form, admin-entered multiline text that may contain
 // URLs (e.g. "楽曲:曲名 https://..."). whitespace-pre-line on the
 // containing element preserves the line breaks already in the string; this
@@ -37,8 +67,11 @@ export default async function WorkDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const work = await prisma.work.findUnique({ where: { slug } });
-  if (!work) notFound();
+  const work = await fetchWorkBySlug(slug);
+  if (!work) {
+    console.error(`[works/${slug}] query succeeded but returned no matching work`);
+    notFound();
+  }
 
   return (
     <section className="mx-auto max-w-3xl px-6 pb-24 pt-28">
