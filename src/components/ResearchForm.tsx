@@ -10,7 +10,6 @@ type ResearchFormValues = {
   references?: string[];
   achievements?: string[];
   paperUrl?: string | null;
-  order?: number;
 };
 
 const fieldClass =
@@ -94,15 +93,6 @@ export default function ResearchForm({
       <div>
         <label className="mb-1 block text-xs text-ink-faint">論文URL（任意）</label>
         <input name="paperUrl" defaultValue={defaultValues?.paperUrl ?? ""} className={fieldClass} />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">並び順（数字が小さいほど先に表示）</label>
-        <input
-          name="order"
-          type="number"
-          defaultValue={defaultValues?.order ?? 0}
-          className={fieldClass}
-        />
       </div>
       <div className="flex justify-center">
         <button

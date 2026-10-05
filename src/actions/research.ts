@@ -26,6 +26,8 @@ function parseLines(raw: string): string[] {
     .filter(Boolean);
 }
 
+// order is deliberately not form-driven: it's set by reorderResearchItem
+// (drag-and-drop on the admin list) and left untouched by this edit form.
 function buildResearchData(formData: FormData) {
   return {
     slug: String(formData.get("slug")),
@@ -39,14 +41,16 @@ function buildResearchData(formData: FormData) {
     references: parseLines(String(formData.get("references") ?? "")),
     achievements: parseLines(String(formData.get("achievements") ?? "")),
     paperUrl: (formData.get("paperUrl") as string) || null,
-    order: Number(formData.get("order") ?? 0),
   };
 }
 
 export async function createResearchItem(formData: FormData) {
   await requireAdmin();
 
-  await prisma.researchItem.create({ data: buildResearchData(formData) });
+  const { _max } = await prisma.researchItem.aggregate({ _max: { order: true } });
+  const nextOrder = (_max.order ?? -1) + 1;
+
+  await prisma.researchItem.create({ data: { ...buildResearchData(formData), order: nextOrder } });
 
   revalidatePath("/research");
   revalidatePath("/admin/research");
@@ -69,6 +73,20 @@ export async function updateResearchItem(id: string, formData: FormData) {
 export async function deleteResearchItem(id: string) {
   await requireAdmin();
   await prisma.researchItem.delete({ where: { id } });
+  revalidatePath("/research");
+  revalidatePath("/admin/research");
+}
+
+// Drag-and-drop reorder on the admin list — orderedIds is the full list of
+// research item IDs in the desired display order; each gets its array index
+// as its new `order` value. A transaction keeps the reassignment atomic.
+export async function reorderResearchItem(orderedIds: string[]) {
+  await requireAdmin();
+
+  await prisma.$transaction(
+    orderedIds.map((id, index) => prisma.researchItem.update({ where: { id }, data: { order: index } }))
+  );
+
   revalidatePath("/research");
   revalidatePath("/admin/research");
 }

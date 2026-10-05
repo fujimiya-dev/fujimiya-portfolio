@@ -3,7 +3,6 @@ type ExperienceFormValues = {
   dateLabel?: string;
   summary?: string;
   tags?: string[];
-  order?: number;
 };
 
 const fieldClass =
@@ -40,15 +39,6 @@ export default function ExperienceForm({
       <div>
         <label className="mb-1 block text-xs text-ink-faint">タグ（カンマ区切り。例：チーム開発, ハッカソン）</label>
         <input name="tags" defaultValue={defaultValues?.tags?.join(", ")} className={fieldClass} />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">並び順（数字が小さいほど先に表示）</label>
-        <input
-          name="order"
-          type="number"
-          defaultValue={defaultValues?.order ?? 0}
-          className={fieldClass}
-        />
       </div>
       <div className="flex justify-center">
         <button

@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { deleteResearchItem } from "@/actions/research";
 import AdminListBackButton from "@/components/AdminListBackButton";
+import ResearchAdminList from "@/components/ResearchAdminList";
 
 export const revalidate = 0;
 
 export default async function AdminResearchPage() {
-  const items = await prisma.researchItem.findMany({ orderBy: { order: "asc" } });
+  const items = await prisma.researchItem.findMany({
+    orderBy: { order: "asc" },
+    select: { id: true, title: true, stage: true },
+  });
 
   return (
     <div>
@@ -19,35 +22,8 @@ export default async function AdminResearchPage() {
         </Link>
       </div>
 
-      <div className="glass-panel divide-y divide-white/10 rounded-sm px-6">
-        {items.map((item) => (
-          <div key={item.id} className="flex items-center justify-between py-4">
-            <div>
-              <p className="font-label">{item.title}</p>
-              <p className="text-xs text-ink-faint">{item.stage}</p>
-            </div>
-            <div className="flex gap-4 text-sm">
-              <Link
-                href={`/admin/research/${item.id}/edit`}
-                className="neon-link text-accent-blue hover:text-accent-teal"
-              >
-                編集
-              </Link>
-              <form
-                action={async () => {
-                  "use server";
-                  await deleteResearchItem(item.id);
-                }}
-              >
-                <button className="neon-link text-red-400 hover:text-red-300">削除</button>
-              </form>
-            </div>
-          </div>
-        ))}
-        {items.length === 0 && (
-          <p className="py-6 text-sm text-ink-faint">まだ研究が登録されていません。</p>
-        )}
-      </div>
+      <p className="mb-3 text-xs text-ink-faint">ドラッグ&ドロップで並び替えできます(並び替えた結果はそのまま保存されます)</p>
+      <ResearchAdminList initialItems={items} />
       <AdminListBackButton href="/admin" label="管理TOPへ" />
     </div>
   );
