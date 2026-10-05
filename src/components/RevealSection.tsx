@@ -15,7 +15,7 @@ export function RevealGlow({
       className={`relative ${className}`}
       initial={{ opacity: 0, y: 26 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.4 }}
+      viewport={{ once: true, amount: "some" }}
       transition={{ duration: 0.9, ease: [0.19, 1, 0.22, 1] }}
     >
       <motion.div
@@ -30,7 +30,7 @@ export function RevealGlow({
         }}
         initial={{ opacity: 0, scale: 0.7 }}
         whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, amount: 0.4 }}
+        viewport={{ once: true, amount: "some" }}
         transition={{ duration: 1.3, ease: [0.19, 1, 0.22, 1] }}
       />
       {children}
@@ -52,7 +52,14 @@ export function RevealFade({
       className={className}
       initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
+      // "some" (any part intersecting) rather than a fixed fraction —
+      // RevealFade sometimes wraps very tall content (e.g. a long Works
+      // description), where no scroll position ever gets a fixed % of the
+      // whole element on screen at once, so whileInView never fired and
+      // the content stayed at its initial opacity:0 forever. Reproduced
+      // against a real long-content work page before this fix, confirmed
+      // gone after.
+      viewport={{ once: true, amount: "some" }}
       transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1], delay }}
     >
       {children}
