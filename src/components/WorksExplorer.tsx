@@ -175,8 +175,8 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
                     {work.title}
                   </h3>
                   <span className="mb-3 mt-1 block text-xs text-ink-faint">
-                    {work.dateLabel}
-                    {work.award ? `　${work.award}` : ""}
+                    <span className="block">{work.dateLabel}</span>
+                    {work.award && <span className="block">{work.award}</span>}
                   </span>
                   <p className="mb-4 line-clamp-2 text-sm text-ink-soft">{work.summary}</p>
                   <div className="mt-auto space-y-2">
