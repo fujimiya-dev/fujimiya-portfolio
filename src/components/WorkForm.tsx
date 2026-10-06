@@ -61,7 +61,7 @@ export default function WorkForm({
               <input name="dateLabel" defaultValue={defaultValues?.dateLabel} className={fieldClass} />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-ink-faint">受賞など（任意、複数行可）</label>
+              <label className="mb-1 block text-xs text-ink-faint">開催・受賞（任意、複数行可。例：○○ハッカソン／優勝）</label>
               <textarea name="award" defaultValue={defaultValues?.award ?? ""} rows={3} className={fieldClass} />
             </div>
             <div>
@@ -109,7 +109,7 @@ export default function WorkForm({
               <input name="dateLabelEn" defaultValue={defaultValues?.dateLabelEn ?? ""} className={fieldClass} />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-ink-faint">Award（任意、複数行可。空欄可）</label>
+              <label className="mb-1 block text-xs text-ink-faint">Event / Award（任意、複数行可。空欄可）</label>
               <textarea name="awardEn" defaultValue={defaultValues?.awardEn ?? ""} rows={3} className={fieldClass} />
             </div>
             <div>

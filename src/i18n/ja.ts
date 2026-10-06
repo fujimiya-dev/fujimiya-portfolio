@@ -54,7 +54,7 @@ export const ja: Dictionary = {
     backToList: "← Works 一覧に戻る",
     demoUrl: "デモURL",
     githubUrl: "GitHub URL",
-    award: "受賞歴",
+    award: "開催・受賞",
     details: "作品詳細",
     comment: "製作者コメント",
     teamSize: "担当人数",

@@ -54,7 +54,7 @@ export const en: Dictionary = {
     backToList: "← Back to Works",
     demoUrl: "Demo URL",
     githubUrl: "GitHub URL",
-    award: "Award",
+    award: "Event / Award",
     details: "Work Details",
     comment: "Creator's Comment",
     teamSize: "Team Size",
