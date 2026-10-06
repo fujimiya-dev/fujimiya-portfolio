@@ -29,24 +29,43 @@ const DEPTH_NEAR = 21;
 const DEPTH_FAR = 55;
 const FRUSTUM_MARGIN = 1.18;
 
+// Deterministic PRNG (mulberry32) — same approach as GrassField.tsx, for
+// the same reason: a given generation must reproduce byte-identically
+// instead of reshuffling on every call, so that an unwanted recompute (see
+// the cache block in Starfield() below) is a no-op rather than a visible
+// reshuffle.
+function mulberry32(seed: number) {
+  let a = seed;
+  return function rng() {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const STARFIELD_SEED = 101;
+
 function sampleStarPosition(
   tanV: number,
   tanH: number,
-  cameraZ: number
+  cameraZ: number,
+  rng: () => number
 ): [number, number, number] {
   let candidate: [number, number, number] = [0, 0, 0];
   for (let attempt = 0; attempt < BAND_SAMPLE_ATTEMPTS; attempt++) {
-    const depth = DEPTH_NEAR + Math.random() * (DEPTH_FAR - DEPTH_NEAR);
+    const depth = DEPTH_NEAR + rng() * (DEPTH_FAR - DEPTH_NEAR);
     const halfH = depth * tanV * FRUSTUM_MARGIN;
     const halfW = depth * tanH * FRUSTUM_MARGIN;
 
-    const x = (Math.random() * 2 - 1) * halfW;
-    const y = (Math.random() * 2 - 1) * halfH;
+    const x = (rng() * 2 - 1) * halfW;
+    const y = (rng() * 2 - 1) * halfH;
     const z = cameraZ - depth;
     candidate = [x, y, z];
 
     const mask = milkyWayBandMask(x, y, z);
-    if (Math.random() * BAND_ACCEPT_CEILING <= 1 + BAND_BIAS * mask) {
+    if (rng() * BAND_ACCEPT_CEILING <= 1 + BAND_BIAS * mask) {
       return candidate;
     }
   }
@@ -170,12 +189,38 @@ const FRAGMENT_SHADER = /* glsl */ `
   }
 `;
 
+// Below this many px of difference, a reported size.width change is
+// treated as noise rather than a real resize — same threshold/reasoning as
+// GrassField.tsx's WIDTH_CHANGE_THRESHOLD_PX.
+const WIDTH_CHANGE_THRESHOLD_PX = 20;
+
+type StarAttributes = {
+  positions: Float32Array;
+  colors: Float32Array;
+  sizes: Float32Array;
+  phases: Float32Array;
+  rateMuls: Float32Array;
+  twinkleAmts: Float32Array;
+};
+
 export default function Starfield({ count }: { count: number }) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const size = useThree((s) => s.size);
 
-  const { positions, colors, sizes, phases, rateMuls, twinkleAmts } = useMemo(() => {
+  // Manual ref-cache instead of useMemo(..., [count, camera, size.width,
+  // size.height]) — identical fix to GrassField.tsx's: a mobile browser's
+  // address bar collapsing on scroll changes the viewport height (and can
+  // nudge width by a few px too) without being a real resize, which the
+  // plain dependency array couldn't tell apart from one, so the whole
+  // field regenerated (previously with fresh Math.random() too) mid-scroll.
+  // Gated on a minimum width delta; height is never a recompute trigger.
+  const cacheRef = useRef<{ width: number; count: number; attrs: StarAttributes } | null>(null);
+  const cache = cacheRef.current;
+  const needsRecompute =
+    !cache || cache.count !== count || Math.abs(cache.width - size.width) > WIDTH_CHANGE_THRESHOLD_PX;
+
+  if (needsRecompute) {
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
@@ -183,13 +228,14 @@ export default function Starfield({ count }: { count: number }) {
     const rateMuls = new Float32Array(count);
     const twinkleAmts = new Float32Array(count);
 
+    const rng = mulberry32(STARFIELD_SEED);
     const vFov = THREE.MathUtils.degToRad(camera.fov);
     const tanV = Math.tan(vFov / 2);
     const tanH = tanV * camera.aspect;
     const cameraZ = camera.position.z;
 
     for (let i = 0; i < count; i++) {
-      const [x, y, z] = sampleStarPosition(tanV, tanH, cameraZ);
+      const [x, y, z] = sampleStarPosition(tanV, tanH, cameraZ, rng);
       positions[i * 3] = x;
       positions[i * 3 + 1] = y;
       positions[i * 3 + 2] = z;
@@ -197,11 +243,11 @@ export default function Starfield({ count }: { count: number }) {
       const dirLen = Math.hypot(x, y, z) || 1;
       const dirY = y / dirLen;
 
-      let lum = DIMMEST + (1 - DIMMEST) * Math.pow(Math.random(), FALLOFF);
+      let lum = DIMMEST + (1 - DIMMEST) * Math.pow(rng(), FALLOFF);
       lum *= atmosphericExtinctionJS(dirY);
       lum = Math.min(1, Math.max(0, lum));
 
-      const hue = starHueFor(Math.random());
+      const hue = starHueFor(rng());
       const neutralMix = 1 - SATURATION * (0.3 + 0.7 * lum);
       const shaded = hue.clone().lerp(NEUTRAL, neutralMix);
       const gain = lum * (1 + 0.18 * lum * lum);
@@ -213,8 +259,8 @@ export default function Starfield({ count }: { count: number }) {
 
       sizes[i] = BASE_SIZE * (0.62 + 1.5 * Math.sqrt(lum));
 
-      phases[i] = Math.random() * Math.PI * 2;
-      rateMuls[i] = 0.6 + Math.random() * 0.9;
+      phases[i] = rng() * Math.PI * 2;
+      rateMuls[i] = 0.6 + rng() * 0.9;
 
       // Stars near the horizon twinkle more (more atmosphere to shimmer
       // through); a random minority flicker hard while the rest stay calm,
@@ -224,16 +270,19 @@ export default function Starfield({ count }: { count: number }) {
       // pixels — without this, the sky's biggest stars flickered the
       // hardest, which read as noisy.
       const low = 1 - smoothstepJS(0.05, 0.55, dirY);
-      const isStrong = Math.random() < TWINKLE_SHARE;
+      const isStrong = rng() < TWINKLE_SHARE;
       twinkleAmts[i] =
         TWINKLE * (0.6 + 0.4 * (1 - lum)) * (0.35 + 0.65 * low) * (isStrong ? 1 : TWINKLE_CALM);
     }
 
-    return { positions, colors, sizes, phases, rateMuls, twinkleAmts };
-    // Regenerates on resize too — the frustum's shape (and so the volume
-    // stars are sampled within) changes with aspect ratio.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, camera, size.width, size.height]);
+    cacheRef.current = {
+      width: size.width,
+      count,
+      attrs: { positions, colors, sizes, phases, rateMuls, twinkleAmts },
+    };
+  }
+
+  const { positions, colors, sizes, phases, rateMuls, twinkleAmts } = cacheRef.current!.attrs;
 
   const uniforms = useMemo(
     () => ({
