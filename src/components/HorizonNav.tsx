@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -60,14 +60,22 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
   // route transition still happens and can still corrupt its measurement —
   // same bug as LanguageToggle's JA/EN dot had for exactly this "active
   // target doesn't change but the route still did" shape of transition.
-  const prevPathnameRef = useRef(pathname);
-  const skipFlipRef = useRef(false);
-  if (prevPathnameRef.current !== pathname) {
-    skipFlipRef.current = true;
-    prevPathnameRef.current = pathname;
-  } else {
-    skipFlipRef.current = false;
-  }
+  //
+  // settledPathname (state, only ever updated from an effect) rather than a
+  // ref updated synchronously during render: React can commit more than one
+  // render for the same navigation before the browser actually paints, and
+  // a ref recomputed on every render would flip skipFlip back off on the
+  // very next of those renders — still before a paint — re-arming layoutId
+  // while the corrupted-measurement window (one real painted frame) hasn't
+  // passed yet. An effect only runs after the browser has painted the
+  // commit it was scheduled from, so skipFlip now stays true across every
+  // render caused by the same navigation, however many there are, until at
+  // least one frame has actually been painted with the new pathname.
+  const [settledPathname, setSettledPathname] = useState(pathname);
+  const skipFlip = pathname !== settledPathname;
+  useEffect(() => {
+    if (pathname !== settledPathname) setSettledPathname(pathname);
+  }, [pathname, settledPathname]);
 
   return (
     <nav className="relative hidden items-center gap-6 whitespace-nowrap lg:flex">
@@ -113,7 +121,7 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
             </Link>
             {active && (
               <motion.div
-                layoutId={skipFlipRef.current ? undefined : "nav-horizon-glow"}
+                layoutId={skipFlip ? undefined : "nav-horizon-glow"}
                 initial={false}
                 className="pointer-events-none absolute -bottom-4 left-0 right-0 h-[4px] rounded-full"
                 style={{ background: "#eaf6ff", boxShadow: "0 0 7px 1px #7FB7FF, 0 0 19px 4px #1E40FF" }}
