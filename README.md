@@ -1,6 +1,6 @@
 # Fujimiya Portfolio
 
-藤田都の個人ポートフォリオサイト。Next.js 15 (App Router) + TypeScript製で、作品(Works)・経歴(Experience)・研究(Research)をDBで管理し、コードを書き換えずに追加・編集できる自作の管理画面を備えています。日本語版・英語版の両方を1つのコードベースで提供しています。
+ふじみやの個人ポートフォリオサイト。Next.js 15 (App Router) + TypeScript製で、作品(Works)・経歴(Experience)・研究(Research)をDBで管理し、コードを書き換えずに追加・編集できる自作の管理画面を備えています。日本語版・英語版の両方を1つのコードベースで提供しています。
 
 **本番URL:** https://portfolio.fujimiya.dev （英語版: https://portfolio.fujimiya.dev/en）
 
@@ -120,6 +120,27 @@ npm run dev
 ## デプロイ
 
 VercelとこのGitHubリポジトリが連携済みで、`master`へのpushで自動デプロイされます。上記の環境変数をVercelのProject Settings → Environment Variablesに設定してください。スキーマを変更した場合は、デプロイ前後どちらかのタイミングで`npm run db:push`を実行して本番DBに反映する必要があります（マイグレーションファイルではなく`prisma db push`方式のため、自動では反映されません）。
+
+## クレジット
+
+### フォント
+
+| フォント | 用途 | 入手元 |
+|---|---|---|
+| Cappuccino Letter（無料版） | トップのタイトル「A Moonlit Dream」、各セクション見出し | ばーちぃ\|monaDesign — https://booth.pm/ja/items/6790460 |
+| Nothing You Could Do | イントロアニメーションの文字、ロゴ「Fujimiya.dev」 | Google Fonts |
+| Zen Old Mincho | 見出し | Google Fonts |
+| Zen Kaku Gothic New | 本文 | Google Fonts |
+| Hina Mincho | ディスプレイ・ラベル | Google Fonts |
+
+Cappuccino Letterは再配布不可のライセンスのため、フォントファイル自体はリポジトリに含めず、ビルド時に文字の輪郭だけをSVGパスとして抽出して使用しています（下記「注意点」参照）。各作品の詳細ページで使用しているフォント・楽曲・モデル等のクレジットは、それぞれの作品ページに個別に記載しています。
+
+### 3D表現の参考資料
+
+トップページの夜空・草原のThree.js実装にあたり、Kingsleyによる以下のClaude Codeスキル（MIT License）を技法の参考にしました。
+
+- [procedural-grass-threejs](https://github.com/CK42BB/procedural-grass-threejs)
+- [procedural-stars-threejs](https://github.com/CK42BB/procedural-stars-threejs)
 
 ## 注意点
 
