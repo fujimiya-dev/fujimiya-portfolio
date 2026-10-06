@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useTransition } from "react";
+import { useTransition } from "react";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
 import type { Locale } from "@/i18n/types";
 
 // Maps the current pathname to its equivalent under the other locale.
@@ -37,24 +36,6 @@ export default function LanguageToggle({
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
-  // Same class of bug HorizonNav.tsx's nav-horizon-glow had (see that file
-  // for the full writeup): an actual Next.js route transition can corrupt
-  // framer-motion's layoutId position measurement for one frame — even for
-  // an element that stays mounted throughout, as JA/EN's own dot does,
-  // since its active language doesn't change when navigating between pages
-  // in the same locale — making the dot briefly fly to a wrong position
-  // before snapping back. Skip the FLIP (hard-cut instead) on the render
-  // right after pathname changes, i.e. whenever a route transition just
-  // happened, regardless of whether the active language itself changed.
-  const prevPathnameRef = useRef(pathname);
-  const skipFlipRef = useRef(false);
-  if (prevPathnameRef.current !== pathname) {
-    skipFlipRef.current = true;
-    prevPathnameRef.current = pathname;
-  } else {
-    skipFlipRef.current = false;
-  }
-
   function choose(locale: Locale) {
     if (locale === current) return;
     const target = localizedPath(pathname, locale);
@@ -84,17 +65,21 @@ export default function LanguageToggle({
             >
               {locale.toUpperCase()}
             </button>
-            {/* Same glow recipe as HorizonNav's page-item dot, but its own
-                layoutId group — JA/EN's active state is independent of
-                (and visible at the same time as) whichever page item is
-                active, so it can't share that group's single instance. */}
+            {/* Same glow recipe as HorizonNav's page-item dot, but a plain
+                div rather than a framer-motion layoutId element: switching
+                language is a full page reload now (see choose() below), so
+                there's never a soft transition between the JA and EN dot
+                positions to animate — a shared layoutId here only meant
+                framer-motion kept re-measuring this element's position
+                across ordinary page navigations (where the active language
+                never even changes) for no visual benefit, which is what
+                let a route transition corrupt that measurement for one
+                frame and made the dot briefly jump. A plain div can't do
+                that: it just always renders wherever the active button is. */}
             {showGlowDot && active && (
-              <motion.div
-                layoutId={skipFlipRef.current ? undefined : "lang-horizon-glow"}
-                initial={false}
+              <div
                 className="pointer-events-none absolute -bottom-4 left-0 right-0 h-[4px] rounded-full"
                 style={{ background: "#eaf6ff", boxShadow: "0 0 7px 1px #7FB7FF, 0 0 19px 4px #1E40FF" }}
-                transition={{ duration: 0.4, ease: [0.65, 0, 0.35, 1] }}
               />
             )}
           </div>
