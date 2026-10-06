@@ -59,8 +59,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const description =
     locale === "en"
-      ? "Portfolio of Miyako Fujita, 1st-year Master's student at Japan Advanced Institute of Science and Technology (JAIST)"
-      : "北陸先端科学技術大学院大学 修士1年 藤田都のポートフォリオ";
+      ? "Portfolio of Fujimiya, a 1st-year Master's student at JAIST."
+      : "北陸先端科学技術大学院大学 修士1年 ふじみやのポートフォリオ";
 
   return {
     metadataBase: new URL("https://portfolio.fujimiya.dev"),
