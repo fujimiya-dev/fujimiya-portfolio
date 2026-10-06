@@ -10,15 +10,30 @@ export default async function EditWorkPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const work = await prisma.work.findUnique({ where: { id } });
+  const work = await prisma.work.findUnique({ where: { id }, include: { translations: true } });
   if (!work) notFound();
 
   const boundUpdate = updateWork.bind(null, work.id);
+  const en = work.translations.find((t) => t.locale === "en");
 
   return (
     <div>
       <div className="glass-panel rounded-sm p-6 sm:p-8">
-        <WorkForm action={boundUpdate} defaultValues={work} submitLabel="更新する" />
+        <WorkForm
+          action={boundUpdate}
+          defaultValues={{
+            ...work,
+            titleEn: en?.title,
+            dateLabelEn: en?.dateLabel,
+            awardEn: en?.award,
+            summaryEn: en?.summary,
+            descriptionEn: en?.description,
+            commentEn: en?.comment,
+            roleEn: en?.role,
+            creditsEn: en?.credits,
+          }}
+          submitLabel="更新する"
+        />
       </div>
       <AdminListBackButton href="/admin/works" label="Works編集一覧へ" />
     </div>

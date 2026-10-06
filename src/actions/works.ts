@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { extractYouTubeId } from "@/lib/youtube";
+import { normText } from "@/lib/formNormalize";
 
 async function requireAdmin() {
   const session = await auth();
@@ -46,13 +47,35 @@ function buildWorkData(formData: FormData) {
   };
 }
 
+function buildWorkTranslationData(formData: FormData) {
+  return {
+    title: normText(formData.get("titleEn")),
+    dateLabel: normText(formData.get("dateLabelEn")),
+    award: normText(formData.get("awardEn")),
+    summary: normText(formData.get("summaryEn")),
+    description: normText(formData.get("descriptionEn")),
+    comment: normText(formData.get("commentEn")),
+    role: normText(formData.get("roleEn")),
+    credits: normText(formData.get("creditsEn")),
+  };
+}
+
+async function upsertWorkTranslation(workId: string, formData: FormData) {
+  await prisma.workTranslation.upsert({
+    where: { workId_locale: { workId, locale: "en" } },
+    create: { workId, locale: "en", ...buildWorkTranslationData(formData) },
+    update: buildWorkTranslationData(formData),
+  });
+}
+
 export async function createWork(formData: FormData) {
   await requireAdmin();
 
   const { _max } = await prisma.work.aggregate({ _max: { order: true } });
   const nextOrder = (_max.order ?? -1) + 1;
 
-  await prisma.work.create({ data: { ...buildWorkData(formData), order: nextOrder } });
+  const work = await prisma.work.create({ data: { ...buildWorkData(formData), order: nextOrder } });
+  await upsertWorkTranslation(work.id, formData);
 
   revalidatePath("/works");
   revalidatePath("/admin/works");
@@ -66,6 +89,7 @@ export async function updateWork(id: string, formData: FormData) {
     where: { id },
     data: buildWorkData(formData),
   });
+  await upsertWorkTranslation(id, formData);
 
   revalidatePath("/works");
   revalidatePath("/admin/works");

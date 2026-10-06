@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { normText } from "@/lib/formNormalize";
 
 async function requireAdmin() {
   const session = await auth();
@@ -28,13 +29,30 @@ function buildExperienceData(formData: FormData) {
   };
 }
 
+function buildExperienceTranslationData(formData: FormData) {
+  return {
+    org: normText(formData.get("orgEn")),
+    dateLabel: normText(formData.get("dateLabelEn")),
+    summary: normText(formData.get("summaryEn")),
+  };
+}
+
+async function upsertExperienceTranslation(experienceId: string, formData: FormData) {
+  await prisma.experienceTranslation.upsert({
+    where: { experienceId_locale: { experienceId, locale: "en" } },
+    create: { experienceId, locale: "en", ...buildExperienceTranslationData(formData) },
+    update: buildExperienceTranslationData(formData),
+  });
+}
+
 export async function createExperience(formData: FormData) {
   await requireAdmin();
 
   const { _max } = await prisma.experience.aggregate({ _max: { order: true } });
   const nextOrder = (_max.order ?? -1) + 1;
 
-  await prisma.experience.create({ data: { ...buildExperienceData(formData), order: nextOrder } });
+  const experience = await prisma.experience.create({ data: { ...buildExperienceData(formData), order: nextOrder } });
+  await upsertExperienceTranslation(experience.id, formData);
 
   revalidatePath("/experience");
   revalidatePath("/admin/experience");
@@ -48,6 +66,7 @@ export async function updateExperience(id: string, formData: FormData) {
     where: { id },
     data: buildExperienceData(formData),
   });
+  await upsertExperienceTranslation(id, formData);
 
   revalidatePath("/experience");
   revalidatePath("/admin/experience");

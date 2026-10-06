@@ -1,4 +1,5 @@
 import ImageUrlField from "@/components/ImageUrlField";
+import LocaleTabs from "@/components/LocaleTabs";
 
 type ResearchFormValues = {
   slug?: string;
@@ -13,6 +14,11 @@ type ResearchFormValues = {
   references?: string[];
   achievements?: string[];
   paperUrl?: string | null;
+  titleEn?: string | null;
+  summaryEn?: string | null;
+  cardSummaryEn?: string | null;
+  captionEn?: string | null;
+  achievementsEn?: string[];
 };
 
 const fieldClass =
@@ -40,37 +46,70 @@ export default function ResearchForm({
           <option value="大学院での研究">大学院での研究</option>
         </select>
       </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">タイトル</label>
-        <input name="title" defaultValue={defaultValues?.title} required className={fieldClass} />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">
-          概要（一覧カード用・短め、任意。未入力の場合は詳細ページ用の概要が代わりに表示されます）
-        </label>
-        <textarea
-          name="cardSummary"
-          defaultValue={defaultValues?.cardSummary ?? ""}
-          rows={2}
-          className={fieldClass}
-        />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">概要（詳細ページ用）</label>
-        <textarea
-          name="summary"
-          defaultValue={defaultValues?.summary}
-          rows={5}
-          className={fieldClass}
-        />
-      </div>
+
+      <LocaleTabs
+        ja={
+          <>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">タイトル</label>
+              <input name="title" defaultValue={defaultValues?.title} required className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">
+                概要（一覧カード用・短め、任意。未入力の場合は詳細ページ用の概要が代わりに表示されます）
+              </label>
+              <textarea name="cardSummary" defaultValue={defaultValues?.cardSummary ?? ""} rows={2} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">概要（詳細ページ用）</label>
+              <textarea name="summary" defaultValue={defaultValues?.summary} rows={5} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">画像キャプション（任意）</label>
+              <input name="caption" defaultValue={defaultValues?.caption ?? ""} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">実績（1行に1件）</label>
+              <textarea name="achievements" defaultValue={defaultValues?.achievements?.join("\n")} rows={3} className={fieldClass} />
+            </div>
+          </>
+        }
+        en={
+          <>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">Title（空欄可。未入力時は日本語版を表示）</label>
+              <input name="titleEn" defaultValue={defaultValues?.titleEn ?? ""} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">
+                Card Summary（一覧カード用・短め、空欄可。未入力時はSummaryを代わりに表示）
+              </label>
+              <textarea name="cardSummaryEn" defaultValue={defaultValues?.cardSummaryEn ?? ""} rows={2} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">Summary（詳細ページ用、空欄可。未入力時は日本語版を表示）</label>
+              <textarea name="summaryEn" defaultValue={defaultValues?.summaryEn ?? ""} rows={5} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">Image Caption（空欄可）</label>
+              <input name="captionEn" defaultValue={defaultValues?.captionEn ?? ""} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">Achievements（1行に1件、空欄可。未入力時は日本語版を表示）</label>
+              <textarea
+                name="achievementsEn"
+                defaultValue={defaultValues?.achievementsEn?.join("\n")}
+                rows={3}
+                className={fieldClass}
+              />
+            </div>
+          </>
+        }
+      />
+
       <div>
         <label className="mb-1 block text-xs text-ink-faint">画像（任意）</label>
         <ImageUrlField name="imageUrl" defaultValue={defaultValues?.imageUrl} />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">画像キャプション（任意）</label>
-        <input name="caption" defaultValue={defaultValues?.caption ?? ""} className={fieldClass} />
       </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">タグ（カンマ区切り。例：史学, 美術）</label>
@@ -92,15 +131,6 @@ export default function ResearchForm({
           name="references"
           defaultValue={defaultValues?.references?.join("\n")}
           rows={5}
-          className={fieldClass}
-        />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">実績（1行に1件）</label>
-        <textarea
-          name="achievements"
-          defaultValue={defaultValues?.achievements?.join("\n")}
-          rows={3}
           className={fieldClass}
         />
       </div>

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { normText, normLines } from "@/lib/formNormalize";
 
 async function requireAdmin() {
   const session = await auth();
@@ -45,13 +46,32 @@ function buildResearchData(formData: FormData) {
   };
 }
 
+function buildResearchTranslationData(formData: FormData) {
+  return {
+    title: normText(formData.get("titleEn")),
+    summary: normText(formData.get("summaryEn")),
+    cardSummary: normText(formData.get("cardSummaryEn")),
+    caption: normText(formData.get("captionEn")),
+    achievements: normLines(formData.get("achievementsEn")),
+  };
+}
+
+async function upsertResearchTranslation(researchItemId: string, formData: FormData) {
+  await prisma.researchItemTranslation.upsert({
+    where: { researchItemId_locale: { researchItemId, locale: "en" } },
+    create: { researchItemId, locale: "en", ...buildResearchTranslationData(formData) },
+    update: buildResearchTranslationData(formData),
+  });
+}
+
 export async function createResearchItem(formData: FormData) {
   await requireAdmin();
 
   const { _max } = await prisma.researchItem.aggregate({ _max: { order: true } });
   const nextOrder = (_max.order ?? -1) + 1;
 
-  await prisma.researchItem.create({ data: { ...buildResearchData(formData), order: nextOrder } });
+  const item = await prisma.researchItem.create({ data: { ...buildResearchData(formData), order: nextOrder } });
+  await upsertResearchTranslation(item.id, formData);
 
   revalidatePath("/research");
   revalidatePath("/admin/research");
@@ -65,6 +85,7 @@ export async function updateResearchItem(id: string, formData: FormData) {
     where: { id },
     data: buildResearchData(formData),
   });
+  await upsertResearchTranslation(id, formData);
 
   revalidatePath("/research");
   revalidatePath("/admin/research");
