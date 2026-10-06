@@ -39,8 +39,6 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
   const pathname = usePathname();
   const [hash, setHash] = useTrackedHash();
 
-  const activeHref = links.find((l) => isActiveLink(pathname, hash, l.href))?.href ?? null;
-
   // Whether the glow dot's move to the *currently* active link should play
   // framer-motion's layoutId FLIP slide, or just hard-cut into place with no
   // shared-layout animation at all. A real route change corrupts the FLIP's
@@ -55,14 +53,20 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
   // me (same pathname, hash-only change) never triggers it and keeps the
   // slide, which is the point of the polished feel there.
   //
-  // This decision is made once, exactly when the active link changes, and
-  // held until it changes again — not recomputed every render, since this
-  // same pathname can re-render several times in a row during a transition.
-  const prevActiveRef = useRef<{ href: string | null; pathname: string }>({ href: activeHref, pathname });
+  // Gated on pathname changing alone — NOT on activeHref also changing.
+  // This used to require both together, which missed Works -> a work's own
+  // detail page ("/works/[slug]"): activeHref stays "/works" either way (see
+  // isActiveLink's startsWith check), so the dot never unmounts, but a real
+  // route transition still happens and can still corrupt its measurement —
+  // same bug as LanguageToggle's JA/EN dot had for exactly this "active
+  // target doesn't change but the route still did" shape of transition.
+  const prevPathnameRef = useRef(pathname);
   const skipFlipRef = useRef(false);
-  if (prevActiveRef.current.href !== activeHref) {
-    skipFlipRef.current = prevActiveRef.current.pathname !== pathname;
-    prevActiveRef.current = { href: activeHref, pathname };
+  if (prevPathnameRef.current !== pathname) {
+    skipFlipRef.current = true;
+    prevPathnameRef.current = pathname;
+  } else {
+    skipFlipRef.current = false;
   }
 
   return (
