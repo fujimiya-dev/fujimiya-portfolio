@@ -31,6 +31,27 @@ model Work {
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  translations WorkTranslation[]
+}
+
+model WorkTranslation {
+  id          String   @id @default(cuid())
+  workId      String
+  locale      String   @default("en")
+  title       String?
+  dateLabel   String?
+  award       String?
+  summary     String?
+  description String?
+  comment     String?
+  role        String?
+  credits     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  work        Work     @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@unique([workId, locale])
 }
 
 model Experience {
@@ -42,6 +63,22 @@ model Experience {
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  translations ExperienceTranslation[]
+}
+
+model ExperienceTranslation {
+  id           String     @id @default(cuid())
+  experienceId String
+  locale       String     @default("en")
+  org          String?
+  dateLabel    String?
+  summary      String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@unique([experienceId, locale])
 }
 
 model ResearchItem {
@@ -61,5 +98,23 @@ model ResearchItem {
   order        Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  translations ResearchItemTranslation[]
+}
+
+model ResearchItemTranslation {
+  id             String       @id @default(cuid())
+  researchItemId String
+  locale         String       @default("en")
+  title          String?
+  summary        String?
+  cardSummary    String?
+  caption        String?
+  achievements   String[]     @default([])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  researchItem   ResearchItem @relation(fields: [researchItemId], references: [id], onDelete: Cascade)
+
+  @@unique([researchItemId, locale])
 }
 
