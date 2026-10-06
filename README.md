@@ -1,5 +1,9 @@
 # Fujimiya Portfolio
 
+© 2026 Fujimiya. All rights reserved.
+このリポジトリは、ポートフォリオとして公開しています。コードや内容の無断での複製・再利用はご遠慮ください。
+This repository is published for portfolio purposes. Please do not copy or reuse the code or content without permission.
+
 ふじみやの個人ポートフォリオサイト。Next.js 15 (App Router) + TypeScript製で、作品(Works)・経歴(Experience)・研究(Research)をDBで管理し、コードを書き換えずに追加・編集できる自作の管理画面を備えています。日本語版・英語版の両方を1つのコードベースで提供しています。
 
 **本番URL:** https://portfolio.fujimiya.dev （英語版: https://portfolio.fujimiya.dev/en）
