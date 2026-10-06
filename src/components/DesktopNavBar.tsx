@@ -11,9 +11,11 @@ const LOGO_CLASS = "font-intro text-[27px] text-[#eaf6ff] [text-shadow:0_0_4px_#
 export default function DesktopNavBar({
   links,
   locale,
+  homeHref,
 }: {
   links: { href: string; label: string }[];
   locale: Locale;
+  homeHref: string;
 }) {
   const barRef = useRef<HTMLDivElement>(null);
   const [logoRect, setLogoRect] = useState<{ left: number; top: number } | null>(null);
@@ -73,7 +75,7 @@ export default function DesktopNavBar({
         // (not its visual center) landed on the midpoint, which read as
         // "not actually centered in the gap" despite the math being right.
         <div className="fixed z-50" style={{ left: logoRect.left, top: logoRect.top, transform: "translateX(-50%)" }}>
-          <IntroTriggerLink href="/" className={LOGO_CLASS}>
+          <IntroTriggerLink href={homeHref} className={LOGO_CLASS}>
             Fujimiya.dev
           </IntroTriggerLink>
         </div>

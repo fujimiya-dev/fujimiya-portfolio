@@ -6,6 +6,9 @@ import Link from "next/link";
 import { RevealFade } from "@/components/RevealSection";
 import NoImage from "@/components/NoImage";
 import YouTubeThumbnail from "@/components/YouTubeThumbnail";
+import { withLocale } from "@/i18n/path";
+import { translateTag } from "@/lib/tagLabels";
+import type { Locale, Dictionary } from "@/i18n/types";
 
 type Work = {
   id: string;
@@ -21,9 +24,20 @@ type Work = {
   techStack: string[];
 };
 
+// Always Japanese — these are the values actually stored on each Work and
+// matched against for filtering; translateTag() only changes how a value is
+// *displayed*, never which works match a given filter/search chip.
 const CATEGORY_FILTERS = ["公開作品", "個人開発", "チーム開発", "ハッカソン", "インターン"];
 
-export default function WorksExplorer({ works }: { works: Work[] }) {
+export default function WorksExplorer({
+  works,
+  locale,
+  dict,
+}: {
+  works: Work[];
+  locale: Locale;
+  dict: Dictionary["works"];
+}) {
   const [chips, setChips] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -83,11 +97,11 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
                 key={chip}
                 className="neon-tag flex items-center gap-1.5 rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
               >
-                {chip}
+                {translateTag(chip, locale)}
                 <button
                   type="button"
                   onClick={() => removeChip(chip)}
-                  aria-label={`${chip}を削除`}
+                  aria-label={locale === "ja" ? `${chip}を削除` : `Remove ${translateTag(chip, locale)}`}
                   className="text-accent-teal/70 hover:text-accent-teal"
                 >
                   ×
@@ -103,7 +117,7 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
               }}
               onFocus={() => setShowSuggestions(true)}
               onKeyDown={onInputKeyDown}
-              placeholder={chips.length === 0 ? "使用技術やキーワードで検索（例：Python、Unity、ハッカソン）" : ""}
+              placeholder={chips.length === 0 ? dict.searchPlaceholder : ""}
               className="min-w-[140px] flex-1 bg-transparent text-sm outline-none placeholder:text-ink-faint"
             />
           </div>
@@ -128,7 +142,7 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
           )}
         </div>
 
-        <p className="mb-3 mt-5 text-xs tracking-widest text-ink-faint">カテゴリー別に絞り込み</p>
+        <p className="mb-3 mt-5 text-xs tracking-widest text-ink-faint">{dict.filterByCategory}</p>
         <div className="flex flex-wrap gap-2">
           {CATEGORY_FILTERS.map((tag) => (
             <button
@@ -140,20 +154,20 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
                   : "border-white/20 text-ink-soft hover:border-accent-teal"
               }`}
             >
-              {tag}
+              {translateTag(tag, locale)}
             </button>
           ))}
         </div>
 
         {filtered.length === 0 && (
-          <p className="mt-4 text-sm text-ink-faint">該当する制作物が見つかりませんでした。</p>
+          <p className="mt-4 text-sm text-ink-faint">{dict.empty}</p>
         )}
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {filtered.map((work) => (
           <RevealFade key={work.id}>
-            <Link href={`/works/${work.slug}`} className="group block h-full">
+            <Link href={withLocale(`/works/${work.slug}`, locale)} className="group block h-full">
               <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition-all group-hover:border-accent-teal/50 group-hover:shadow-[0_0_24px_rgba(30,64,255,0.18)]">
                 <div className="relative aspect-video border-b border-white/10 bg-white/[0.02]">
                   {work.imageUrl ? (
@@ -186,7 +200,7 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
                           key={tag}
                           className="neon-tag rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
                         >
-                          {tag}
+                          {translateTag(tag, locale)}
                         </span>
                       ))}
                     </div>
@@ -196,7 +210,7 @@ export default function WorksExplorer({ works }: { works: Work[] }) {
                           key={tag}
                           className="rounded-full border border-white/20 px-3 py-1 text-xs text-ink-soft"
                         >
-                          {tag}
+                          {translateTag(tag, locale)}
                         </span>
                       ))}
                     </div>

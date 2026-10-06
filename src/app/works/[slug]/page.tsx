@@ -6,6 +6,10 @@ import { RevealFade } from "@/components/RevealSection";
 import NoImage from "@/components/NoImage";
 import WorkGallery from "@/components/WorkGallery";
 import { youtubeEmbedUrl } from "@/lib/youtube";
+import { getDictionary, getLocale } from "@/i18n/server";
+import { withLocale } from "@/i18n/path";
+import { translateTag } from "@/lib/tagLabels";
+import { resolveWork } from "@/lib/resolveTranslation";
 
 export const revalidate = 0;
 
@@ -23,7 +27,7 @@ async function fetchWorkBySlug(slug: string) {
   let lastError: unknown;
   for (let attempt = 1; attempt <= FETCH_RETRY_ATTEMPTS; attempt++) {
     try {
-      return await prisma.work.findUnique({ where: { slug } });
+      return await prisma.work.findUnique({ where: { slug }, include: { translations: true } });
     } catch (err) {
       lastError = err;
       console.error(`[works/${slug}] prisma.work.findUnique failed (attempt ${attempt}/${FETCH_RETRY_ATTEMPTS}):`, err);
@@ -67,16 +71,17 @@ export default async function WorkDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const work = await fetchWorkBySlug(slug);
-  if (!work) {
+  const [workRaw, dict, locale] = await Promise.all([fetchWorkBySlug(slug), getDictionary(), getLocale()]);
+  if (!workRaw) {
     console.error(`[works/${slug}] query succeeded but returned no matching work`);
     notFound();
   }
+  const work = resolveWork(workRaw, locale);
 
   return (
     <section className="mx-auto max-w-3xl px-6 pb-24 pt-28">
-      <Link href="/works" className="neon-link mb-10 inline-block text-sm text-accent-blue hover:text-accent-teal">
-        ← Works 一覧に戻る
+      <Link href={withLocale("/works", locale)} className="neon-link mb-10 inline-block text-sm text-accent-blue hover:text-accent-teal">
+        {dict.workDetail.backToList}
       </Link>
 
       <RevealFade>
@@ -111,7 +116,7 @@ export default async function WorkDetailPage({
         <div className="mb-8 space-y-4">
           {work.demoUrl && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">デモURL</h2>
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.demoUrl}</h2>
               <a
                 href={work.demoUrl}
                 target="_blank"
@@ -125,7 +130,7 @@ export default async function WorkDetailPage({
 
           {work.githubUrl && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">GitHub URL</h2>
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.githubUrl}</h2>
               <a
                 href={work.githubUrl}
                 target="_blank"
@@ -139,20 +144,20 @@ export default async function WorkDetailPage({
 
           {work.award && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">受賞歴</h2>
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.award}</h2>
               <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">{work.award}</p>
             </div>
           )}
 
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">作品詳細</h2>
+            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.details}</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
               {work.description}
             </p>
           </div>
 
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">製作者コメント</h2>
+            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.comment}</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
               {work.comment}
             </p>
@@ -160,11 +165,11 @@ export default async function WorkDetailPage({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">担当人数</h2>
-              <p className="text-[15px] text-ink-soft">{work.teamSize}人</p>
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.teamSize}</h2>
+              <p className="text-[15px] text-ink-soft">{work.teamSize}{dict.workDetail.teamSizeSuffix}</p>
             </div>
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">担当部分</h2>
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.role}</h2>
               <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
                 {work.role}
               </p>
@@ -173,27 +178,27 @@ export default async function WorkDetailPage({
 
           <div className="glass-panel space-y-4 rounded-sm p-6">
             <div>
-              <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">カテゴリ</h2>
+              <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.category}</h2>
               <div className="flex flex-wrap gap-2">
                 {work.category.map((tag) => (
                   <span
                     key={tag}
                     className="neon-tag rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
                   >
-                    {tag}
+                    {translateTag(tag, locale)}
                   </span>
                 ))}
               </div>
             </div>
             <div>
-              <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">使用技術</h2>
+              <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.techStack}</h2>
               <div className="flex flex-wrap gap-2">
                 {work.techStack.map((tag) => (
                   <span
                     key={tag}
                     className="rounded-full border border-white/20 px-3 py-1 text-xs text-ink-soft"
                   >
-                    {tag}
+                    {translateTag(tag, locale)}
                   </span>
                 ))}
               </div>
@@ -202,7 +207,7 @@ export default async function WorkDetailPage({
 
           {work.credits && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">クレジット</h2>
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.credits}</h2>
               <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
                 {renderWithLinks(work.credits)}
               </p>
@@ -212,10 +217,10 @@ export default async function WorkDetailPage({
 
         <div className="mt-12 flex justify-center">
           <Link
-            href="/works"
+            href={withLocale("/works", locale)}
             className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)]"
           >
-            ほかの作品もみる
+            {dict.workDetail.viewMore}
           </Link>
         </div>
       </RevealFade>

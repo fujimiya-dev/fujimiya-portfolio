@@ -3,6 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { RevealFade } from "@/components/RevealSection";
+import { getDictionary, getLocale } from "@/i18n/server";
+import { withLocale } from "@/i18n/path";
+import { translateTag } from "@/lib/tagLabels";
+import { resolveResearchItem } from "@/lib/resolveTranslation";
 
 export const revalidate = 0;
 
@@ -12,17 +16,22 @@ export default async function ResearchDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const item = await prisma.researchItem.findUnique({ where: { slug } });
-  if (!item) notFound();
+  const [itemRaw, dict, locale] = await Promise.all([
+    prisma.researchItem.findUnique({ where: { slug }, include: { translations: true } }),
+    getDictionary(),
+    getLocale(),
+  ]);
+  if (!itemRaw) notFound();
+  const item = resolveResearchItem(itemRaw, locale);
 
   return (
     <section className="mx-auto max-w-3xl px-6 pb-24 pt-28">
-      <Link href="/research" className="neon-link mb-10 inline-block text-sm text-accent-blue hover:text-accent-teal">
-        ← Research 一覧に戻る
+      <Link href={withLocale("/research", locale)} className="neon-link mb-10 inline-block text-sm text-accent-blue hover:text-accent-teal">
+        {dict.researchDetail.backToList}
       </Link>
 
       <RevealFade>
-        <span className="mb-2 block text-xs tracking-wide text-accent-blue">{item.stage}</span>
+        <span className="mb-2 block text-xs tracking-wide text-accent-blue">{translateTag(item.stage, locale)}</span>
         <h1 className="mb-8 font-label text-4xl font-bold leading-relaxed">{item.title}</h1>
 
         <div className="glass-panel relative mb-2 aspect-video overflow-hidden rounded-sm border border-white/15 bg-white/[0.02]">
@@ -58,34 +67,34 @@ export default async function ResearchDetailPage({
 
         <div className="mb-8 space-y-4">
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">概要</h2>
+            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.researchDetail.summary}</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">{item.summary}</p>
           </div>
 
           <div className="glass-panel space-y-4 rounded-sm p-6">
             <div>
-              <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">タグ</h2>
+              <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">{dict.researchDetail.tags}</h2>
               <div className="flex flex-wrap gap-2">
                 {item.tags.map((tag) => (
                   <span
                     key={tag}
                     className="neon-tag rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
                   >
-                    {tag}
+                    {translateTag(tag, locale)}
                   </span>
                 ))}
               </div>
             </div>
             {item.techStack.length > 0 && (
               <div>
-                <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">使用技術</h2>
+                <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">{dict.researchDetail.techStack}</h2>
                 <div className="flex flex-wrap gap-2">
                   {item.techStack.map((tag) => (
                     <span
                       key={tag}
                       className="rounded-full border border-white/20 px-3 py-1 text-xs text-ink-soft"
                     >
-                      {tag}
+                      {translateTag(tag, locale)}
                     </span>
                   ))}
                 </div>
@@ -95,7 +104,7 @@ export default async function ResearchDetailPage({
 
           {item.achievements.length > 0 && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">実績</h2>
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.researchDetail.achievements}</h2>
               <ul className="list-disc space-y-1 pl-5 text-[15px] leading-relaxed text-ink-soft">
                 {item.achievements.map((achievement) => (
                   <li key={achievement}>{achievement}</li>
@@ -106,7 +115,7 @@ export default async function ResearchDetailPage({
 
           {item.references.length > 0 && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">主な参考文献</h2>
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.researchDetail.references}</h2>
               <ul className="list-disc space-y-1 pl-5 text-[15px] leading-relaxed text-ink-soft">
                 {item.references.map((ref) => (
                   <li key={ref}>{ref}</li>
@@ -123,16 +132,16 @@ export default async function ResearchDetailPage({
             rel="noopener"
             className="neon-link border-b border-accent-blue/50 text-sm text-accent-blue transition-colors hover:border-accent-teal hover:text-accent-teal"
           >
-            論文を見る ↗
+            {dict.researchDetail.viewPaper}
           </a>
         )}
 
         <div className="mt-12 flex justify-center">
           <Link
-            href="/research"
+            href={withLocale("/research", locale)}
             className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)]"
           >
-            ほかの研究もみる
+            {dict.researchDetail.viewMore}
           </Link>
         </div>
       </RevealFade>

@@ -6,7 +6,8 @@ import heroTitlePathData from "@/components/heroTitlePathData.json";
 import IntroOverlayHost from "@/components/IntroOverlayHost";
 import AboutScrollSpy from "@/components/AboutScrollSpy";
 import SectionHeading from "@/components/SectionHeading";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getLocale } from "@/i18n/server";
+import { withLocale } from "@/i18n/path";
 import { TbBrandPython, TbBrandTypescript, TbBrandJavascript, TbBrandCSharp, TbBrandCpp, TbBrandUnity } from "react-icons/tb";
 import { FaJava } from "react-icons/fa";
 import { SiUnrealengine } from "react-icons/si";
@@ -22,12 +23,10 @@ const techStack = [
   { label: "UE", Icon: SiUnrealengine },
 ];
 
-const interests = ["Web開発", "ゲーム開発", "空間演出", "XR"];
-
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const dict = await getDictionary();
+  const [dict, locale] = await Promise.all([getDictionary(), getLocale()]);
 
   return (
     <>
@@ -51,7 +50,7 @@ export default async function HomePage() {
       <section id="about" className="mx-auto max-w-4xl scroll-mt-24 px-6 pb-24 pt-20">
         <RevealGlow className="mb-16 text-center">
           <span className="mb-6 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
-            自身について
+            {dict.home.eyebrow}
           </span>
           <SectionHeading textKey="aboutMe" label={dict.nav.aboutMe} />
         </RevealGlow>
@@ -61,7 +60,7 @@ export default async function HomePage() {
           <div className="glass-panel profile-photo-frame w-full overflow-hidden rounded-sm">
             <Image
               src="/profile.png"
-              alt="藤田都"
+              alt={dict.home.photoAlt}
               width={2160}
               height={2160}
               className="block h-auto w-full"
@@ -71,29 +70,29 @@ export default async function HomePage() {
             <table className="mb-6 w-full text-sm">
               <tbody>
                 <tr className="neon-divider">
-                  <td className="w-24 py-3 font-label text-ink-faint">名前</td>
-                  <td className="py-3">藤田 都</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">{dict.home.nameLabel}</td>
+                  <td className="py-3">{dict.home.name}</td>
                 </tr>
                 <tr className="neon-divider">
-                  <td className="w-24 py-3 font-label text-ink-faint">所属</td>
-                  <td className="py-3">北陸先端科学技術大学院大学</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">{dict.home.affiliationLabel}</td>
+                  <td className="py-3">{dict.home.affiliation}</td>
                 </tr>
                 <tr className="neon-divider">
-                  <td className="w-24 py-3 font-label text-ink-faint">専攻</td>
-                  <td className="py-3">先端科学技術研究科 先端科学技術専攻</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">{dict.home.majorLabel}</td>
+                  <td className="py-3">{dict.home.major}</td>
                 </tr>
                 <tr className="neon-divider">
-                  <td className="w-24 py-3 font-label text-ink-faint">学年</td>
-                  <td className="py-3">修士1年</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">{dict.home.yearLabel}</td>
+                  <td className="py-3">{dict.home.year}</td>
                 </tr>
                 <tr className="neon-divider">
-                  <td className="w-24 py-3 font-label text-ink-faint">資格</td>
-                  <td className="py-3">中学校・高校教諭一種免許状(社会)、温泉ソムリエ</td>
+                  <td className="w-24 py-3 font-label text-ink-faint">{dict.home.qualificationLabel}</td>
+                  <td className="py-3">{dict.home.qualification}</td>
                 </tr>
               </tbody>
             </table>
 
-            <p className="mb-3 font-label text-xs tracking-widest text-ink-faint">勉強している技術</p>
+            <p className="mb-3 font-label text-xs tracking-widest text-ink-faint">{dict.home.studyingLabel}</p>
             <div className="mb-6 grid grid-cols-4 gap-x-2 gap-y-4 sm:grid-cols-7">
               {techStack.map(({ label, Icon }) => (
                 <div key={label} className="flex flex-col items-center gap-2">
@@ -103,9 +102,9 @@ export default async function HomePage() {
               ))}
             </div>
 
-            <p className="mb-3 font-label text-xs tracking-widest text-ink-faint">興味分野</p>
+            <p className="mb-3 font-label text-xs tracking-widest text-ink-faint">{dict.home.interestsLabel}</p>
             <div className="flex flex-wrap gap-2">
-              {interests.map((tag) => (
+              {dict.home.interests.map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full border border-white/20 px-3 py-1 text-xs text-ink-soft [text-shadow:0_0_6px_rgba(127,183,255,0.45)]"
@@ -121,13 +120,12 @@ export default async function HomePage() {
 
         <RevealFade delay={0.1} className="mx-auto mt-16 max-w-xl text-center">
           <p className="text-sm leading-relaxed text-ink">
-            学部では西洋美術史を専攻。
-            <br />
-            大学3年でのハッカソン初参加をきっかけに、「アイデアを形にする」楽しさに目覚める。
-            <br />
-            自分の世界をより広げたいと思い、情報系大学院へ分野転向。
-            <br />
-            フロントからバックまで幅広く手がけつつ、特にUIデザインへのこだわりがあります。
+            {dict.home.bio.split("\n").map((line, i, arr) => (
+              <span key={i}>
+                {line}
+                {i < arr.length - 1 && <br />}
+              </span>
+            ))}
           </p>
         </RevealFade>
 
@@ -136,7 +134,7 @@ export default async function HomePage() {
 
         <div className="mt-12 flex justify-center">
           <Link
-            href="/works"
+            href={withLocale("/works", locale)}
             className="rounded-sm border border-accent-teal px-8 py-3 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)]"
           >
             {dict.home.goToWorks}

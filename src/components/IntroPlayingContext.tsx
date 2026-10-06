@@ -72,8 +72,12 @@ export function clearForcePlayIntro() {
 // client-side navigation (e.g. clicking "About me") is unreliable — Next
 // updates the hash slightly *after* the new route's first render, so a
 // check made at that moment can race and see the old ("") hash.
+function isHomePath(pathname: string) {
+  return pathname === "/" || pathname === "/en";
+}
+
 const initialHardLoadWillAutoPlay =
-  typeof window !== "undefined" && window.location.pathname === "/" && window.location.hash === "";
+  typeof window !== "undefined" && isHomePath(window.location.pathname) && window.location.hash === "";
 let autoPlayAvailable = true;
 
 // Side-effect-free peek, for the same StrictMode-double-invoke reason as
@@ -92,7 +96,7 @@ export function clearInitialAutoPlayIntro() {
 // "About me" ("/#about"), and not via the "Top" nav link either — that
 // should land straight on the section/top without replaying the intro.
 function willIntroPlay(pathname: string) {
-  if (pathname !== "/") return false;
+  if (!isHomePath(pathname)) return false;
   return peekForcePlayIntro() || peekInitialAutoPlayIntro();
 }
 
@@ -109,7 +113,7 @@ export function IntroPlayingProvider({ children }: { children: ReactNode }) {
     // ones that decide and drive these two flags (see willIntroPlay /
     // peekForcePlayIntro in IntroOverlay.tsx) since only it knows whether
     // it actually started playing.
-    if (pathname !== "/") {
+    if (!isHomePath(pathname)) {
       setIntroPlaying(false);
       setHeroReady(true);
     }

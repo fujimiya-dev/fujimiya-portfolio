@@ -1,4 +1,5 @@
 import { getDictionary, getLocale } from "@/i18n/server";
+import { withLocale } from "@/i18n/path";
 import LanguageToggle from "@/components/LanguageToggle";
 import MobileMenu from "@/components/MobileMenu";
 import IntroTriggerLink from "@/components/IntroTriggerLink";
@@ -8,17 +9,17 @@ export default async function TopNav() {
   const [dict, locale] = await Promise.all([getDictionary(), getLocale()]);
 
   const links = [
-    { href: "/", label: dict.nav.top },
-    { href: "/#about", label: dict.nav.aboutMe },
-    { href: "/works", label: dict.nav.works },
-    { href: "/experience", label: dict.nav.experience },
-    { href: "/research", label: dict.nav.research },
-    { href: "/contact", label: dict.nav.contact },
+    { href: withLocale("/", locale), label: dict.nav.top },
+    { href: withLocale("/#about", locale), label: dict.nav.aboutMe },
+    { href: withLocale("/works", locale), label: dict.nav.works },
+    { href: withLocale("/experience", locale), label: dict.nav.experience },
+    { href: withLocale("/research", locale), label: dict.nav.research },
+    { href: withLocale("/contact", locale), label: dict.nav.contact },
   ];
 
   const logo = (
     <IntroTriggerLink
-      href="/"
+      href={withLocale("/", locale)}
       className="font-intro text-[27px] text-[#eaf6ff] [text-shadow:0_0_4px_#eaf6ff,0_0_11px_#7FB7FF,0_0_22px_#1E40FF]"
     >
       Fujimiya.dev
@@ -55,7 +56,7 @@ export default async function TopNav() {
           owns it was what caused the bar to visibly drift the last time
           this was attempted here — moving both concerns into one client
           component keeps that measurement local to what it depends on). */}
-      <DesktopNavBar links={links} locale={locale} />
+      <DesktopNavBar links={links} locale={locale} homeHref={withLocale("/", locale)} />
     </header>
   );
 }

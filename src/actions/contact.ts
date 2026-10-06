@@ -2,6 +2,7 @@
 
 import { Resend } from "resend";
 import { headers } from "next/headers";
+import { getDictionary } from "@/i18n/server";
 
 export type ContactResult = { ok: true } | { ok: false; error: string };
 
@@ -47,9 +48,6 @@ async function getClientIp(): Promise<string> {
   return h.get("x-real-ip") ?? "unknown";
 }
 
-const RECAPTCHA_FAIL_MESSAGE =
-  "reCAPTCHA認証に失敗しました。チェックを入れ直してから再度送信してください。何度も失敗する場合は直接X(@fujimiya_dev)までご連絡ください。";
-
 async function verifyRecaptcha(token: string, ip: string): Promise<boolean> {
   const secret = process.env.RECAPTCHA_SECRET_KEY;
   if (!secret) {
@@ -73,6 +71,8 @@ async function verifyRecaptcha(token: string, ip: string): Promise<boolean> {
 }
 
 export async function sendContactMessage(formData: FormData): Promise<ContactResult> {
+  const dict = await getDictionary();
+
   // Honeypot — see ContactForm.tsx's hidden "company" field. A real user
   // never sees or fills it; a naive bot that fills every input it finds
   // trips this. Fake success instead of an error so it doesn't learn the
@@ -86,24 +86,24 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
   const message = String(formData.get("message") ?? "").trim();
 
   if (!name || !email || !message) {
-    return { ok: false, error: "すべての項目を入力してください。" };
+    return { ok: false, error: dict.contactErrors.missingFields };
   }
 
   const ip = await getClientIp();
   if (isRateLimited(ip)) {
-    return { ok: false, error: "短時間に多くのお問い合わせを受け付けました。しばらく時間をおいて再度お試しください。" };
+    return { ok: false, error: dict.contactErrors.rateLimited };
   }
 
   const recaptchaToken = String(formData.get("recaptchaToken") ?? "").trim();
   if (!recaptchaToken || !(await verifyRecaptcha(recaptchaToken, ip))) {
-    return { ok: false, error: RECAPTCHA_FAIL_MESSAGE };
+    return { ok: false, error: dict.contactErrors.recaptchaFailed };
   }
 
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.CONTACT_TO_EMAIL;
   if (!apiKey || !to) {
     console.error("RESEND_API_KEY / CONTACT_TO_EMAIL が設定されていません");
-    return { ok: false, error: "現在お問い合わせを受け付けられません。しばらくしてから再度お試しください。" };
+    return { ok: false, error: dict.contactErrors.serviceUnavailable };
   }
 
   try {
@@ -133,6 +133,6 @@ export async function sendContactMessage(formData: FormData): Promise<ContactRes
     return { ok: true };
   } catch (err) {
     console.error("contact form send failed:", err);
-    return { ok: false, error: "送信に失敗しました。時間をおいて再度お試しください。" };
+    return { ok: false, error: dict.contactErrors.sendFailed };
   }
 }

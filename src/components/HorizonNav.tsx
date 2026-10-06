@@ -13,10 +13,15 @@ const SCROLL_SPY_SUPPRESS_MS = 1000;
 
 type NavLink = { href: string; label: string };
 
-// href is either a plain route ("/works") or a same-page hash link on the
-// home route ("/#about"). usePathname() never includes the hash, so "Top"
-// and "About me" both resolve to pathname "/" — the hash has to be tracked
-// separately to tell them apart.
+// Both locales' home routes — "/" (ja) and "/en" (en) — need the same
+// hash === "" requirement that "Top" vs "About me" relies on (see below),
+// so both need to be recognized as "the home route", not just "/".
+export const HOME_PATHS = ["/", "/en"];
+
+// href is either a plain route ("/works", "/en/works") or a same-page hash
+// link on the home route ("/#about", "/en#about"). usePathname() never
+// includes the hash, so "Top" and "About me" resolve to the same pathname —
+// the hash has to be tracked separately to tell them apart.
 export function isActiveLink(pathname: string, hash: string, href: string) {
   const hashIndex = href.indexOf("#");
   if (hashIndex !== -1) {
@@ -24,8 +29,8 @@ export function isActiveLink(pathname: string, hash: string, href: string) {
     const hrefHash = href.slice(hashIndex);
     return pathname === hrefPath && hash === hrefHash;
   }
-  if (href === "/") {
-    return pathname === "/" && hash === "";
+  if (HOME_PATHS.includes(href)) {
+    return pathname === href && hash === "";
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -72,7 +77,7 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
             <Link
               href={link.href}
               onClick={() => {
-                const staysOnHomeRoute = link.href === "/" || linkHash === "#about";
+                const staysOnHomeRoute = HOME_PATHS.includes(link.href) || linkHash === "#about";
                 if (staysOnHomeRoute) {
                   // Only set hash eagerly for a click that keeps pathname
                   // at "/" (Top/About me) — pathname itself doesn't change

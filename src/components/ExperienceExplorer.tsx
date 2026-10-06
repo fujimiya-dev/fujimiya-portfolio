@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { RevealFade } from "@/components/RevealSection";
+import { translateTag } from "@/lib/tagLabels";
+import type { Locale, Dictionary } from "@/i18n/types";
 
 type Experience = {
   id: string;
@@ -11,9 +13,18 @@ type Experience = {
   tags: string[];
 };
 
+// Always Japanese — see the matching comment in WorksExplorer.tsx.
 const CATEGORY_FILTERS = ["個人開発", "チーム開発", "ハッカソン", "インターン"];
 
-export default function ExperienceExplorer({ items }: { items: Experience[] }) {
+export default function ExperienceExplorer({
+  items,
+  locale,
+  dict,
+}: {
+  items: Experience[];
+  locale: Locale;
+  dict: Dictionary["experience"];
+}) {
   const [chips, setChips] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -73,11 +84,11 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
                 key={chip}
                 className="neon-tag flex items-center gap-1.5 rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
               >
-                {chip}
+                {translateTag(chip, locale)}
                 <button
                   type="button"
                   onClick={() => removeChip(chip)}
-                  aria-label={`${chip}を削除`}
+                  aria-label={locale === "ja" ? `${chip}を削除` : `Remove ${translateTag(chip, locale)}`}
                   className="text-accent-teal/70 hover:text-accent-teal"
                 >
                   ×
@@ -94,7 +105,7 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => setShowSuggestions(false)}
               onKeyDown={onInputKeyDown}
-              placeholder={chips.length === 0 ? "キーワードや使用技術で検索（例：ハッカソン、インターン、Python）" : ""}
+              placeholder={chips.length === 0 ? dict.searchPlaceholder : ""}
               className="min-w-[140px] flex-1 bg-transparent text-sm outline-none placeholder:text-ink-faint"
             />
           </div>
@@ -119,7 +130,7 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
           )}
         </div>
 
-        <p className="mb-3 mt-5 text-xs tracking-widest text-ink-faint">カテゴリー別に絞り込み</p>
+        <p className="mb-3 mt-5 text-xs tracking-widest text-ink-faint">{dict.filterByCategory}</p>
         <div className="flex flex-wrap gap-2">
           {CATEGORY_FILTERS.map((tag) => (
             <button
@@ -131,13 +142,13 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
                   : "border-white/20 text-ink-soft hover:border-accent-teal"
               }`}
             >
-              {tag}
+              {translateTag(tag, locale)}
             </button>
           ))}
         </div>
 
         {filtered.length === 0 && (
-          <p className="mt-4 text-sm text-ink-faint">該当する経験が見つかりませんでした。</p>
+          <p className="mt-4 text-sm text-ink-faint">{dict.empty}</p>
         )}
       </div>
 
@@ -155,7 +166,7 @@ export default function ExperienceExplorer({ items }: { items: Experience[] }) {
                       key={tag}
                       className="neon-tag rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
                     >
-                      {tag}
+                      {translateTag(tag, locale)}
                     </span>
                   ))}
                 </div>

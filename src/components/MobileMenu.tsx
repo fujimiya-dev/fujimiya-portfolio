@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { isActiveLink } from "@/components/HorizonNav";
+import { isActiveLink, HOME_PATHS } from "@/components/HorizonNav";
 import { useTrackedHash, suppressScrollSpyHash } from "@/components/useTrackedHash";
 
 // Mirrors HorizonNav's own suppression window — see useTrackedHash.ts.
@@ -67,7 +67,7 @@ export default function MobileMenu({
                         // setting hash eagerly for a cross-route click lets a
                         // stale pathname="/" + reset hash="" combination
                         // transiently (and wrongly) read as "Top" active.
-                        const staysOnHomeRoute = link.href === "/" || linkHash === "#about";
+                        const staysOnHomeRoute = HOME_PATHS.includes(link.href) || linkHash === "#about";
                         if (staysOnHomeRoute) {
                           suppressScrollSpyHash(SCROLL_SPY_SUPPRESS_MS);
                           setHash(linkHash);

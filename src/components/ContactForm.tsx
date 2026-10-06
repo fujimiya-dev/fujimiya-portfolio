@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import Script from "next/script";
 import { sendContactMessage } from "@/actions/contact";
+import type { Dictionary } from "@/i18n/types";
 
 type Status = { type: "idle" } | { type: "success" } | { type: "error"; message: string };
 
@@ -41,9 +42,6 @@ const X_LINK_MARKER = "X(@fujimiya_dev)";
 // button and zero explanation of why.
 const WIDGET_LOAD_TIMEOUT_MS = 6000;
 
-const WIDGET_LOAD_FAIL_MESSAGE =
-  "ロボット確認の読み込みに失敗しました。広告ブロッカーなどの拡張機能を一時的に無効にするか、直接X(@fujimiya_dev)までご連絡ください。";
-
 function renderErrorMessage(message: string) {
   const idx = message.indexOf(X_LINK_MARKER);
   if (idx === -1) return message;
@@ -63,7 +61,7 @@ function renderErrorMessage(message: string) {
   );
 }
 
-export default function ContactForm() {
+export default function ContactForm({ dict }: { dict: Dictionary["contact"] }) {
   const formRef = useRef<HTMLFormElement>(null);
   const captchaContainerRef = useRef<HTMLDivElement>(null);
   const captchaWidgetId = useRef<number | null>(null);
@@ -140,7 +138,7 @@ export default function ContactForm() {
   if (status.type === "success") {
     return (
       <div className="glass-panel rounded-sm p-8 text-center">
-        <p className="text-sm text-accent-teal">送信しました。ご連絡ありがとうございます。</p>
+        <p className="text-sm text-accent-teal">{dict.success}</p>
       </div>
     );
   }
@@ -160,16 +158,16 @@ export default function ContactForm() {
       />
 
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">お名前</label>
-        <input name="name" required className={fieldClass} placeholder="山田 太郎" />
+        <label className="mb-1 block text-xs text-ink-faint">{dict.nameLabel}</label>
+        <input name="name" required className={fieldClass} placeholder={dict.namePlaceholder} />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">メールアドレス</label>
+        <label className="mb-1 block text-xs text-ink-faint">{dict.emailLabel}</label>
         <input name="email" type="email" required className={fieldClass} placeholder="you@example.com" />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-ink-faint">メッセージ</label>
-        <textarea name="message" required rows={5} className={fieldClass} placeholder="お問い合わせ内容をご記入ください" />
+        <label className="mb-1 block text-xs text-ink-faint">{dict.messageLabel}</label>
+        <textarea name="message" required rows={5} className={fieldClass} placeholder={dict.messagePlaceholder} />
       </div>
 
       {/* Honeypot — invisible to sighted users (off-screen, not display:none
@@ -191,7 +189,7 @@ export default function ContactForm() {
       </div>
 
       {widgetLoadFailed && (
-        <p className="text-center text-xs text-[#ff8a8a]">{renderErrorMessage(WIDGET_LOAD_FAIL_MESSAGE)}</p>
+        <p className="text-center text-xs text-[#ff8a8a]">{renderErrorMessage(dict.widgetLoadFail)}</p>
       )}
 
       {status.type === "error" && <p className="text-xs text-[#ff8a8a]">{renderErrorMessage(status.message)}</p>}
@@ -202,7 +200,7 @@ export default function ContactForm() {
           disabled={isPending || !captchaToken}
           className="rounded-sm border border-accent-teal px-6 py-2 text-sm text-accent-teal transition-all hover:bg-accent-teal hover:text-sky-deep hover:shadow-[0_0_20px_rgba(30,64,255,0.4)] disabled:opacity-50"
         >
-          {isPending ? "送信中…" : "送信する"}
+          {isPending ? dict.submitting : dict.submit}
         </button>
       </div>
     </form>

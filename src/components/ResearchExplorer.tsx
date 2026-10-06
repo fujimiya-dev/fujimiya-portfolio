@@ -3,6 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { RevealFade } from "@/components/RevealSection";
+import { withLocale } from "@/i18n/path";
+import { translateTag } from "@/lib/tagLabels";
+import type { Locale } from "@/i18n/types";
 
 type ResearchItem = {
   id: string;
@@ -37,12 +40,12 @@ function NoImage() {
   );
 }
 
-export default function ResearchExplorer({ items }: { items: ResearchItem[] }) {
+export default function ResearchExplorer({ items, locale }: { items: ResearchItem[]; locale: Locale }) {
   return (
     <div className="space-y-14">
       {items.map((item) => (
         <RevealFade key={item.id}>
-          <Link href={`/research/${item.slug}`} className="group block">
+          <Link href={withLocale(`/research/${item.slug}`, locale)} className="group block">
             <div className="glass-panel grid grid-cols-1 gap-10 rounded-sm p-7 transition-all group-hover:border-accent-teal/50 group-hover:shadow-[0_0_24px_rgba(30,64,255,0.18)] md:grid-cols-[280px_1fr]">
               <figure className="relative aspect-video overflow-hidden rounded-sm border border-white/15 bg-white/[0.02]">
                 {item.imageUrl ? (
@@ -58,7 +61,7 @@ export default function ResearchExplorer({ items }: { items: ResearchItem[] }) {
                 )}
               </figure>
               <div>
-                <span className="mb-2 block text-xs tracking-wide text-accent-blue">{item.stage}</span>
+                <span className="mb-2 block text-xs tracking-wide text-accent-blue">{translateTag(item.stage, locale)}</span>
                 <h3 className="mb-4 font-label text-xl font-bold leading-relaxed transition-colors group-hover:text-accent-teal">
                   {item.title}
                 </h3>
@@ -69,7 +72,7 @@ export default function ResearchExplorer({ items }: { items: ResearchItem[] }) {
                       key={tag}
                       className="neon-tag rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
                     >
-                      {tag}
+                      {translateTag(tag, locale)}
                     </span>
                   ))}
                 </div>

@@ -1,10 +1,22 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { setLocale } from "@/actions/locale";
 import type { Locale } from "@/i18n/types";
+
+// Maps the current pathname to its equivalent under the other locale.
+// Locale is a URL prefix now ("/en/...", JA unprefixed), not a cookie, so
+// switching has to navigate rather than just re-render in place.
+function localizedPath(pathname: string, locale: Locale): string {
+  const isEn = pathname === "/en" || pathname.startsWith("/en/");
+  if (locale === "en") {
+    if (isEn) return pathname;
+    return pathname === "/" ? "/en" : `/en${pathname}`;
+  }
+  if (!isEn) return pathname;
+  return pathname === "/en" ? "/" : pathname.slice(3);
+}
 
 // Same text treatment as HorizonNav's page items, so JA/EN reads as part
 // of the same row rather than a visually distinct control bolted on.
@@ -22,14 +34,21 @@ export default function LanguageToggle({
   // line, so it keeps the plain active/inactive text treatment only.
   showGlowDot?: boolean;
 }) {
-  const router = useRouter();
+  const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
   function choose(locale: Locale) {
     if (locale === current) return;
-    startTransition(async () => {
-      await setLocale(locale);
-      router.refresh();
+    const target = localizedPath(pathname, locale);
+    // A plain client-side router.push() leaves the root layout (TopNav,
+    // Footer, <html lang>) stale: "/en" isn't a real route segment to
+    // Next's client router (only middleware.ts rewrites it), so crossing
+    // the locale boundary doesn't look like a layout change and the
+    // already-rendered layout output is reused as-is. A full navigation
+    // forces middleware to run again and the whole tree — including the
+    // layout — to re-render server-side with the new locale.
+    startTransition(() => {
+      window.location.href = target;
     });
   }
 
