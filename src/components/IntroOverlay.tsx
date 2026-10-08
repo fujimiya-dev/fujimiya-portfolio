@@ -86,6 +86,14 @@ export default function IntroOverlay() {
   const setIntroPlaying = useSetIntroPlaying();
   const setHeroReady = useSetHeroReady();
   const [phase, setPhase] = useState<Phase>(() => (shouldPlayOnMount() ? "drawing" : "done"));
+  // Holds the two setTimeout ids scheduled by the mount effect below
+  // (hero-ready hand-off, sweep start) so skip() can cancel them. Without
+  // this, skipping during "drawing" would force phase to "done" right
+  // away, but those two timers — still alive, since their own effect
+  // cleanup only runs on a `mounted` change, which skipping doesn't
+  // trigger — would fire later anyway and flip phase back to "sweeping",
+  // replaying the back half of the intro well after the user skipped it.
+  const pendingTimersRef = useRef<{ toHeroReady?: ReturnType<typeof setTimeout>; toSweeping?: ReturnType<typeof setTimeout> }>({});
   // TopNav/main each create their own stacking context in layout.tsx, so a
   // z-index alone here can't escape main's context to sit above TopNav —
   // portal straight onto <body> instead, where our z-index is compared
@@ -137,9 +145,45 @@ export default function IntroOverlay() {
     clearForcePlayIntro();
     clearInitialAutoPlayIntro();
 
+    // prefers-reduced-motion: skip straight to the settled end state
+    // instead of playing any of the trace/sweep. Checked here (not in the
+    // phase initializer) so it still runs after a force-replay click, and
+    // so the hero-ready/intro-playing hand-off below happens the same way
+    // a normal skip does.
+    if (phase === "drawing" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setHeroReady?.(true);
+      setIntroPlaying?.(false);
+      setPhase("done");
+    }
+
     return () => mq.removeEventListener("change", onChange);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Cancels the two pending timers (see pendingTimersRef above) and settles
+  // every context flag the end of a normal playthrough would, so skipping
+  // mid-animation lands in exactly the same state as letting it finish:
+  // hero mounted, frameloop handed back, overlay gone for good.
+  function skip() {
+    clearTimeout(pendingTimersRef.current.toHeroReady);
+    clearTimeout(pendingTimersRef.current.toSweeping);
+    setHeroReady?.(true);
+    setIntroPlaying?.(false);
+    setPhase("done");
+  }
+
+  useEffect(() => {
+    if (phase === "done") return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Enter" || e.key === "Escape") {
+        e.preventDefault();
+        skip();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   // Runs on the render *after* mounted flips true — the <path> elements only
   // exist in the DOM from that render onward (gated by `!mounted` below), so
@@ -186,6 +230,8 @@ export default function IntroOverlay() {
       setPhase("sweeping");
       setMinted(true);
     }, DRAW_MS + HOLD_MS);
+
+    pendingTimersRef.current = { toHeroReady, toSweeping };
 
     return () => {
       clearTimeout(toHeroReady);
@@ -348,8 +394,27 @@ export default function IntroOverlay() {
           transition: bgFading ? `opacity ${BG_FADE_MS}ms ease` : "none",
           pointerEvents: bgFading ? "none" : "auto",
         }}
+        onClick={skip}
         aria-hidden="true"
       />
+
+      {/* Always clickable (not gated by bgFading, unlike the backdrop above)
+          so skip stays available for the whole playthrough, including the
+          final fade-out. Sits above every other overlay layer (highest of
+          99/101/102 used elsewhere here). */}
+      <button
+        type="button"
+        onClick={skip}
+        aria-label="Skip intro"
+        className="fixed right-5 top-5 z-[103] flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-xs text-[#eaf6ff] backdrop-blur-sm transition-colors hover:border-white/40 hover:bg-white/10"
+        style={{ textShadow: "0 0 6px rgba(127,183,255,0.6)" }}
+      >
+        Skip
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polygon points="5 4 15 12 5 20 5 4" />
+          <line x1="19" y1="5" x2="19" y2="19" />
+        </svg>
+      </button>
 
       <svg
         ref={svgRef}
