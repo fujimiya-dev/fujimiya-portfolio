@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import { useEffect, useRef, useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { PerformanceMonitor } from "@react-three/drei";
 import { EffectComposer, Bloom, SelectiveBloom } from "@react-three/postprocessing";
 import * as THREE from "three";
@@ -23,7 +23,47 @@ import GrassField from "./GrassField";
 import SkyBackdrop from "./SkyBackdrop";
 import ParallaxRig from "./ParallaxRig";
 import { useQualityTier, useReducedMotionFlag, usePageVisible } from "./useEnvironmentFlags";
-import { useIntroPlaying } from "@/components/IntroPlayingContext";
+import { useIntroPlaying, useSetSceneReady } from "@/components/IntroPlayingContext";
+
+// Reports "a real frame has actually been drawn" back to IntroOverlay's skip
+// path, via the SceneReady context — distinct from the Canvas merely being
+// mounted, since shader compilation + the first draw call still takes real,
+// variable time after that. Must render *inside* <Canvas> since useThree /
+// useFrame only work within the R3F tree.
+//
+// compileAsync (parallel shader compilation, available since three 0.159) is
+// fired here too, best-effort, so that first real draw call is cheaper when
+// it happens. But readiness itself is NOT gated on its promise settling —
+// deliberately: compileAsync's only purpose is to make the first frame's
+// render() call cheap; it is not a prerequisite for that frame to happen.
+// If render() runs before compileAsync resolves, three.js just compiles
+// synchronously as part of that render instead — slower, but by the time
+// useFrame's callback below actually fires, that cost has already been
+// paid either way, and it happened behind the still-opaque skip overlay
+// either way. Gating on the promise too (as an earlier version of this did)
+// risks never firing at all if it happens not to resolve in a given
+// environment, leaving sceneReady permanently false and every skip falling
+// back to IntroOverlay's 3-second safety timeout instead of its real signal.
+function SceneReadySignal() {
+  const setSceneReady = useSetSceneReady();
+  const firedRef = useRef(false);
+  const { gl, scene, camera } = useThree();
+
+  useEffect(() => {
+    const renderer = gl as unknown as {
+      compileAsync?: (scene: THREE.Scene, camera: THREE.Camera) => Promise<unknown>;
+    };
+    renderer.compileAsync?.(scene, camera).catch(() => {});
+  }, [gl, scene, camera]);
+
+  useFrame(() => {
+    if (firedRef.current) return;
+    firedRef.current = true;
+    setSceneReady?.(true);
+  });
+
+  return null;
+}
 
 export default function NightSkyScene() {
   const tier = useQualityTier();
@@ -81,6 +121,7 @@ export default function NightSkyScene() {
         camera={{ position: [0, 0, 12], fov: 50, near: 0.1, far: 100 }}
       >
         <color attach="background" args={["#05070f"]} />
+        <SceneReadySignal />
         <PerformanceMonitor onDecline={() => setDprBoost(false)} onIncline={() => setDprBoost(true)} />
         <ParallaxRig>
           <SkyBackdrop />

@@ -25,6 +25,18 @@ const SetIntroPlayingContext = createContext<Dispatch<SetStateAction<boolean>> |
 const HeroReadyContext = createContext(true);
 const SetHeroReadyContext = createContext<Dispatch<SetStateAction<boolean>> | null>(null);
 
+// Whether NightSkyScene has actually rendered a real frame yet (shaders
+// compiled, first draw call done) — distinct from HeroReady above, which
+// only means "allowed to mount". Starts false and is flipped once, by
+// NightSkyScene itself, the first time its render loop ticks after mount.
+// Consulted only by IntroOverlay's skip() path (see there for why): once
+// mounted/ready the scene stays mounted across the rest of the session
+// (confirmed by the existing heroReady behavior below), so this reflects
+// real readiness rather than going stale between an intro replay and a
+// later skip.
+const SceneReadyContext = createContext(false);
+const SetSceneReadyContext = createContext<Dispatch<SetStateAction<boolean>> | null>(null);
+
 // Forces IntroOverlay to remount from scratch, replaying the trace even
 // when the pathname doesn't change (e.g. clicking "Top" while already on
 // "/", scrolled down at #about — a plain pathname-keyed effect wouldn't
@@ -104,6 +116,7 @@ export function IntroPlayingProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [introPlaying, setIntroPlaying] = useState(() => willIntroPlay(pathname));
   const [heroReady, setHeroReady] = useState(() => !willIntroPlay(pathname));
+  const [sceneReady, setSceneReady] = useState(() => !willIntroPlay(pathname));
   const [introEpoch, setIntroEpoch] = useState(0);
 
   useEffect(() => {
@@ -116,6 +129,7 @@ export function IntroPlayingProvider({ children }: { children: ReactNode }) {
     if (!isHomePath(pathname)) {
       setIntroPlaying(false);
       setHeroReady(true);
+      setSceneReady(true);
     }
   }, [pathname]);
 
@@ -126,9 +140,13 @@ export function IntroPlayingProvider({ children }: { children: ReactNode }) {
       <IntroPlayingContext.Provider value={introPlaying}>
         <SetHeroReadyContext.Provider value={setHeroReady}>
           <HeroReadyContext.Provider value={heroReady}>
-            <BumpIntroEpochContext.Provider value={bumpIntroEpoch}>
-              <IntroEpochContext.Provider value={introEpoch}>{children}</IntroEpochContext.Provider>
-            </BumpIntroEpochContext.Provider>
+            <SetSceneReadyContext.Provider value={setSceneReady}>
+              <SceneReadyContext.Provider value={sceneReady}>
+                <BumpIntroEpochContext.Provider value={bumpIntroEpoch}>
+                  <IntroEpochContext.Provider value={introEpoch}>{children}</IntroEpochContext.Provider>
+                </BumpIntroEpochContext.Provider>
+              </SceneReadyContext.Provider>
+            </SetSceneReadyContext.Provider>
           </HeroReadyContext.Provider>
         </SetHeroReadyContext.Provider>
       </IntroPlayingContext.Provider>
@@ -150,6 +168,14 @@ export function useHeroReady() {
 
 export function useSetHeroReady() {
   return useContext(SetHeroReadyContext);
+}
+
+export function useSceneReady() {
+  return useContext(SceneReadyContext);
+}
+
+export function useSetSceneReady() {
+  return useContext(SetSceneReadyContext);
 }
 
 export function useIntroEpoch() {

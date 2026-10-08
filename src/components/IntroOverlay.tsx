@@ -7,6 +7,7 @@ import introPathDataMobile from "./introPathDataMobile.json";
 import {
   useSetIntroPlaying,
   useSetHeroReady,
+  useSceneReady,
   peekForcePlayIntro,
   clearForcePlayIntro,
   peekInitialAutoPlayIntro,
@@ -33,6 +34,19 @@ const PARTICLE_MAX_DIST = 280;
 // same time.
 const BG_FADE_DELAY_MS = 1300;
 const BG_FADE_MS = 900;
+// Skip path only (see skip()/beginReveal() below) — a dedicated black
+// overlay fades in over the in-progress trace, waits for the 3D scene to
+// actually be ready behind it, then fades back out. Kept deliberately
+// separate from the normal-playthrough timing above: that timeline is
+// untouched by any of this.
+const SKIP_FADE_IN_MS = 500;
+const SKIP_FADE_OUT_MS = 400;
+const SKIP_SAFETY_MS = 3000; // never leave the screen black longer than this
+const SKIP_WAITING_DOT_DELAY_MS = 800; // only shown if still waiting this long after fade-in completes
+// Same color as the backdrop below (#020308) — chosen over flat black so the
+// overlay reads as a continuation of the intro's own background rather than
+// a jump to a different color.
+const SKIP_OVERLAY_COLOR = "#020308";
 // Each glyph's own trace takes this fraction of DRAW_MS, with glyphs'
 // start times staggered evenly across the remaining span so consecutive
 // letters overlap slightly — reading as one continuous left-to-right
@@ -47,7 +61,7 @@ const NEON_FILTER = "drop-shadow(0 0 6px #1E40FF) drop-shadow(0 0 15px #7FB7FF)"
 const MINT_STROKE = "#a8f5c8";
 const MINT_FILTER = "drop-shadow(0 0 6px #3ecf8e) drop-shadow(0 0 15px #8ef0a0)";
 
-type Phase = "drawing" | "sweeping" | "done";
+type Phase = "drawing" | "sweeping" | "skip-transition" | "done";
 
 // Decides once, at mount, whether this playthrough should actually run.
 // The force-play flag (set by IntroTriggerLink — the "Fujimiya.dev" logo
@@ -85,6 +99,7 @@ function easeOutCubic(t: number) {
 export default function IntroOverlay() {
   const setIntroPlaying = useSetIntroPlaying();
   const setHeroReady = useSetHeroReady();
+  const sceneReady = useSceneReady();
   const [phase, setPhase] = useState<Phase>(() => (shouldPlayOnMount() ? "drawing" : "done"));
   // Holds the two setTimeout ids scheduled by the mount effect below
   // (hero-ready hand-off, sweep start) so skip() can cancel them. Without
@@ -109,6 +124,38 @@ export default function IntroOverlay() {
   const [isMobile, setIsMobile] = useState(false);
   const [minted, setMinted] = useState(false);
   const [bgFading, setBgFading] = useState(false);
+  // Skip-path overlay state — see skip()/beginReveal() below.
+  const [skipOverlayOpaque, setSkipOverlayOpaque] = useState(false);
+  const [skipTransitionMs, setSkipTransitionMs] = useState(SKIP_FADE_IN_MS);
+  // Wall-clock timestamp (performance.now()) of the moment the fade-in
+  // visually started (set at raf2 below) — read instead of a second
+  // "fadeInDone" timer/state so the "fade-in finished" condition is a plain
+  // elapsed-time comparison, not another scheduled callback waiting its own
+  // turn on the main thread. Two independently-scheduled timers (this one
+  // plus sceneReady's own useFrame-driven signal) compounded their delay
+  // under heavy main-thread contention — confirmed while profiling a cold
+  // scene mount, where the fade-in's own setTimeout fired nearly 2 seconds
+  // late because the WebGL draw calls in between were hogging the thread,
+  // even though the CSS opacity transition itself (compositor-driven, not
+  // main-thread-bound) had long since finished on screen.
+  const fadeInStartRef = useRef<number | null>(null);
+  // True once the fade-out to reveal Hero has begun — at that point the old
+  // trace/sweep backdrop, SVG and canvas are removed outright instead of
+  // fading, since the new overlay is already fully opaque black (identical
+  // to the old backdrop's own color) at that exact moment, so there's
+  // nothing for removing them to visibly disturb.
+  const [skipRevealing, setSkipRevealing] = useState(false);
+  const [showWaitingDot, setShowWaitingDot] = useState(false);
+  const skipTimersRef = useRef<{
+    raf1?: number;
+    raf2?: number;
+    raf3?: number;
+    waitingDot?: ReturnType<typeof setTimeout>;
+    safety?: ReturnType<typeof setTimeout>;
+    fadeOutDone?: ReturnType<typeof setTimeout>;
+    readyRecheck?: ReturnType<typeof setTimeout>;
+  }>({});
+  const fadeOutStartedRef = useRef(false);
   const pathRefs = useRef<(SVGPathElement | null)[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -160,17 +207,122 @@ export default function IntroOverlay() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Cancels the two pending timers (see pendingTimersRef above) and settles
-  // every context flag the end of a normal playthrough would, so skipping
-  // mid-animation lands in exactly the same state as letting it finish:
-  // hero mounted, frameloop handed back, overlay gone for good.
+  // Cancels the two pending timers (see pendingTimersRef above) and hands
+  // off to the "skip-transition" phase below instead of revealing Hero
+  // immediately — jumping straight to "done" here used to be the whole
+  // bug: Hero's text/layout is always-rendered page content that appears
+  // the instant the overlay is gone, but the 3D night-sky Canvas still has
+  // to mount, compile its shaders and draw a first real frame, which takes
+  // real (and variable) time. The skip-transition phase fades to a black
+  // overlay first, starts that work behind it, and only fades the overlay
+  // away once both the fade-in and the scene are actually ready — see
+  // beginReveal() and the effects below.
   function skip() {
+    if (phase !== "drawing" && phase !== "sweeping") return;
     clearTimeout(pendingTimersRef.current.toHeroReady);
     clearTimeout(pendingTimersRef.current.toSweeping);
-    setHeroReady?.(true);
-    setIntroPlaying?.(false);
-    setPhase("done");
+    setPhase("skip-transition");
   }
+
+  // Starts the overlay's fade-out, revealing Hero/NightSkyScene underneath.
+  // Called from two places — checkReady() below, and the 3-second safety
+  // timeout — so it's guarded against running twice.
+  function beginReveal() {
+    if (fadeOutStartedRef.current) return;
+    fadeOutStartedRef.current = true;
+    clearTimeout(skipTimersRef.current.safety);
+    clearTimeout(skipTimersRef.current.waitingDot);
+    clearTimeout(skipTimersRef.current.readyRecheck);
+    setShowWaitingDot(false);
+    setSkipRevealing(true);
+    setSkipTransitionMs(SKIP_FADE_OUT_MS);
+    setSkipOverlayOpaque(false);
+    skipTimersRef.current.fadeOutDone = setTimeout(() => {
+      setPhase("done");
+    }, SKIP_FADE_OUT_MS);
+  }
+
+  // The "both conditions met" gate: fade-in-elapsed is checked against the
+  // wall clock (fadeInStartRef) rather than via its own separate timer —
+  // see fadeInStartRef's comment above for why a second independently
+  // -scheduled timer was the wrong way to do this.
+  function checkReady() {
+    if (phase !== "skip-transition" || fadeOutStartedRef.current || !sceneReady) return;
+    const start = fadeInStartRef.current;
+    if (start === null) return; // fade-in hasn't started yet; raf2 below will re-trigger this check
+    const remaining = SKIP_FADE_IN_MS - (performance.now() - start);
+    clearTimeout(skipTimersRef.current.readyRecheck);
+    if (remaining <= 0) {
+      beginReveal();
+    } else {
+      skipTimersRef.current.readyRecheck = setTimeout(checkReady, remaining);
+    }
+  }
+
+  // Orchestrates the whole skip-transition phase: fade the new overlay in,
+  // wait 1-2 frames, then start preparing the 3D scene behind it, plus the
+  // 3-second safety fallback so the screen never stays black indefinitely.
+  useEffect(() => {
+    if (phase !== "skip-transition") return;
+
+    setSkipOverlayOpaque(false);
+    setSkipTransitionMs(SKIP_FADE_IN_MS);
+    fadeInStartRef.current = null;
+    setSkipRevealing(false);
+    setShowWaitingDot(false);
+    fadeOutStartedRef.current = false;
+
+    // Three chained frames: the first commits the overlay's initial
+    // opacity:0 paint, the second flips it to opaque (this is when the
+    // fade-in transition actually starts), the third — one frame after
+    // that — begins mounting/reusing the 3D scene, per "wait 1-2 frames,
+    // then begin scene preparation".
+    const raf1 = requestAnimationFrame(() => {
+      const raf2 = requestAnimationFrame(() => {
+        setSkipOverlayOpaque(true);
+        fadeInStartRef.current = performance.now();
+        skipTimersRef.current.waitingDot = setTimeout(
+          () => setShowWaitingDot(true),
+          SKIP_FADE_IN_MS + SKIP_WAITING_DOT_DELAY_MS
+        );
+        checkReady(); // in case sceneReady is already true (e.g. a post-skip replay)
+        const raf3 = requestAnimationFrame(() => {
+          setHeroReady?.(true);
+          // Flipped here rather than at the very end of the reveal so
+          // NightSkyScene's frameloop is already "always" (not "demand")
+          // while it's preparing behind the still-opaque overlay — that
+          // makes its first-frame-rendered signal (see SceneReadySignal in
+          // NightSkyScene.tsx) land promptly instead of depending on
+          // demand-mode's single implicit initial render.
+          setIntroPlaying?.(false);
+        });
+        skipTimersRef.current.raf3 = raf3;
+      });
+      skipTimersRef.current.raf2 = raf2;
+    });
+    skipTimersRef.current.raf1 = raf1;
+
+    skipTimersRef.current.safety = setTimeout(beginReveal, SKIP_SAFETY_MS);
+
+    return () => {
+      cancelAnimationFrame(skipTimersRef.current.raf1 ?? 0);
+      cancelAnimationFrame(skipTimersRef.current.raf2 ?? 0);
+      cancelAnimationFrame(skipTimersRef.current.raf3 ?? 0);
+      clearTimeout(skipTimersRef.current.waitingDot);
+      clearTimeout(skipTimersRef.current.safety);
+      clearTimeout(skipTimersRef.current.fadeOutDone);
+      clearTimeout(skipTimersRef.current.readyRecheck);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  // Re-checks the instant sceneReady itself flips true — the common case,
+  // since scene prep usually takes longer than the fade-in itself.
+  useEffect(() => {
+    if (phase !== "skip-transition") return;
+    checkReady();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, sceneReady]);
 
   useEffect(() => {
     if (phase === "done") return;
@@ -387,35 +539,65 @@ export default function IntroOverlay() {
 
   return createPortal(
     <>
-      <div
-        className="fixed inset-0 z-[99] bg-[#020308]"
-        style={{
-          opacity: bgFading ? 0 : 1,
-          transition: bgFading ? `opacity ${BG_FADE_MS}ms ease` : "none",
-          pointerEvents: bgFading ? "none" : "auto",
-        }}
-        onClick={skip}
-        aria-hidden="true"
-      />
+      {/* The pre-skip-reveal trace/sweep UI — removed outright (not faded)
+          once skipRevealing flips true, since by then the new overlay
+          below is already fully opaque in the exact same color, so there's
+          nothing for their removal to visibly disturb. */}
+      {!skipRevealing && (
+        <>
+          <div
+            className="fixed inset-0 z-[99] bg-[#020308]"
+            style={{
+              opacity: bgFading ? 0 : 1,
+              transition: bgFading ? `opacity ${BG_FADE_MS}ms ease` : "none",
+              pointerEvents: bgFading ? "none" : "auto",
+            }}
+            onClick={skip}
+            aria-hidden="true"
+          />
 
-      {/* Always clickable (not gated by bgFading, unlike the backdrop above)
-          so skip stays available for the whole playthrough, including the
-          final fade-out. Sits above every other overlay layer (highest of
-          99/101/102 used elsewhere here). */}
-      <button
-        type="button"
-        onClick={skip}
-        aria-label="Skip intro"
-        className="fixed right-5 top-5 z-[103] flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-xs text-[#eaf6ff] backdrop-blur-sm transition-colors hover:border-white/40 hover:bg-white/10"
-        style={{ textShadow: "0 0 6px rgba(127,183,255,0.6)" }}
-      >
-        Skip
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <polygon points="5 4 15 12 5 20 5 4" />
-          <line x1="19" y1="5" x2="19" y2="19" />
-        </svg>
-      </button>
+          {/* Always clickable (not gated by bgFading, unlike the backdrop above)
+              so skip stays available for the whole playthrough, including the
+              final fade-out. Sits above every other overlay layer (highest of
+              99/101/102 used elsewhere here). */}
+          <button
+            type="button"
+            onClick={skip}
+            aria-label="Skip intro"
+            className="fixed right-5 top-5 z-[103] flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-xs text-[#eaf6ff] backdrop-blur-sm transition-colors hover:border-white/40 hover:bg-white/10"
+            style={{ textShadow: "0 0 6px rgba(127,183,255,0.6)" }}
+          >
+            Skip
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polygon points="5 4 15 12 5 20 5 4" />
+              <line x1="19" y1="5" x2="19" y2="19" />
+            </svg>
+          </button>
+        </>
+      )}
 
+      {phase === "skip-transition" && (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center"
+          style={{
+            backgroundColor: SKIP_OVERLAY_COLOR,
+            opacity: skipOverlayOpaque ? 1 : 0,
+            transition: `opacity ${skipTransitionMs}ms ease`,
+            pointerEvents: skipRevealing ? "none" : "auto",
+          }}
+          onClick={skipRevealing ? undefined : skip}
+          aria-hidden="true"
+        >
+          {showWaitingDot && (
+            <span
+              className="h-2 w-2 rounded-full bg-[#7FB7FF]"
+              style={{ boxShadow: "0 0 10px 4px rgba(127,183,255,0.7)", animation: "moon-pulse 1.6s ease-in-out infinite" }}
+            />
+          )}
+        </div>
+      )}
+
+      {!skipRevealing && (
       <svg
         ref={svgRef}
         viewBox={data.viewBox}
@@ -459,8 +641,11 @@ export default function IntroOverlay() {
           />
         ))}
       </svg>
+      )}
 
-      <canvas ref={canvasRef} className="fixed inset-0 z-[102]" style={{ pointerEvents: "none", mixBlendMode: "screen" }} aria-hidden="true" />
+      {!skipRevealing && (
+        <canvas ref={canvasRef} className="fixed inset-0 z-[102]" style={{ pointerEvents: "none", mixBlendMode: "screen" }} aria-hidden="true" />
+      )}
     </>,
     document.body
   );
