@@ -114,56 +114,52 @@ body {
   }
 }
 
-/* Header background state: transparent over the Hero's first screen,
-   solid+blurred everywhere text needs to stay readable over moving
-   content. Only background-color/backdrop-filter/the border-line's
-   opacity transition — nothing that affects layout (header height/padding
-   never change between states, so the rest of the page never shifts) or
-   needs a compositor transform, keeping this cheap on mobile even with
-   the night-sky WebGL canvas already painting underneath. */
-/* No position here on purpose — the header is already `position: fixed`
-   via Tailwind's `fixed` utility class, which (being "positioned") already
-   gives ::after below a valid containing block on its own. Setting
-   `position: relative` here too previously fought that utility class for
-   the same property and — same specificity, this rule ordered later in
-   the stylesheet — won, silently turning the header back into a
-   normal-flow element that scrolled away with the page instead of
-   staying pinned. */
-.header-chrome {
-  transition: background-color 0.25s ease, backdrop-filter 0.25s ease;
-}
-
-.header-chrome::after {
+/* Header background state: transparent over the first screen of any page,
+   a soft top-to-bottom gradient (never a flat band) everywhere text needs
+   to stay readable over moving content. The gradient — background, blur,
+   and the mask that fades the blur out too — lives on ::before, sized
+   taller than the header itself and set behind the header's own content
+   (negative z-index), so the fade has room to resolve to fully transparent
+   past the header's bottom edge instead of being clipped exactly at it —
+   which is what read as a hard-edged "band" slicing through whatever's
+   behind it (the moon, in particular). Only this layer's opacity
+   transitions — the gradient/blur/mask values themselves never change, so
+   there's no expensive blur-radius animation, just a compositor-cheap
+   fade, and nothing here touches layout (header height/padding never
+   change between states) or needs a transform.
+   Do NOT add `position: relative` (or any `position`) to .header-chrome
+   itself to give ::before a containing block — the header is already
+   `position: fixed` via Tailwind's `fixed` utility class, which is
+   already "positioned" and already a valid containing block for an
+   absolutely-positioned ::before on its own. Declaring `position` here
+   too fights that utility class for the same property at equal
+   specificity; this rule, ordered later in the stylesheet, wins, which
+   has twice now silently turned the header back into a normal-flow
+   element that scrolls away with the page instead of staying pinned. */
+.header-chrome::before {
   content: "";
   position: absolute;
-  inset: auto 0 0 0;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(158, 212, 255, 0.4) 15%, rgba(158, 212, 255, 0.4) 85%, transparent);
-  opacity: 0;
-  transition: opacity 0.25s ease;
+  inset: 0 0 auto 0;
+  height: 150%;
+  z-index: -1;
   pointer-events: none;
-}
-
-.header-transparent {
-  background-color: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-.header-solid {
-  background-color: rgba(5, 15, 25, 0.6);
+  background: linear-gradient(to bottom, rgba(5, 15, 25, 0.75) 0%, rgba(5, 15, 25, 0.75) 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
-.header-solid::after {
+.header-solid::before {
   opacity: 1;
 }
 
-/* backdrop-filter unsupported: fall back to a more opaque background so
-   text underneath stays readable without the blur doing part of the work. */
+/* backdrop-filter unsupported: fall back to a darker gradient so text
+   underneath stays readable without the blur doing part of the work. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .header-solid {
-    background-color: rgba(5, 15, 25, 0.88);
+  .header-chrome::before {
+    background: linear-gradient(to bottom, rgba(5, 15, 25, 0.92) 0%, rgba(5, 15, 25, 0.92) 60%, transparent 100%);
   }
 }
