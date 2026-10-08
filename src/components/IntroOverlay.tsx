@@ -196,10 +196,20 @@ export default function IntroOverlay() {
     // React has actually hydrated and is about to make the real decision
     // below (play, skip straight to "done" for reduced motion, etc.) —
     // unconditional and first thing in this effect so it fires the same way
-    // regardless of which branch runs after it. A no-op if it's already
-    // gone (removed by layout.tsx's own inline script for a hash landing,
-    // or simply not rendered at all for a soft-navigation remount).
-    document.getElementById("intro-preboot")?.remove();
+    // regardless of which branch runs after it. Hidden via style, same as
+    // layout.tsx's own inline script — never .remove()'d: that div is
+    // permanently present in the tree now (layout.tsx renders it on every
+    // route, just hidden via `display` off the home route), specifically
+    // so this effect never has to fight React over a node React still
+    // thinks exists. An earlier version called .remove() here, which
+    // crashed on the next client-side navigation away from "/" (React's
+    // own reconciliation then tried to remove/reorder that already-gone
+    // node and threw NotFoundError) — see layout.tsx's comment for the
+    // full history. A no-op if already hidden (layout.tsx's own inline
+    // script already hid it for a hash landing, or this is a soft-
+    // navigation remount where it was never shown in the first place).
+    const preboot = document.getElementById("intro-preboot");
+    if (preboot) preboot.style.display = "none";
 
     const mq = window.matchMedia("(max-width: 1023px)");
     setIsMobile(mq.matches);
