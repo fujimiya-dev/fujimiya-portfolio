@@ -77,7 +77,7 @@ export default function MobileMenu({
                       className={`px-5 py-2 font-serif text-3xl transition-colors ${
                         active
                           ? "text-[#eaf6ff] [text-shadow:0_0_16px_rgba(127,183,255,0.7)]"
-                          : "text-ink-soft hover:text-[#eaf6ff]"
+                          : "hover-glow-text"
                       }`}
                     >
                       {link.label}

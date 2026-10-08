@@ -62,7 +62,7 @@ export default function ResearchExplorer({ items, locale }: { items: ResearchIte
               </figure>
               <div>
                 <span className="mb-2 block text-xs tracking-wide text-accent-blue">{translateTag(item.stage, locale)}</span>
-                <h3 className="mb-4 font-label text-xl font-bold leading-relaxed transition-colors group-hover:text-accent-teal">
+                <h3 className="hover-glow-card-title mb-4 font-label text-xl font-bold leading-relaxed">
                   {item.title}
                 </h3>
                 <p className="mb-4 whitespace-pre-line text-sm text-ink-soft">{item.cardSummary || item.summary}</p>

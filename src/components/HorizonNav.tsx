@@ -116,7 +116,7 @@ export default function HorizonNav({ links }: { links: NavLink[] }) {
               className={`relative text-[16px] font-medium transition-colors ${
                 active
                   ? "text-[#eaf6ff] [text-shadow:0_0_12px_rgba(127,183,255,0.65)]"
-                  : "text-[#93a3c2] [text-shadow:0_1px_4px_rgba(2,8,20,0.75)] hover:text-[#eaf6ff]"
+                  : "hover-glow-text"
               }`}
             >
               {link.label}

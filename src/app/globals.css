@@ -107,6 +107,86 @@ body {
   box-shadow: 0 4px 6px -6px rgba(30, 64, 255, 0.5);
 }
 
+/* Hover/focus treatment for secondary link-like text (nav items, the JA/EN
+   toggle, the footer link, Works/Research card titles) — previously these
+   went solid-white -> a pale blue (#eaf6ff) on hover, which actually read
+   as *less* visible against this site's own blue night-sky backdrop.
+   Replaced with the opposite direction: a slightly dimmed default (so
+   hover/focus has somewhere brighter to go) that becomes pure white plus a
+   soft glow, instead of changing hue. The glow reuses the exact colors the
+   page titles' own glow uses (SectionHeading.tsx's GLOW_FILTER / the
+   Fujimiya.dev logo's text-shadow: core #eaf6ff, mid #7FB7FF, outer
+   #1E40FF) — not a new color — just with far smaller blur radii (roughly a
+   third), since this is small body/label text where the title's full-size
+   blur would smear the letterforms instead of reading as a glow. */
+:root {
+  --link-default-color: rgba(255, 255, 255, 0.9);
+  --link-hover-color: #fff;
+  --link-hover-glow: 0 0 1px #eaf6ff, 0 0 4px #7fb7ff, 0 0 7px #1e40ff;
+  /* The subtle dark halo nav/JA-EN text already had, kept for the default
+     (non-hover) state — these sit over the animated night-sky scene itself
+     wherever the header is still in its transparent state, so legibility
+     against whatever happens to be behind them (bright moon, grass
+     highlights, etc.) still needs this regardless of the text color
+     change above it. */
+  --link-default-shadow: 0 1px 4px rgba(2, 8, 20, 0.75);
+  /* Card titles (Works/Research) got --link-hover-glow at first, then a
+     dimmed-down version of the same blue glow — but any blurred *light*
+     text-shadow behind already-bright (near-white -> white) text softens
+     the glyph edges themselves, which read as "blurry" rather than
+     "glowing" at text-xl. Replaced with the opposite approach: a dark
+     shadow (near the page's own background navy, not a light color) that
+     darkens what's *behind* the letterforms instead of blurring them —
+     the same trick a drop-shadow/outline uses to keep text readable over
+     a busy photo. Two layers: a tight one that reads as a crisp contrast
+     edge right at the glyph boundary, and a wider, softer one that dims a
+     larger halo behind the text so it still stands out over something
+     bright directly behind it (the moon, the Milky Way band). This is its
+     own, separately-tunable variable (not shared with --link-hover-glow)
+     specifically so card titles can be adjusted here without touching
+     nav/JA-EN/footer. */
+  --card-title-hover-shadow: 0 1px 3px rgba(0, 8, 40, 0.8), 0 2px 8px rgba(0, 8, 40, 0.5);
+}
+
+/* Self-hover (nav links, JA/EN buttons, footer link): the hovered/focused
+   element IS the text. */
+.hover-glow-text {
+  color: var(--link-default-color);
+  text-shadow: var(--link-default-shadow);
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+@media (hover: hover) {
+  .hover-glow-text:hover {
+    color: var(--link-hover-color);
+    text-shadow: var(--link-hover-glow);
+  }
+}
+
+.hover-glow-text:focus-visible {
+  color: var(--link-hover-color);
+  text-shadow: var(--link-hover-glow);
+}
+
+/* Group-hover (Works/Research cards): the hoverable area is the whole card
+   (an <a class="group">), not just the title text inside it. */
+.hover-glow-card-title {
+  color: var(--link-default-color);
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+@media (hover: hover) {
+  .group:hover .hover-glow-card-title {
+    color: var(--link-hover-color);
+    text-shadow: var(--card-title-hover-shadow);
+  }
+}
+
+.group:focus-visible .hover-glow-card-title {
+  color: var(--link-hover-color);
+  text-shadow: var(--card-title-hover-shadow);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *{
     animation-duration: 0.01ms !important;

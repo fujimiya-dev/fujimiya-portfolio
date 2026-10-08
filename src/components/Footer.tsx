@@ -16,7 +16,7 @@ export default async function Footer() {
   return (
     <footer className="relative z-[2] py-6 text-center text-xs text-ink-faint [text-shadow:0_0_10px_rgba(127,183,255,0.25)]">
       <nav className="mb-2">
-        <Link href={withLocale("/privacy", locale)} className="neon-link hover:text-[#eaf6ff]">
+        <Link href={withLocale("/privacy", locale)} className="hover-glow-text">
           {dict.footer.privacyPolicy}
         </Link>
       </nav>

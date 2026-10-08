@@ -20,7 +20,7 @@ function localizedPath(pathname: string, locale: Locale): string {
 // Same text treatment as HorizonNav's page items, so JA/EN reads as part
 // of the same row rather than a visually distinct control bolted on.
 const ACTIVE_TEXT = "text-[#eaf6ff] [text-shadow:0_0_12px_rgba(127,183,255,0.65)]";
-const INACTIVE_TEXT = "text-[#93a3c2] [text-shadow:0_1px_4px_rgba(2,8,20,0.75)] hover:text-[#eaf6ff]";
+const INACTIVE_TEXT = "hover-glow-text";
 
 export default function LanguageToggle({
   current,

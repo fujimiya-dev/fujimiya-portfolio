@@ -168,7 +168,7 @@ export default function WorksExplorer({
         {filtered.map((work) => (
           <RevealFade key={work.id}>
             <Link href={withLocale(`/works/${work.slug}`, locale)} className="group block h-full">
-              <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition-all group-hover:border-accent-teal/50 group-hover:shadow-[0_0_24px_rgba(30,64,255,0.18)]">
+              <article className="glass-panel flex h-full flex-col overflow-hidden rounded-sm transition-all group-hover:border-accent-teal/70 group-hover:shadow-[0_0_28px_rgba(30,64,255,0.28)]">
                 <div className="relative aspect-video border-b border-white/10 bg-white/[0.02]">
                   {work.imageUrl ? (
                     <Image
@@ -185,7 +185,7 @@ export default function WorksExplorer({
                   )}
                 </div>
                 <div className="flex flex-1 flex-col p-6">
-                  <h3 className="font-label text-xl font-bold transition-colors group-hover:text-accent-teal">
+                  <h3 className="hover-glow-card-title font-label text-xl font-bold">
                     {work.title}
                   </h3>
                   <span className="mb-3 mt-1 block text-xs text-ink-faint">
