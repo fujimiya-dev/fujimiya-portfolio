@@ -113,3 +113,57 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Header background state: transparent over the Hero's first screen,
+   solid+blurred everywhere text needs to stay readable over moving
+   content. Only background-color/backdrop-filter/the border-line's
+   opacity transition — nothing that affects layout (header height/padding
+   never change between states, so the rest of the page never shifts) or
+   needs a compositor transform, keeping this cheap on mobile even with
+   the night-sky WebGL canvas already painting underneath. */
+/* No position here on purpose — the header is already `position: fixed`
+   via Tailwind's `fixed` utility class, which (being "positioned") already
+   gives ::after below a valid containing block on its own. Setting
+   `position: relative` here too previously fought that utility class for
+   the same property and — same specificity, this rule ordered later in
+   the stylesheet — won, silently turning the header back into a
+   normal-flow element that scrolled away with the page instead of
+   staying pinned. */
+.header-chrome {
+  transition: background-color 0.25s ease, backdrop-filter 0.25s ease;
+}
+
+.header-chrome::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(158, 212, 255, 0.4) 15%, rgba(158, 212, 255, 0.4) 85%, transparent);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.header-transparent {
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.header-solid {
+  background-color: rgba(5, 15, 25, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.header-solid::after {
+  opacity: 1;
+}
+
+/* backdrop-filter unsupported: fall back to a more opaque background so
+   text underneath stays readable without the blur doing part of the work. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .header-solid {
+    background-color: rgba(5, 15, 25, 0.88);
+  }
+}

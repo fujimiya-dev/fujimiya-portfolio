@@ -4,6 +4,7 @@ import LanguageToggle from "@/components/LanguageToggle";
 import MobileMenu from "@/components/MobileMenu";
 import IntroTriggerLink from "@/components/IntroTriggerLink";
 import DesktopNavBar from "@/components/DesktopNavBar";
+import HeaderChrome from "@/components/HeaderChrome";
 
 export default async function TopNav() {
   const [dict, locale] = await Promise.all([getDictionary(), getLocale()]);
@@ -27,7 +28,7 @@ export default async function TopNav() {
   );
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-5 py-4">
+    <HeaderChrome>
       {/* Mobile/narrow-desktop: plain left-logo / right-controls row.
           HorizonNav hides itself below `lg` (1024px) — below this there's
           no "centered group" to speak of here; this matches the layout
@@ -57,6 +58,6 @@ export default async function TopNav() {
           this was attempted here — moving both concerns into one client
           component keeps that measurement local to what it depends on). */}
       <DesktopNavBar links={links} locale={locale} homeHref={withLocale("/", locale)} />
-    </header>
+    </HeaderChrome>
   );
 }

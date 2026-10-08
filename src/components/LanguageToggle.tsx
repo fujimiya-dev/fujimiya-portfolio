@@ -20,7 +20,7 @@ function localizedPath(pathname: string, locale: Locale): string {
 // Same text treatment as HorizonNav's page items, so JA/EN reads as part
 // of the same row rather than a visually distinct control bolted on.
 const ACTIVE_TEXT = "text-[#eaf6ff] [text-shadow:0_0_12px_rgba(127,183,255,0.65)]";
-const INACTIVE_TEXT = "text-[#93a3c2] hover:text-[#eaf6ff]";
+const INACTIVE_TEXT = "text-[#93a3c2] [text-shadow:0_1px_4px_rgba(2,8,20,0.75)] hover:text-[#eaf6ff]";
 
 export default function LanguageToggle({
   current,
@@ -57,10 +57,10 @@ export default function LanguageToggle({
         const active = current === locale;
         return (
           <div key={locale} className="relative flex items-center">
-            {i === 1 && <span className="mr-1.5 text-[15px] text-[#93a3c2]">/</span>}
+            {i === 1 && <span className="mr-1.5 text-[16px] text-[#93a3c2]">/</span>}
             <button
               onClick={() => choose(locale)}
-              className={`relative text-[15px] transition-colors ${active ? ACTIVE_TEXT : INACTIVE_TEXT}`}
+              className={`relative text-[16px] font-medium transition-colors ${active ? ACTIVE_TEXT : INACTIVE_TEXT}`}
               aria-current={active}
             >
               {locale.toUpperCase()}
