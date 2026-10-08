@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import localFont from "next/font/local";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
@@ -90,6 +91,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const locale = await getLocale();
+  // Set by middleware.ts from the request path, before the "/en" rewrite —
+  // true only for "/" and "/en", the two paths that render page.tsx (and
+  // so the only ones IntroOverlay may ever autoplay on). See the comment on
+  // #intro-preboot below for why this needs to be known this early.
+  const isHome = (await headers()).get("x-is-home") === "1";
 
   return (
     <html
@@ -97,6 +103,62 @@ export default async function RootLayout({
       className={`${zenOldMincho.variable} ${zenKaku.variable} ${hinaMincho.variable} ${hinaMinchoLabel.variable} ${nothingYouCouldDo.variable}`}
     >
       <body className="grid min-h-screen grid-rows-[1fr_auto] font-sans">
+        {isHome && (
+          <>
+            {/* Covers the screen in the intro's own black (#020308) from the
+                very first byte of HTML — before the JS bundle loads, before
+                React hydrates — so there's no gap where the plain page
+                (Hero text, nav, CSS-only sky gradient) is visible ahead of
+                the intro. IntroOverlay can't render anything itself until
+                after hydration confirms document.body exists (it portals
+                there), which left exactly that gap. Rendered as a sibling
+                of NightSky/TopNav/main below — not nested inside main's own
+                stacking context — at the maximum z-index, so it reliably
+                covers the header too (same reason IntroOverlay itself
+                portals to document.body instead of z-index-ing from inside
+                main).
+                Hidden (never removed — see suppressHydrationWarning below)
+                by whichever of these actually ends up happening:
+                - the inline script below, synchronously, if the URL already
+                  has a hash (intro won't autoplay — e.g. "/#about")
+                - the inline script's own 5s fallback timer, if hydration
+                  never completes at all (paired with the <noscript> rule
+                  below, which acts immediately rather than waiting 5s, for
+                  the simpler "JS is just disabled" case specifically)
+                Actually removed from the DOM by IntroOverlay's own mount
+                effect, once React has hydrated and made the real decision
+                (plays, or doesn't — covers prefers-reduced-motion too) —
+                not by the inline script, and deliberately via style.display
+                rather than removing the node when the script itself needs
+                to act first: this div is part of React's own hydrated tree
+                (it's JSX output from this Server Component), so mutating
+                the DOM out from under React *before* hydration runs — which
+                the hash/fallback cases above need to do, since they can by
+                definition fire before the JS bundle has even loaded — must
+                leave the node itself in place for React to hydrate against,
+                or hydration fails with a "server/client markup mismatch"
+                error (confirmed: removing it here instead of hiding it
+                threw exactly that on a hash landing). suppressHydrationWarning
+                tells React not to complain about *this element's own*
+                attributes changing underneath it (the style mutation),
+                which is exactly what it's for. */}
+            <div
+              id="intro-preboot"
+              aria-hidden="true"
+              suppressHydrationWarning
+              style={{ position: "fixed", inset: 0, zIndex: 2147483647, background: "#020308" }}
+            />
+            <noscript>
+              <style>{"#intro-preboot{display:none!important}"}</style>
+            </noscript>
+            <script
+              dangerouslySetInnerHTML={{
+                __html:
+                  "(function(){try{function c(){var e=document.getElementById('intro-preboot');if(e)e.style.display='none';}if(location.hash){c();return;}setTimeout(c,5000);}catch(e){}})();",
+              }}
+            />
+          </>
+        )}
         <IntroPlayingProvider>
           <NightSky />
           <TopNav />

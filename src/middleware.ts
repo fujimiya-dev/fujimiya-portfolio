@@ -30,6 +30,11 @@ export default async function middleware(request: NextRequest) {
   const isEn = pathname === "/en" || pathname.startsWith("/en/");
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-locale", isEn ? "en" : "ja");
+  // Lets the root layout render a pre-hydration black cover (see layout.tsx)
+  // only on the two paths that actually render page.tsx (home) — exactly
+  // the paths IntroOverlay itself may autoplay on. Computed from the
+  // original request path, before the "/en" rewrite below.
+  requestHeaders.set("x-is-home", pathname === "/" || pathname === "/en" ? "1" : "0");
 
   if (isEn) {
     const url = request.nextUrl.clone();

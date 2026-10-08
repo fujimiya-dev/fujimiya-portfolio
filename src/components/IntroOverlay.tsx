@@ -173,6 +173,16 @@ export default function IntroOverlay() {
   const data = isMobile ? introPathDataMobile : introPathData;
 
   useEffect(() => {
+    // Hands off from layout.tsx's pre-hydration black cover (#intro-preboot
+    // — see the comment there) to this component's own rendering, now that
+    // React has actually hydrated and is about to make the real decision
+    // below (play, skip straight to "done" for reduced motion, etc.) —
+    // unconditional and first thing in this effect so it fires the same way
+    // regardless of which branch runs after it. A no-op if it's already
+    // gone (removed by layout.tsx's own inline script for a hash landing,
+    // or simply not rendered at all for a soft-navigation remount).
+    document.getElementById("intro-preboot")?.remove();
+
     const mq = window.matchMedia("(max-width: 1023px)");
     setIsMobile(mq.matches);
     const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
