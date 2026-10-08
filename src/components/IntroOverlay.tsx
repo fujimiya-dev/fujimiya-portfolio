@@ -124,6 +124,24 @@ export default function IntroOverlay() {
   const [isMobile, setIsMobile] = useState(false);
   const [minted, setMinted] = useState(false);
   const [bgFading, setBgFading] = useState(false);
+  // False from the SVG's very first render (the one where `mounted` just
+  // flipped true) until the dasharray-setup effect below has actually run
+  // and put every glyph into its hidden, undrawn state. Without this gate,
+  // that first render paints the <path> elements with no dasharray applied
+  // yet — i.e. the complete "Welcome to..." stroke, fully drawn — and
+  // that's a real, visible frame: setting dasharray happens in a *later*
+  // effect (gated on `mounted`, since the <path> refs don't exist until
+  // the render mounted=true itself produces), which React runs only after
+  // committing (and the browser painting) that first render. Gating the
+  // whole SVG's opacity on this instead of relying on effect-ordering means
+  // the unsafe "full text, no dasharray yet" state is simply never opaque,
+  // regardless of how many frames pass before the hiding effect runs —
+  // and since both the dasharray mutation and this flag flip happen inside
+  // the same synchronous effect body, there's no intermediate commit where
+  // dasharray is still unset but this is already true. Applies equally to
+  // every (re)mount — the hard-load path *and* a logo-click replay, which
+  // remounts this whole component fresh via IntroOverlayHost's epoch key.
+  const [glyphsReady, setGlyphsReady] = useState(false);
   // Skip-path overlay state — see skip()/beginReveal() below.
   const [skipOverlayOpaque, setSkipOverlayOpaque] = useState(false);
   const [skipTransitionMs, setSkipTransitionMs] = useState(SKIP_FADE_IN_MS);
@@ -368,6 +386,11 @@ export default function IntroOverlay() {
       el.style.strokeDashoffset = `${length}`;
     }
     glyphLengthsRef.current = lengths;
+    // Only safe to reveal the SVG (see glyphsReady's own comment above) once
+    // every glyph is already in the hidden state set just above — same
+    // synchronous effect body, so there's no commit in between where one is
+    // true but not the other.
+    setGlyphsReady(true);
     // Force a synchronous layout flush so the browser actually commits this
     // fully-hidden state before the transitions are enabled below —
     // without it, a single rAF can still get coalesced with this write and
@@ -632,6 +655,11 @@ export default function IntroOverlay() {
           // color and vanishes individually as the sweep passes over it —
           // see the per-glyph opacity transition set in the tick loop above.
           filter: minted ? MINT_FILTER : NEON_FILTER,
+          // No transition on this one deliberately — see glyphsReady's own
+          // comment. It's a correctness gate (hidden until safe to show),
+          // not a designed fade, so it must flip instantly together with
+          // the dasharray state it's paired with.
+          opacity: glyphsReady ? 1 : 0,
           transition: `filter ${SWEEP_MS}ms ease`,
         }}
         aria-hidden="true"
