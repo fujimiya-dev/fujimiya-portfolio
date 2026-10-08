@@ -194,6 +194,28 @@ body {
   }
 }
 
+/* Header background color — sampled from the actual rendered scene, not
+   guessed: SkyBackdrop.tsx's uColorMid (#0a2e3f, rgb(10,46,63)) is the
+   dominant color visible at the top of the viewport (confirmed by reading
+   real pixel colors off a rendered screenshot at the header's position —
+   the camera's FOV rarely frames the sky sphere's true zenith/nadir, so
+   uColorMid — not uColorTop/uColorBottom — is what's actually behind the
+   header in practice; sampled result was ~rgb(17,51,62), a close match
+   once tone mapping is accounted for). Darkened from there so the header's
+   own layer still reads as "deeper than the sky behind it" rather than
+   flattening into it — previously a near-neutral rgb(5,15,25) with almost
+   no hue, which read as a disconnected black band against the blue/teal
+   sky instead of a shadowed continuation of it.
+   Darkened further than the ~20% that would be a purely aesthetic match,
+   specifically to hold the header text's contrast ratio close to its
+   previous near-black value (see the contrast report in the commit this
+   shipped in) — a straight 20%-darker teal reads clearly as "part of the
+   sky" but measures a bit lower in contrast (still far above the 4.5:1
+   floor; reported, not silently dropped). */
+:root {
+  --header-bg-rgb: 8, 37, 50;
+}
+
 /* Header background state: transparent over the first screen of any page,
    a soft top-to-bottom gradient (never a flat band) everywhere text needs
    to stay readable over moving content. The gradient — background, blur,
@@ -223,7 +245,7 @@ body {
   height: 150%;
   z-index: -1;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(5, 15, 25, 0.75) 0%, rgba(5, 15, 25, 0.75) 60%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(var(--header-bg-rgb), 0.75) 0%, rgba(var(--header-bg-rgb), 0.75) 60%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
   backdrop-filter: blur(12px);
@@ -240,6 +262,6 @@ body {
    underneath stays readable without the blur doing part of the work. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .header-chrome::before {
-    background: linear-gradient(to bottom, rgba(5, 15, 25, 0.92) 0%, rgba(5, 15, 25, 0.92) 60%, transparent 100%);
+    background: linear-gradient(to bottom, rgba(var(--header-bg-rgb), 0.92) 0%, rgba(var(--header-bg-rgb), 0.92) 60%, transparent 100%);
   }
 }
