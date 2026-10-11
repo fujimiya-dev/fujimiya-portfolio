@@ -10,7 +10,10 @@ export default async function EditExperiencePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const item = await prisma.experience.findUnique({ where: { id }, include: { translations: true } });
+  const [item, works] = await Promise.all([
+    prisma.experience.findUnique({ where: { id }, include: { translations: true } }),
+    prisma.work.findMany({ orderBy: { order: "asc" }, select: { id: true, title: true } }),
+  ]);
   if (!item) notFound();
 
   const boundUpdate = updateExperience.bind(null, item.id);
@@ -28,6 +31,7 @@ export default async function EditExperiencePage({
             summaryEn: en?.summary,
           }}
           submitLabel="更新する"
+          allWorks={works}
         />
       </div>
       <AdminListBackButton href="/admin/experience" label="Experience編集一覧へ" />

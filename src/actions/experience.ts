@@ -26,6 +26,10 @@ function buildExperienceData(formData: FormData) {
     dateLabel: String(formData.get("dateLabel")),
     summary: String(formData.get("summary")),
     tags: parseTags(String(formData.get("tags") ?? "")),
+    // Checkbox list order in ExperienceForm follows Work.order, and getAll()
+    // preserves DOM order — so this is already in display order, with no
+    // separate reordering step needed.
+    workIds: formData.getAll("workIds").map(String),
   };
 }
 

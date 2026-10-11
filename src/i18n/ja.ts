@@ -45,6 +45,7 @@ export const ja: Dictionary = {
     searchPlaceholder: "キーワードや使用技術で検索（例：ハッカソン、インターン、Python）",
     filterByCategory: "カテゴリー別に絞り込み",
     empty: "該当する経験が見つかりませんでした。",
+    viewWork: "作品をみる",
   },
   research: {
     eyebrow: "研究",
