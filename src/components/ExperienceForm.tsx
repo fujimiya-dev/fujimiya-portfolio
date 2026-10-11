@@ -5,6 +5,7 @@ type ExperienceFormValues = {
   dateLabel?: string;
   summary?: string;
   tags?: string[];
+  workIds?: string[];
   orgEn?: string | null;
   dateLabelEn?: string | null;
   summaryEn?: string | null;
@@ -17,11 +18,17 @@ export default function ExperienceForm({
   action,
   defaultValues,
   submitLabel,
+  allWorks,
 }: {
   action: (formData: FormData) => void;
   defaultValues?: ExperienceFormValues;
   submitLabel: string;
+  // 全Work(id/title)。並び順(Work.order昇順)で渡される前提 — チェックボックスを
+  // 並び替えるUIは用意していないため、保存時はこの表示順がそのままworkIdsの
+  // 並び順(=「作品をみる」ボタンの表示順)になる。
+  allWorks: { id: string; title: string }[];
 }) {
+  const selectedWorkIds = new Set(defaultValues?.workIds ?? []);
   return (
     <form action={action} className="space-y-5">
       <LocaleTabs
@@ -63,6 +70,31 @@ export default function ExperienceForm({
         <label className="mb-1 block text-xs text-ink-faint">タグ（カンマ区切り。例：チーム開発, ハッカソン）</label>
         <input name="tags" defaultValue={defaultValues?.tags?.join(", ")} className={fieldClass} />
       </div>
+
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">
+          関連する作品（任意、複数選択可。公開ページに「作品をみる」ボタンが表示されます）
+        </label>
+        {allWorks.length === 0 ? (
+          <p className="text-sm text-ink-faint">登録されている作品がありません。</p>
+        ) : (
+          <div className="space-y-1.5 rounded-sm border border-white/10 p-3">
+            {allWorks.map((work) => (
+              <label key={work.id} className="flex items-center gap-2 text-sm text-ink-soft">
+                <input
+                  type="checkbox"
+                  name="workIds"
+                  value={work.id}
+                  defaultChecked={selectedWorkIds.has(work.id)}
+                  className="accent-accent-teal"
+                />
+                {work.title}
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="flex justify-center">
         <button
           type="submit"

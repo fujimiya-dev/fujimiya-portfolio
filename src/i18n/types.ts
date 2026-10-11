@@ -52,6 +52,7 @@ export type Dictionary = {
     searchPlaceholder: string;
     filterByCategory: string;
     empty: string;
+    viewWork: string;
   };
   research: {
     eyebrow: string;

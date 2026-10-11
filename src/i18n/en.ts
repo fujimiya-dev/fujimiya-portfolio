@@ -45,6 +45,7 @@ export const en: Dictionary = {
     searchPlaceholder: "Search by keyword or tech stack (e.g. Hackathon, Internship, Python)",
     filterByCategory: "Filter by category",
     empty: "No matching experience found.",
+    viewWork: "View Work",
   },
   research: {
     eyebrow: "Research",

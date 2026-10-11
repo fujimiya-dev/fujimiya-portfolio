@@ -60,6 +60,7 @@ model Experience {
   dateLabel String
   summary   String
   tags      String[]
+  workIds   String[] @default([]) // 関連するWork.id。並び順=ボタンの表示順(Work側のリレーションは持たない、WorksのteamSize等と同じ非正規化パターン)
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

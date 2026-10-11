@@ -5,7 +5,7 @@ import { RevealGlow } from "@/components/RevealSection";
 import SectionHeading from "@/components/SectionHeading";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { withLocale } from "@/i18n/path";
-import { resolveExperience } from "@/lib/resolveTranslation";
+import { resolveExperience, resolveWork } from "@/lib/resolveTranslation";
 
 export const revalidate = 0;
 
@@ -15,7 +15,24 @@ export default async function ExperiencePage() {
     getDictionary(),
     getLocale(),
   ]);
-  const resolved = items.map((item) => resolveExperience(item, locale));
+
+  const allWorkIds = Array.from(new Set(items.flatMap((item) => item.workIds)));
+  const works =
+    allWorkIds.length > 0
+      ? await prisma.work.findMany({ where: { id: { in: allWorkIds } }, include: { translations: true } })
+      : [];
+  const workById = new Map(works.map((work) => [work.id, resolveWork(work, locale)]));
+
+  const resolved = items.map((item) => ({
+    ...resolveExperience(item, locale),
+    // Preserves workIds' own order (the admin-selected display order) and
+    // silently drops any id whose Work has since been deleted, rather than
+    // relying on findMany()'s (unordered) result order or erroring.
+    works: item.workIds
+      .map((id) => workById.get(id))
+      .filter((work): work is NonNullable<typeof work> => work != null)
+      .map((work) => ({ slug: work.slug, title: work.title })),
+  }));
 
   return (
     <section className="mx-auto max-w-4xl px-6 pb-24 pt-32">
