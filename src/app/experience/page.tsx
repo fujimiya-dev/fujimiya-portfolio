@@ -10,18 +10,22 @@ import { resolveExperience, resolveWork } from "@/lib/resolveTranslation";
 export const revalidate = 0;
 
 export default async function ExperiencePage() {
-  const [items, dict, locale] = await Promise.all([
+  // Work is fetched in full (same query /works/page.tsx already runs) in the
+  // same Promise.all as the Experience query, instead of a separate
+  // `where: { id: { in: allWorkIds } }` query issued *after* awaiting the
+  // Experience query — that second query depended on allWorkIds (derived
+  // from the first query's result), forcing two round-trips to the database
+  // in sequence. Works tables are small, so fetching all of them unfiltered
+  // and narrowing to each Experience's workIds in JS below removes that
+  // dependency entirely, cutting one full DB round-trip off this page.
+  const [items, allWorks, dict, locale] = await Promise.all([
     prisma.experience.findMany({ orderBy: { order: "asc" }, include: { translations: true } }),
+    prisma.work.findMany({ include: { translations: true } }),
     getDictionary(),
     getLocale(),
   ]);
 
-  const allWorkIds = Array.from(new Set(items.flatMap((item) => item.workIds)));
-  const works =
-    allWorkIds.length > 0
-      ? await prisma.work.findMany({ where: { id: { in: allWorkIds } }, include: { translations: true } })
-      : [];
-  const workById = new Map(works.map((work) => [work.id, resolveWork(work, locale)]));
+  const workById = new Map(allWorks.map((work) => [work.id, resolveWork(work, locale)]));
 
   const resolved = items.map((item) => ({
     ...resolveExperience(item, locale),
