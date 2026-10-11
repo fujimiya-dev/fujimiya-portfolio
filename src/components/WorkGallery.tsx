@@ -6,7 +6,20 @@ import RetryImage from "@/components/RetryImage";
 
 const VISIBLE_COUNT = 3;
 
-export default function WorkGallery({ images, alt }: { images: string[]; alt: string }) {
+export default function WorkGallery({
+  images,
+  alt,
+  galleryLabel,
+}: {
+  images: string[];
+  alt: string;
+  // Passed in from the (server-rendered) detail page rather than read here
+  // directly — this is a client component, so it can't call the server-only
+  // getDictionary()/getLocale() itself. Previously hardcoded to the
+  // Japanese "ギャラリー" literal, which meant the English site showed
+  // Japanese text for this one heading.
+  galleryLabel: string;
+}) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
@@ -42,7 +55,7 @@ export default function WorkGallery({ images, alt }: { images: string[]; alt: st
 
   return (
     <div className="glass-panel mb-8 rounded-sm p-6">
-      <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">ギャラリー</h2>
+      <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{galleryLabel}</h2>
       <div className="flex items-center gap-2">
         {canSlide && (
           <button

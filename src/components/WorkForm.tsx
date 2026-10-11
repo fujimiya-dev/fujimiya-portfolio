@@ -49,24 +49,24 @@ export default function WorkForm({
         <input name="slug" defaultValue={defaultValues?.slug} required className={fieldClass} />
       </div>
 
+      {/* Translatable (JA/EN) fields, grouped together so the two locales
+          stay side by side for the translation workflow — ordered to
+          follow the detail page's current display order (title, gallery,
+          description, category/tech, period, team size|role, award,
+          comment, demo URL, GitHub URL, video, credits) as closely as that
+          grouping allows: gallery/category/tech/team size/the URLs/video
+          aren't translated, so they can't live in this tab block (see the
+          flat section below) — within just the translatable subset, that
+          leaves title, description, period(dateLabel), role, award,
+          comment, credits, in that relative order. summary — only used by
+          the Works *list* page's card, not this detail page at all — has
+          no place in that order, so it's kept at the very end. */}
       <LocaleTabs
         ja={
           <>
             <div>
               <label className="mb-1 block text-xs text-ink-faint">タイトル</label>
               <input name="title" defaultValue={defaultValues?.title} required className={fieldClass} />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-ink-faint">期間（例：2024.12.20 – 2025.1.17）</label>
-              <input name="dateLabel" defaultValue={defaultValues?.dateLabel} className={fieldClass} />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-ink-faint">開催・受賞（任意、複数行可。例：○○ハッカソン／優勝）</label>
-              <textarea name="award" defaultValue={defaultValues?.award ?? ""} rows={3} className={fieldClass} />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-ink-faint">概要（一覧用の短い説明、複数行可）</label>
-              <textarea name="summary" defaultValue={defaultValues?.summary} rows={3} className={fieldClass} />
             </div>
             <div>
               <label className="mb-1 block text-xs text-ink-faint">詳細説明</label>
@@ -78,6 +78,18 @@ export default function WorkForm({
               />
             </div>
             <div>
+              <label className="mb-1 block text-xs text-ink-faint">期間（例：2024.12.20 – 2025.1.17）</label>
+              <input name="dateLabel" defaultValue={defaultValues?.dateLabel} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">担当部分</label>
+              <textarea name="role" defaultValue={defaultValues?.role ?? "準備中"} rows={3} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">開催・受賞（任意、複数行可。例：○○ハッカソン／優勝）</label>
+              <textarea name="award" defaultValue={defaultValues?.award ?? ""} rows={3} className={fieldClass} />
+            </div>
+            <div>
               <label className="mb-1 block text-xs text-ink-faint">製作者コメント</label>
               <textarea
                 name="comment"
@@ -87,14 +99,14 @@ export default function WorkForm({
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-ink-faint">担当部分</label>
-              <textarea name="role" defaultValue={defaultValues?.role ?? "準備中"} rows={3} className={fieldClass} />
-            </div>
-            <div>
               <label className="mb-1 block text-xs text-ink-faint">
                 クレジット（任意、複数行可。例：楽曲:曲名 / アーティスト名 https://...）
               </label>
               <textarea name="credits" defaultValue={defaultValues?.credits ?? ""} rows={5} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">概要（一覧用の短い説明、複数行可）</label>
+              <textarea name="summary" defaultValue={defaultValues?.summary} rows={3} className={fieldClass} />
             </div>
           </>
         }
@@ -103,18 +115,6 @@ export default function WorkForm({
             <div>
               <label className="mb-1 block text-xs text-ink-faint">Title（空欄可。未入力時は日本語版を表示）</label>
               <input name="titleEn" defaultValue={defaultValues?.titleEn ?? ""} className={fieldClass} />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-ink-faint">Date（空欄可。未入力時は日本語版を表示）</label>
-              <input name="dateLabelEn" defaultValue={defaultValues?.dateLabelEn ?? ""} className={fieldClass} />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-ink-faint">Event / Award（任意、複数行可。空欄可）</label>
-              <textarea name="awardEn" defaultValue={defaultValues?.awardEn ?? ""} rows={3} className={fieldClass} />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-ink-faint">Summary（空欄可。未入力時は日本語版を表示）</label>
-              <textarea name="summaryEn" defaultValue={defaultValues?.summaryEn ?? ""} rows={3} className={fieldClass} />
             </div>
             <div>
               <label className="mb-1 block text-xs text-ink-faint">Description（空欄可。未入力時は日本語版を表示）</label>
@@ -126,6 +126,18 @@ export default function WorkForm({
               />
             </div>
             <div>
+              <label className="mb-1 block text-xs text-ink-faint">Date（空欄可。未入力時は日本語版を表示）</label>
+              <input name="dateLabelEn" defaultValue={defaultValues?.dateLabelEn ?? ""} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">My Role（空欄可。未入力時は日本語版を表示）</label>
+              <textarea name="roleEn" defaultValue={defaultValues?.roleEn ?? ""} rows={3} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">Event / Award（任意、複数行可。空欄可）</label>
+              <textarea name="awardEn" defaultValue={defaultValues?.awardEn ?? ""} rows={3} className={fieldClass} />
+            </div>
+            <div>
               <label className="mb-1 block text-xs text-ink-faint">Creator's Comment（空欄可。未入力時は日本語版を表示）</label>
               <textarea
                 name="commentEn"
@@ -135,17 +147,47 @@ export default function WorkForm({
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-ink-faint">My Role（空欄可。未入力時は日本語版を表示）</label>
-              <textarea name="roleEn" defaultValue={defaultValues?.roleEn ?? ""} rows={3} className={fieldClass} />
-            </div>
-            <div>
               <label className="mb-1 block text-xs text-ink-faint">Credits（任意、複数行可。空欄可）</label>
               <textarea name="creditsEn" defaultValue={defaultValues?.creditsEn ?? ""} rows={5} className={fieldClass} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-faint">Summary（空欄可。未入力時は日本語版を表示）</label>
+              <textarea name="summaryEn" defaultValue={defaultValues?.summaryEn ?? ""} rows={3} className={fieldClass} />
             </div>
           </>
         }
       />
 
+      {/* Not translatable, so they can't live inside the tabs above —
+          ordered here to continue the detail page's sequence as closely
+          as a single flat section can: gallery first (it sits right under
+          the title on the page), then category/tech stack, team size
+          (pairing with "role" up in the tabs), then the URL/video fields
+          in their on-page order. */}
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">
+          ギャラリー（任意、複数枚登録可・並び替え可）
+        </label>
+        <ScreenshotsField name="screenshots" defaultValue={defaultValues?.screenshots} />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">カテゴリ（カンマ区切り。例：チーム開発, ハッカソン）</label>
+        <input name="category" defaultValue={defaultValues?.category?.join(", ")} className={fieldClass} />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">使用技術（カンマ区切り。例：Python, Django）</label>
+        <input name="techStack" defaultValue={defaultValues?.techStack?.join(", ")} className={fieldClass} />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-faint">担当人数</label>
+        <input
+          name="teamSize"
+          type="number"
+          min={1}
+          defaultValue={defaultValues?.teamSize ?? 1}
+          className={fieldClass}
+        />
+      </div>
       <div>
         <label className="mb-1 block text-xs text-ink-faint">デモURL（任意）</label>
         <input
@@ -163,16 +205,6 @@ export default function WorkForm({
           type="url"
           defaultValue={defaultValues?.githubUrl ?? ""}
           placeholder="https://github.com/..."
-          className={fieldClass}
-        />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">担当人数</label>
-        <input
-          name="teamSize"
-          type="number"
-          min={1}
-          defaultValue={defaultValues?.teamSize ?? 1}
           className={fieldClass}
         />
       </div>
@@ -196,20 +228,6 @@ export default function WorkForm({
         <p className="mt-1 text-[11px] text-ink-faint">
           一覧ページではサムネイル画像が優先、作品詳細ページではYouTube動画が優先して表示されます。
         </p>
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">
-          ギャラリー（任意、複数枚登録可・並び替え可）
-        </label>
-        <ScreenshotsField name="screenshots" defaultValue={defaultValues?.screenshots} />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">カテゴリ（カンマ区切り。例：チーム開発, ハッカソン）</label>
-        <input name="category" defaultValue={defaultValues?.category?.join(", ")} className={fieldClass} />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-ink-faint">使用技術（カンマ区切り。例：Python, Django）</label>
-        <input name="techStack" defaultValue={defaultValues?.techStack?.join(", ")} className={fieldClass} />
       </div>
       <div className="flex justify-center">
         <button
