@@ -66,6 +66,7 @@ export const ja: Dictionary = {
     category: "カテゴリ",
     techStack: "使用技術",
     credits: "クレジット",
+    gallery: "ギャラリー",
     viewMore: "ほかの作品もみる",
   },
   researchDetail: {

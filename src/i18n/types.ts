@@ -73,6 +73,7 @@ export type Dictionary = {
     category: string;
     techStack: string;
     credits: string;
+    gallery: string;
     viewMore: string;
   };
   researchDetail: {

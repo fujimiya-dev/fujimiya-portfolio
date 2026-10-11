@@ -66,6 +66,7 @@ export const en: Dictionary = {
     category: "Category",
     techStack: "Tech Stack",
     credits: "Credits",
+    gallery: "Gallery",
     viewMore: "See More Works",
   },
   researchDetail: {

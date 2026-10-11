@@ -93,7 +93,7 @@ export default async function WorkDetailPage({
             directly under the title, same as if this weren't here at all)
             and already carries its own mb-8, matching the rhythm of every
             other top-level block on this page. */}
-        <WorkGallery images={work.screenshots} alt={work.title} />
+        <WorkGallery images={work.screenshots} alt={work.title} galleryLabel={dict.workDetail.gallery} />
 
         <div className="mb-8 space-y-4">
           <div className="glass-panel rounded-sm p-6">
