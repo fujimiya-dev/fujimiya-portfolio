@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { RevealFade } from "@/components/RevealSection";
 import { translateTag } from "@/lib/tagLabels";
 import { withLocale } from "@/i18n/path";
@@ -177,13 +178,10 @@ export default function ExperienceExplorer({
           // what caused the reported bug (line visible before any card,
           // and visibly drifting from each card mid-transition).
           //
-          // Fix: give each card its own line segment, rendered *inside*
-          // that same card's RevealFade wrapper (as a sibling to its
-          // glass-panel), so it shares the exact same opacity/slide
-          // animation and trigger as its card — not merely timed to look
-          // similar, but structurally the same transform, so it cannot
-          // drift from it at any point. Segments overlap by half the
-          // list's gap (space-y-6 = 24px, so 12px) on each side so
+          // Fix: give each card its own line segment, revealed by the same
+          // viewport trigger as its card, with the same vertical range, so
+          // it always tracks that card's reveal. Segments overlap by half
+          // the list's gap (space-y-6 = 24px, so 12px) on each side so
           // adjacent segments meet exactly in the gap's midpoint, reading
           // as one continuous line once revealed. The original single
           // gradient's ~12%/88% fade (computed against the full list's
@@ -191,52 +189,74 @@ export default function ExperienceExplorer({
           // first/last segment's own height — visually indistinguishable
           // in practice, since that original fade zone was already close
           // to one card's height for this list's length.
+          //
+          // The outer wrapper below is a plain, never-animated div (not a
+          // RevealFade/motion.div) specifically so its position:relative +
+          // isolate stacking context is permanently stable — the line
+          // segment (z-index:-10) and card (z-index:auto) are compared
+          // within a stacking context that never itself changes opacity.
+          // An earlier version nested the segment *inside* RevealFade's own
+          // animated (opacity+transform) wrapper; the card's glass-panel
+          // has backdrop-filter, which is expensive to composite, and
+          // under slow/dev-mode rendering the correctly-behind (z-index
+          // -10) but cheap-to-paint line could still become visible ahead
+          // of the glass-panel for a frame or two while its blur was still
+          // compositing — a paint-timing issue, not a wrong z-index. Giving
+          // the line its own independent, opacity-only fade (no shared
+          // animated ancestor with the card) removes that shared-layer
+          // interaction entirely.
           const lineClass = isFirst
             ? "bg-[linear-gradient(to_bottom,transparent,rgba(127,183,255,0.4)_90%)]"
             : isLast
               ? "bg-[linear-gradient(to_top,transparent,rgba(127,183,255,0.4)_90%)]"
               : "bg-[rgba(127,183,255,0.4)]";
           return (
-          <RevealFade key={item.id} className="relative isolate">
-            <div
-              aria-hidden
-              className={`pointer-events-none absolute left-[97px] -z-10 w-px ${isFirst ? "top-1" : "-top-3"} ${isLast ? "bottom-1" : "-bottom-3"} ${lineClass}`}
-            />
-            <div className="glass-panel grid grid-cols-[98px_1fr] gap-8 rounded-sm p-5">
-              <div className="pt-1 font-serif text-sm text-ink-faint">{item.dateLabel}</div>
-              <div>
-                <h3 className="mb-1 font-label text-base">{item.org}</h3>
-                <p className="mb-3 whitespace-pre-line text-sm text-ink-soft">{item.summary}</p>
-                <div className="flex flex-wrap gap-2">
-                  {item.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="neon-tag rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
-                    >
-                      {translateTag(tag, locale)}
-                    </span>
-                  ))}
-                </div>
-                {item.works.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {item.works.map((work) => (
-                      <Link
-                        key={work.slug}
-                        href={withLocale(`/works/${work.slug}`, locale)}
-                        className="hover-glow-text inline-flex items-center gap-1.5 rounded-sm border border-white/20 px-4 py-1.5 text-xs transition-colors hover:border-accent-teal"
-                      >
-                        {item.works.length > 1
-                          ? locale === "ja"
-                            ? `${dict.viewWork}（${work.title}）`
-                            : `${dict.viewWork} (${work.title})`
-                          : dict.viewWork}
-                      </Link>
-                    ))}
+            <div key={item.id} className="relative isolate">
+              <motion.div
+                aria-hidden
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, amount: "some" }}
+                transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+                className={`pointer-events-none absolute left-[97px] -z-10 w-px ${isFirst ? "top-1" : "-top-3"} ${isLast ? "bottom-1" : "-bottom-3"} ${lineClass}`}
+              />
+              <RevealFade>
+                <div className="glass-panel grid grid-cols-[98px_1fr] gap-8 rounded-sm p-5">
+                  <div className="pt-1 font-serif text-sm text-ink-faint">{item.dateLabel}</div>
+                  <div>
+                    <h3 className="mb-1 font-label text-base">{item.org}</h3>
+                    <p className="mb-3 whitespace-pre-line text-sm text-ink-soft">{item.summary}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {item.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="neon-tag rounded-full border border-accent-teal/35 bg-accent-teal/10 px-3 py-1 text-xs text-accent-teal"
+                        >
+                          {translateTag(tag, locale)}
+                        </span>
+                      ))}
+                    </div>
+                    {item.works.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {item.works.map((work) => (
+                          <Link
+                            key={work.slug}
+                            href={withLocale(`/works/${work.slug}`, locale)}
+                            className="hover-glow-text inline-flex items-center gap-1.5 rounded-sm border border-white/20 px-4 py-1.5 text-xs transition-colors hover:border-accent-teal"
+                          >
+                            {item.works.length > 1
+                              ? locale === "ja"
+                                ? `${dict.viewWork}（${work.title}）`
+                                : `${dict.viewWork} (${work.title})`
+                              : dict.viewWork}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              </RevealFade>
             </div>
-          </RevealFade>
           );
         })}
       </div>
