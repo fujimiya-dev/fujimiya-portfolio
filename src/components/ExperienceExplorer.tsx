@@ -173,23 +173,6 @@ export default function ExperienceExplorer({
               <div>
                 <h3 className="mb-1 font-label text-base">{item.org}</h3>
                 <p className="mb-3 whitespace-pre-line text-sm text-ink-soft">{item.summary}</p>
-                {item.works.length > 0 && (
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    {item.works.map((work) => (
-                      <Link
-                        key={work.slug}
-                        href={withLocale(`/works/${work.slug}`, locale)}
-                        className="hover-glow-text inline-flex items-center gap-1.5 rounded-full border border-white/20 px-4 py-1.5 text-xs transition-colors hover:border-accent-teal"
-                      >
-                        {item.works.length > 1
-                          ? locale === "ja"
-                            ? `${dict.viewWork}（${work.title}）`
-                            : `${dict.viewWork} (${work.title})`
-                          : dict.viewWork}
-                      </Link>
-                    ))}
-                  </div>
-                )}
                 <div className="flex flex-wrap gap-2">
                   {item.tags.map((tag) => (
                     <span
@@ -200,6 +183,23 @@ export default function ExperienceExplorer({
                     </span>
                   ))}
                 </div>
+                {item.works.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {item.works.map((work) => (
+                      <Link
+                        key={work.slug}
+                        href={withLocale(`/works/${work.slug}`, locale)}
+                        className="hover-glow-text inline-flex items-center gap-1.5 rounded-sm border border-white/20 px-4 py-1.5 text-xs transition-colors hover:border-accent-teal"
+                      >
+                        {item.works.length > 1
+                          ? locale === "ja"
+                            ? `${dict.viewWork}（${work.title}）`
+                            : `${dict.viewWork} (${work.title})`
+                          : dict.viewWork}
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </RevealFade>
