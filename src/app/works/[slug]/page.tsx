@@ -88,14 +88,14 @@ export default async function WorkDetailPage({
       <RevealFade>
         <h1 className="mb-8 text-center font-label text-4xl font-bold">{work.title}</h1>
 
-        <div className="mb-8 space-y-4">
-          {/* 制作期間 — same box treatment as the other info panels below
-              (previously just plain text under the title). */}
-          <div className="glass-panel rounded-sm p-6">
-            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.period}</h2>
-            <p className="text-[15px] text-ink-soft">{work.dateLabel}</p>
-          </div>
+        {/* ギャラリー — right under the title; self-contained (returns null
+            when there are no screenshots, so an empty gallery leaves 作品紹介
+            directly under the title, same as if this weren't here at all)
+            and already carries its own mb-8, matching the rhythm of every
+            other top-level block on this page. */}
+        <WorkGallery images={work.screenshots} alt={work.title} />
 
+        <div className="mb-8 space-y-4">
           <div className="glass-panel rounded-sm p-6">
             <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.details}</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
@@ -130,6 +130,14 @@ export default async function WorkDetailPage({
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* 制作期間 — same box treatment as the other info panels (not
+              plain text under the title, and not inside the category/tech
+              panel above — its own standalone panel, same as before). */}
+          <div className="glass-panel rounded-sm p-6">
+            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.period}</h2>
+            <p className="text-[15px] text-ink-soft">{work.dateLabel}</p>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -188,21 +196,7 @@ export default async function WorkDetailPage({
               </a>
             </div>
           )}
-
-          {/* クレジット — not part of the requested 1-11 reorder, left in
-              its existing relative position (last within this panel
-              group), unchanged otherwise. */}
-          {work.credits && (
-            <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.credits}</h2>
-              <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
-                {renderWithLinks(work.credits)}
-              </p>
-            </div>
-          )}
         </div>
-
-        <WorkGallery images={work.screenshots} alt={work.title} />
 
         <div className="glass-panel relative mb-8 aspect-video overflow-hidden rounded-sm border border-white/15 bg-white/[0.02]">
           {work.youtubeId ? (
@@ -226,6 +220,16 @@ export default async function WorkDetailPage({
             <NoImage />
           )}
         </div>
+
+        {/* クレジット — last on the page now, after the demo video. */}
+        {work.credits && (
+          <div className="glass-panel mb-8 rounded-sm p-6">
+            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.credits}</h2>
+            <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
+              {renderWithLinks(work.credits)}
+            </p>
+          </div>
+        )}
 
         <div className="mt-12 flex justify-center">
           <Link
