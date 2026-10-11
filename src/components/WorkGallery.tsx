@@ -55,7 +55,7 @@ export default function WorkGallery({
 
   return (
     <div className="glass-panel mb-8 rounded-sm p-6">
-      <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{galleryLabel}</h2>
+      <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{galleryLabel}</h2>
       <div className="flex items-center gap-2">
         {canSlide && (
           <button

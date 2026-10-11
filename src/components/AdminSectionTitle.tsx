@@ -15,10 +15,10 @@ export default function AdminSectionTitle({
 }) {
   return (
     <RevealGlow className="text-center">
-      <span className="mb-7 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
+      <span className="mb-7 flex items-center justify-center gap-2 heading-eyebrow tracking-widest text-accent-teal">
         {eyebrow}
       </span>
-      <SectionHeading textKey={textKey} label={label} className="mx-auto mb-14 h-10 w-auto" />
+      <SectionHeading textKey={textKey} label={label} className="heading-xl mx-auto mb-14 w-auto" />
     </RevealGlow>
   );
 }

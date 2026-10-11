@@ -13,6 +13,27 @@ body {
   overflow-x: hidden;
 }
 
+/* Site-wide heading sizes — the one place that controls how big every page
+   heading (including admin's) renders, so a future size tweak never means
+   hunting through each page/component. Each clamp() interpolates smoothly
+   between a phone-width value and a desktop-width value (390px/1440px) —
+   this only touches size, never font family/weight/glyph shapes. */
+:root {
+  /* 大見出し — SectionHeading(SVGで描画される「About me」「Works」等)の
+     高さ。元はh-10(40px)固定。スマホ(390px)で約1.1倍(44px)、
+     PC(1440px)で約1.15倍(46px)。 */
+  --heading-xl-h: clamp(2.75rem, 2.704rem + 0.19vw, 2.875rem);
+
+  /* 小見出し — ページ冒頭の「作ったもの」等のeyebrowラベル。元は
+     text-xs(12px)。スマホで約1.15倍(13.8px)、PCで約1.2倍(14.4px)。 */
+  --heading-eyebrow-size: clamp(0.8625rem, 0.849rem + 0.057vw, 0.9rem);
+
+  /* 小見出し — 作品/研究詳細ページの項目見出し(「ギャラリー」
+     「カテゴリ・使用技術」等、neon-label)。元はtext-sm(14px)。
+     スマホで約1.15倍(16.1px)、PCで約1.2倍(16.8px)。 */
+  --heading-fieldlabel-size: clamp(1.006rem, 0.99rem + 0.067vw, 1.05rem);
+}
+
 .sky-fixed {
   position: fixed;
   inset: 0;
@@ -79,6 +100,22 @@ body {
    "glowing" visual language instead of flat borders/text. */
 .neon-label {
   text-shadow: 0 0 12px rgba(127, 183, 255, 0.65);
+}
+
+/* Heading-size utilities — pair with the --heading-* tokens above. Kept as
+   plain classes (rather than inlining `text-[length:var(...)]` everywhere)
+   so every call site reads the same as it did with the Tailwind size
+   utility it replaces (text-xs/text-sm) instead of a var() reference. */
+.heading-xl {
+  height: var(--heading-xl-h);
+}
+
+.heading-eyebrow {
+  font-size: var(--heading-eyebrow-size);
+}
+
+.heading-fieldlabel {
+  font-size: var(--heading-fieldlabel-size);
 }
 
 .neon-tag {

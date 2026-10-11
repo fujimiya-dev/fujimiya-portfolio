@@ -25,7 +25,7 @@ export default function SectionHeading({ textKey, label, className }: { textKey:
       <svg
         aria-hidden="true"
         viewBox={data.viewBox}
-        className={className ?? "mx-auto h-10 w-auto"}
+        className={className ?? "heading-xl mx-auto w-auto"}
         style={{ filter: GLOW_FILTER }}
       >
         <path d={data.path} fill="#eaf6ff" />

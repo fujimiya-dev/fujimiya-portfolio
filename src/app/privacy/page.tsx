@@ -32,7 +32,7 @@ function PrivacyJa() {
         <span className="mb-7 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           プライバシーポリシー
         </span>
-        <SectionHeading textKey="privacyPolicy" label="Privacy Policy" className="mx-auto mb-14 h-10 w-auto" />
+        <SectionHeading textKey="privacyPolicy" label="Privacy Policy" className="heading-xl mx-auto mb-14 w-auto" />
       </RevealGlow>
 
       <RevealFade>
@@ -135,7 +135,7 @@ function PrivacyEn() {
         <span className="mb-7 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
           プライバシーポリシー
         </span>
-        <SectionHeading textKey="privacyPolicy" label="Privacy Policy" className="mx-auto mb-14 h-10 w-auto" />
+        <SectionHeading textKey="privacyPolicy" label="Privacy Policy" className="heading-xl mx-auto mb-14 w-auto" />
       </RevealGlow>
 
       <RevealFade>

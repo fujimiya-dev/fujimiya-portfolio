@@ -20,10 +20,10 @@ export default async function ResearchPage() {
   return (
     <section className="mx-auto max-w-4xl px-6 pb-24 pt-32">
       <RevealGlow className="text-center">
-        <span className="mb-7 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
+        <span className="mb-7 flex items-center justify-center gap-2 heading-eyebrow tracking-widest text-accent-teal">
           {dict.research.eyebrow}
         </span>
-        <SectionHeading textKey="research" label={dict.nav.research} className="mx-auto mb-14 h-10 w-auto" />
+        <SectionHeading textKey="research" label={dict.nav.research} className="heading-xl mx-auto mb-14 w-auto" />
       </RevealGlow>
       <ResearchExplorer items={resolved} locale={locale} />
 
