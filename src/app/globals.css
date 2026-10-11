@@ -32,6 +32,11 @@ body {
      「カテゴリ・使用技術」等、neon-label)。元はtext-sm(14px)。
      スマホで約1.15倍(16.1px)、PCで約1.2倍(16.8px)。 */
   --heading-fieldlabel-size: clamp(1.006rem, 0.99rem + 0.067vw, 1.05rem);
+
+  /* 小見出し — プライバシーポリシーの各条見出し(「第1条(個人情報)」
+     等)。元はtext-lg(18px)。スマホで約1.15倍(20.7px)、PCで約1.2倍
+     (21.6px)。 */
+  --heading-article-size: clamp(1.294rem, 1.273rem + 0.086vw, 1.35rem);
 }
 
 .sky-fixed {
@@ -116,6 +121,10 @@ body {
 
 .heading-fieldlabel {
   font-size: var(--heading-fieldlabel-size);
+}
+
+.heading-article {
+  font-size: var(--heading-article-size);
 }
 
 .neon-tag {
