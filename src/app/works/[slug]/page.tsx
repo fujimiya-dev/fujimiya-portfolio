@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { RevealFade } from "@/components/RevealSection";
 import NoImage from "@/components/NoImage";
 import WorkGallery from "@/components/WorkGallery";
+import CollapsibleComment from "@/components/CollapsibleComment";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { withLocale } from "@/i18n/path";
@@ -85,95 +86,21 @@ export default async function WorkDetailPage({
       </Link>
 
       <RevealFade>
-        <h1 className="mb-2 font-label text-4xl font-bold">{work.title}</h1>
-        <span className="mb-8 block text-sm text-ink-faint">{work.dateLabel}</span>
-
-        <div className="glass-panel relative mb-8 aspect-video overflow-hidden rounded-sm border border-white/15 bg-white/[0.02]">
-          {work.youtubeId ? (
-            <iframe
-              src={youtubeEmbedUrl(work.youtubeId)}
-              title={work.title}
-              className="absolute inset-0 h-full w-full"
-              loading="lazy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          ) : work.imageUrl ? (
-            <Image
-              src={work.imageUrl}
-              alt={work.title}
-              fill
-              sizes="(min-width: 768px) 768px, 100vw"
-              className="object-contain"
-            />
-          ) : (
-            <NoImage />
-          )}
-        </div>
-
-        <WorkGallery images={work.screenshots} alt={work.title} />
+        <h1 className="mb-8 text-center font-label text-4xl font-bold">{work.title}</h1>
 
         <div className="mb-8 space-y-4">
-          {work.demoUrl && (
-            <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.demoUrl}</h2>
-              <a
-                href={work.demoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="neon-link break-all text-[15px] text-accent-blue underline underline-offset-2 hover:text-accent-teal"
-              >
-                {work.demoUrl}
-              </a>
-            </div>
-          )}
-
-          {work.githubUrl && (
-            <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.githubUrl}</h2>
-              <a
-                href={work.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="neon-link break-all text-[15px] text-accent-blue underline underline-offset-2 hover:text-accent-teal"
-              >
-                {work.githubUrl}
-              </a>
-            </div>
-          )}
-
-          {work.award && (
-            <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.award}</h2>
-              <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">{work.award}</p>
-            </div>
-          )}
+          {/* 制作期間 — same box treatment as the other info panels below
+              (previously just plain text under the title). */}
+          <div className="glass-panel rounded-sm p-6">
+            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.period}</h2>
+            <p className="text-[15px] text-ink-soft">{work.dateLabel}</p>
+          </div>
 
           <div className="glass-panel rounded-sm p-6">
             <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.details}</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
               {work.description}
             </p>
-          </div>
-
-          <div className="glass-panel rounded-sm p-6">
-            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.comment}</h2>
-            <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
-              {work.comment}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.teamSize}</h2>
-              <p className="text-[15px] text-ink-soft">{work.teamSize}{dict.workDetail.teamSizeSuffix}</p>
-            </div>
-            <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.role}</h2>
-              <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
-                {work.role}
-              </p>
-            </div>
           </div>
 
           <div className="glass-panel space-y-4 rounded-sm p-6">
@@ -205,6 +132,66 @@ export default async function WorkDetailPage({
             </div>
           </div>
 
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="glass-panel rounded-sm p-6">
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.teamSize}</h2>
+              <p className="text-[15px] text-ink-soft">{work.teamSize}{dict.workDetail.teamSizeSuffix}</p>
+            </div>
+            <div className="glass-panel rounded-sm p-6">
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.role}</h2>
+              <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
+                {work.role}
+              </p>
+            </div>
+          </div>
+
+          {work.award && (
+            <div className="glass-panel rounded-sm p-6">
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.award}</h2>
+              <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">{work.award}</p>
+            </div>
+          )}
+
+          <div className="glass-panel rounded-sm p-6">
+            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.comment}</h2>
+            <CollapsibleComment
+              text={work.comment}
+              showMoreLabel={dict.workDetail.showMore}
+              showLessLabel={dict.workDetail.showLess}
+            />
+          </div>
+
+          {work.demoUrl && (
+            <div className="glass-panel rounded-sm p-6">
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.demoUrl}</h2>
+              <a
+                href={work.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="neon-link break-all text-[15px] text-accent-blue underline underline-offset-2 hover:text-accent-teal"
+              >
+                {work.demoUrl}
+              </a>
+            </div>
+          )}
+
+          {work.githubUrl && (
+            <div className="glass-panel rounded-sm p-6">
+              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.githubUrl}</h2>
+              <a
+                href={work.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="neon-link break-all text-[15px] text-accent-blue underline underline-offset-2 hover:text-accent-teal"
+              >
+                {work.githubUrl}
+              </a>
+            </div>
+          )}
+
+          {/* クレジット — not part of the requested 1-11 reorder, left in
+              its existing relative position (last within this panel
+              group), unchanged otherwise. */}
           {work.credits && (
             <div className="glass-panel rounded-sm p-6">
               <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.credits}</h2>
@@ -212,6 +199,31 @@ export default async function WorkDetailPage({
                 {renderWithLinks(work.credits)}
               </p>
             </div>
+          )}
+        </div>
+
+        <WorkGallery images={work.screenshots} alt={work.title} />
+
+        <div className="glass-panel relative mb-8 aspect-video overflow-hidden rounded-sm border border-white/15 bg-white/[0.02]">
+          {work.youtubeId ? (
+            <iframe
+              src={youtubeEmbedUrl(work.youtubeId)}
+              title={work.title}
+              className="absolute inset-0 h-full w-full"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          ) : work.imageUrl ? (
+            <Image
+              src={work.imageUrl}
+              alt={work.title}
+              fill
+              sizes="(min-width: 768px) 768px, 100vw"
+              className="object-contain"
+            />
+          ) : (
+            <NoImage />
           )}
         </div>
 

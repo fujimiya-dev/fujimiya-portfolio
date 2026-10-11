@@ -59,11 +59,14 @@ export type Dictionary = {
   };
   workDetail: {
     backToList: string;
+    period: string;
     demoUrl: string;
     githubUrl: string;
     award: string;
     details: string;
     comment: string;
+    showMore: string;
+    showLess: string;
     teamSize: string;
     teamSizeSuffix: string;
     role: string;
