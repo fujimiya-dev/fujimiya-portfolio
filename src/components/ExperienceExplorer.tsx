@@ -165,9 +165,43 @@ export default function ExperienceExplorer({
       </div>
       )}
 
-      <div className="relative space-y-6 before:absolute before:bottom-1 before:left-[97px] before:top-1 before:w-px before:bg-[linear-gradient(to_bottom,transparent,rgba(127,183,255,0.4)_12%,rgba(127,183,255,0.4)_88%,transparent)]">
-        {filtered.map((item) => (
-          <RevealFade key={item.id}>
+      <div className="relative space-y-6">
+        {filtered.map((item, index) => {
+          const isFirst = index === 0;
+          const isLast = index === filtered.length - 1;
+          // The timeline line used to be one plain CSS pseudo-element,
+          // spanning the whole list, rendered as soon as this component
+          // mounted — regardless of whether any card had scrolled into
+          // view yet. Each card, meanwhile, only fades/slides in via its
+          // own independent RevealFade reveal. That mismatch is exactly
+          // what caused the reported bug (line visible before any card,
+          // and visibly drifting from each card mid-transition).
+          //
+          // Fix: give each card its own line segment, rendered *inside*
+          // that same card's RevealFade wrapper (as a sibling to its
+          // glass-panel), so it shares the exact same opacity/slide
+          // animation and trigger as its card — not merely timed to look
+          // similar, but structurally the same transform, so it cannot
+          // drift from it at any point. Segments overlap by half the
+          // list's gap (space-y-6 = 24px, so 12px) on each side so
+          // adjacent segments meet exactly in the gap's midpoint, reading
+          // as one continuous line once revealed. The original single
+          // gradient's ~12%/88% fade (computed against the full list's
+          // height) is approximated here as a fade confined to just the
+          // first/last segment's own height — visually indistinguishable
+          // in practice, since that original fade zone was already close
+          // to one card's height for this list's length.
+          const lineClass = isFirst
+            ? "bg-[linear-gradient(to_bottom,transparent,rgba(127,183,255,0.4)_90%)]"
+            : isLast
+              ? "bg-[linear-gradient(to_top,transparent,rgba(127,183,255,0.4)_90%)]"
+              : "bg-[rgba(127,183,255,0.4)]";
+          return (
+          <RevealFade key={item.id} className="relative isolate">
+            <div
+              aria-hidden
+              className={`pointer-events-none absolute left-[97px] -z-10 w-px ${isFirst ? "top-1" : "-top-3"} ${isLast ? "bottom-1" : "-bottom-3"} ${lineClass}`}
+            />
             <div className="glass-panel grid grid-cols-[98px_1fr] gap-8 rounded-sm p-5">
               <div className="pt-1 font-serif text-sm text-ink-faint">{item.dateLabel}</div>
               <div>
@@ -203,7 +237,8 @@ export default function ExperienceExplorer({
               </div>
             </div>
           </RevealFade>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
