@@ -5,6 +5,7 @@ import MobileMenu from "@/components/MobileMenu";
 import IntroTriggerLink from "@/components/IntroTriggerLink";
 import DesktopNavBar from "@/components/DesktopNavBar";
 import HeaderChrome from "@/components/HeaderChrome";
+import { SITE_LOGO_TEXT } from "@/lib/siteBranding";
 
 export default async function TopNav() {
   const [dict, locale] = await Promise.all([getDictionary(), getLocale()]);
@@ -23,7 +24,7 @@ export default async function TopNav() {
       href={withLocale("/", locale)}
       className="font-intro text-[27px] text-[#eaf6ff] [text-shadow:0_0_4px_#eaf6ff,0_0_11px_#7FB7FF,0_0_22px_#1E40FF]"
     >
-      Fujimiya.dev
+      {SITE_LOGO_TEXT}
     </IntroTriggerLink>
   );
 

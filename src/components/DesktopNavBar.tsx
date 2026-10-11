@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import HorizonNav from "@/components/HorizonNav";
 import LanguageToggle from "@/components/LanguageToggle";
 import IntroTriggerLink from "@/components/IntroTriggerLink";
+import { SITE_LOGO_TEXT } from "@/lib/siteBranding";
 import type { Locale } from "@/i18n/types";
 
 const LOGO_CLASS = "font-intro text-[27px] text-[#eaf6ff] [text-shadow:0_0_4px_#eaf6ff,0_0_11px_#7FB7FF,0_0_22px_#1E40FF]";
@@ -76,7 +77,7 @@ export default function DesktopNavBar({
         // "not actually centered in the gap" despite the math being right.
         <div className="fixed z-50" style={{ left: logoRect.left, top: logoRect.top, transform: "translateX(-50%)" }}>
           <IntroTriggerLink href={homeHref} className={LOGO_CLASS}>
-            Fujimiya.dev
+            {SITE_LOGO_TEXT}
           </IntroTriggerLink>
         </div>
       )}
