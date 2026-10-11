@@ -16,6 +16,14 @@ type Experience = {
 // Always Japanese — see the matching comment in WorksExplorer.tsx.
 const CATEGORY_FILTERS = ["個人開発", "チーム開発", "ハッカソン", "インターン"];
 
+// Toggles the search bar + category filter chips on/off without deleting any
+// of the code behind them — same approach as SHOW_WORKS_SEARCH_AND_FILTER in
+// WorksExplorer.tsx. Conditional *rendering* (not CSS) so a hidden search
+// input/filter button can never pick up keyboard focus. When this is false,
+// `filtered` is forced to equal `items` unconditionally (see its useMemo
+// below) rather than relying on `chips` merely happening to stay empty.
+const SHOW_EXPERIENCE_SEARCH_AND_FILTER = false;
+
 export default function ExperienceExplorer({
   items,
   locale,
@@ -44,7 +52,7 @@ export default function ExperienceExplorer({
   }, [allTags, chips, inputValue]);
 
   const filtered = useMemo(() => {
-    if (chips.length === 0) return items;
+    if (!SHOW_EXPERIENCE_SEARCH_AND_FILTER || chips.length === 0) return items;
     return items.filter((item) => {
       const text = `${item.org} ${item.summary} ${item.tags.join(" ")}`.toLowerCase();
       return chips.every((chip) => text.includes(chip.toLowerCase()));
@@ -76,6 +84,7 @@ export default function ExperienceExplorer({
 
   return (
     <div>
+      {SHOW_EXPERIENCE_SEARCH_AND_FILTER && (
       <div className="glass-panel mb-8 rounded-sm p-5">
         <div className="relative">
           <div className="flex flex-wrap items-center gap-2 border-b border-white/20 pb-3 focus-within:border-accent-teal">
@@ -151,6 +160,7 @@ export default function ExperienceExplorer({
           <p className="mt-4 text-sm text-ink-faint">{dict.empty}</p>
         )}
       </div>
+      )}
 
       <div className="relative space-y-6 before:absolute before:bottom-1 before:left-[97px] before:top-1 before:w-px before:bg-[linear-gradient(to_bottom,transparent,rgba(127,183,255,0.4)_12%,rgba(127,183,255,0.4)_88%,transparent)]">
         {filtered.map((item) => (
