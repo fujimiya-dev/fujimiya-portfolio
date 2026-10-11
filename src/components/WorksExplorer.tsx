@@ -29,6 +29,18 @@ type Work = {
 // *displayed*, never which works match a given filter/search chip.
 const CATEGORY_FILTERS = ["公開作品", "個人開発", "チーム開発", "ハッカソン", "インターン"];
 
+// Toggles the search bar + category filter chips on/off without deleting
+// any of the code behind them, so this is a one-line flip to bring them
+// back later. Conditional *rendering* (not a CSS class) specifically so a
+// hidden search input/filter button can never pick up keyboard focus —
+// display:none still leaves an element focusable by Tab in some browsers,
+// not-rendering it at all doesn't. When this is false, `filtered` is
+// forced to equal `works` unconditionally (see its useMemo below) rather
+// than relying on `chips` merely happening to stay empty with no UI left
+// to populate it — so every work always shows, with no dependence on
+// nothing else ever setting `chips`.
+const SHOW_WORKS_SEARCH_AND_FILTER = false;
+
 export default function WorksExplorer({
   works,
   locale,
@@ -57,7 +69,7 @@ export default function WorksExplorer({
   }, [allTags, chips, inputValue]);
 
   const filtered = useMemo(() => {
-    if (chips.length === 0) return works;
+    if (!SHOW_WORKS_SEARCH_AND_FILTER || chips.length === 0) return works;
     return works.filter((w) => {
       const text = `${w.title} ${w.description} ${w.category.join(" ")} ${w.techStack.join(" ")}`.toLowerCase();
       return chips.every((chip) => text.includes(chip.toLowerCase()));
@@ -89,6 +101,7 @@ export default function WorksExplorer({
 
   return (
     <div>
+      {SHOW_WORKS_SEARCH_AND_FILTER && (
       <div className="glass-panel mb-8 rounded-sm p-5">
         <div className="relative">
           <div className="flex flex-wrap items-center gap-2 border-b border-white/20 pb-3 focus-within:border-accent-teal">
@@ -163,6 +176,7 @@ export default function WorksExplorer({
           <p className="mt-4 text-sm text-ink-faint">{dict.empty}</p>
         )}
       </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {filtered.map((work) => (
