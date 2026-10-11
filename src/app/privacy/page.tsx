@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 function Article({ heading, children }: { heading: string; children: React.ReactNode }) {
   return (
     <div className="border-b border-white/10 pb-8 pt-8 first:pt-0 last:border-b-0 last:pb-0">
-      <h2 className="mb-3 font-label text-lg font-bold text-ink">{heading}</h2>
+      <h2 className="heading-article mb-3 font-label font-bold text-ink">{heading}</h2>
       <div className="space-y-3 text-sm leading-relaxed text-ink-soft">{children}</div>
     </div>
   );
@@ -29,10 +29,10 @@ function PrivacyJa() {
   return (
     <>
       <RevealGlow className="text-center">
-        <span className="mb-7 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
+        <span className="mb-7 flex items-center justify-center gap-2 heading-eyebrow tracking-widest text-accent-teal">
           プライバシーポリシー
         </span>
-        <SectionHeading textKey="privacyPolicy" label="Privacy Policy" className="mx-auto mb-14 h-10 w-auto" />
+        <SectionHeading textKey="privacyPolicy" label="Privacy Policy" className="heading-xl mx-auto mb-14 w-auto" />
       </RevealGlow>
 
       <RevealFade>
@@ -132,10 +132,10 @@ function PrivacyEn() {
   return (
     <>
       <RevealGlow className="text-center">
-        <span className="mb-7 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
-          プライバシーポリシー
+        <span className="mb-7 flex items-center justify-center gap-2 heading-eyebrow tracking-widest text-accent-teal">
+          Privacy Policy
         </span>
-        <SectionHeading textKey="privacyPolicy" label="Privacy Policy" className="mx-auto mb-14 h-10 w-auto" />
+        <SectionHeading textKey="privacyPolicy" label="Privacy Policy" className="heading-xl mx-auto mb-14 w-auto" />
       </RevealGlow>
 
       <RevealFade>

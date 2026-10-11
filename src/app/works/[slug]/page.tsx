@@ -97,7 +97,7 @@ export default async function WorkDetailPage({
 
         <div className="mb-8 space-y-4">
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.details}</h2>
+            <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.workDetail.details}</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
               {work.description}
             </p>
@@ -105,7 +105,7 @@ export default async function WorkDetailPage({
 
           <div className="glass-panel space-y-4 rounded-sm p-6">
             <div>
-              <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.category}</h2>
+              <h2 className="neon-label heading-fieldlabel mb-2 font-label tracking-wide text-accent-teal">{dict.workDetail.category}</h2>
               <div className="flex flex-wrap gap-2">
                 {work.category.map((tag) => (
                   <span
@@ -118,7 +118,7 @@ export default async function WorkDetailPage({
               </div>
             </div>
             <div>
-              <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.techStack}</h2>
+              <h2 className="neon-label heading-fieldlabel mb-2 font-label tracking-wide text-accent-teal">{dict.workDetail.techStack}</h2>
               <div className="flex flex-wrap gap-2">
                 {work.techStack.map((tag) => (
                   <span
@@ -136,17 +136,17 @@ export default async function WorkDetailPage({
               plain text under the title, and not inside the category/tech
               panel above — its own standalone panel, same as before). */}
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.period}</h2>
+            <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.workDetail.period}</h2>
             <p className="text-[15px] text-ink-soft">{work.dateLabel}</p>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.teamSize}</h2>
+              <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.workDetail.teamSize}</h2>
               <p className="text-[15px] text-ink-soft">{work.teamSize}{dict.workDetail.teamSizeSuffix}</p>
             </div>
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.role}</h2>
+              <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.workDetail.role}</h2>
               <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
                 {work.role}
               </p>
@@ -155,13 +155,13 @@ export default async function WorkDetailPage({
 
           {work.award && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.award}</h2>
+              <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.workDetail.award}</h2>
               <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">{work.award}</p>
             </div>
           )}
 
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.comment}</h2>
+            <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.workDetail.comment}</h2>
             <CollapsibleComment
               text={work.comment}
               showMoreLabel={dict.workDetail.showMore}
@@ -171,7 +171,7 @@ export default async function WorkDetailPage({
 
           {work.demoUrl && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.demoUrl}</h2>
+              <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.workDetail.demoUrl}</h2>
               <a
                 href={work.demoUrl}
                 target="_blank"
@@ -185,7 +185,7 @@ export default async function WorkDetailPage({
 
           {work.githubUrl && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.githubUrl}</h2>
+              <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.workDetail.githubUrl}</h2>
               <a
                 href={work.githubUrl}
                 target="_blank"
@@ -224,7 +224,7 @@ export default async function WorkDetailPage({
         {/* クレジット — last on the page now, after the demo video. */}
         {work.credits && (
           <div className="glass-panel mb-8 rounded-sm p-6">
-            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.workDetail.credits}</h2>
+            <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.workDetail.credits}</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">
               {renderWithLinks(work.credits)}
             </p>

@@ -41,10 +41,10 @@ export default async function ExperiencePage() {
   return (
     <section className="mx-auto max-w-4xl px-6 pb-24 pt-32">
       <RevealGlow className="text-center">
-        <span className="mb-7 flex items-center justify-center gap-2 text-xs tracking-widest text-accent-teal">
+        <span className="mb-7 flex items-center justify-center gap-2 heading-eyebrow tracking-widest text-accent-teal">
           {dict.experience.eyebrow}
         </span>
-        <SectionHeading textKey="experience" label={dict.nav.experience} className="mx-auto mb-14 h-10 w-auto" />
+        <SectionHeading textKey="experience" label={dict.nav.experience} className="heading-xl mx-auto mb-14 w-auto" />
       </RevealGlow>
       <ExperienceExplorer items={resolved} locale={locale} dict={dict.experience} />
 

@@ -67,13 +67,13 @@ export default async function ResearchDetailPage({
 
         <div className="mb-8 space-y-4">
           <div className="glass-panel rounded-sm p-6">
-            <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.researchDetail.summary}</h2>
+            <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.researchDetail.summary}</h2>
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink-soft">{item.summary}</p>
           </div>
 
           <div className="glass-panel space-y-4 rounded-sm p-6">
             <div>
-              <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">{dict.researchDetail.tags}</h2>
+              <h2 className="neon-label heading-fieldlabel mb-2 font-label tracking-wide text-accent-teal">{dict.researchDetail.tags}</h2>
               <div className="flex flex-wrap gap-2">
                 {item.tags.map((tag) => (
                   <span
@@ -87,7 +87,7 @@ export default async function ResearchDetailPage({
             </div>
             {item.techStack.length > 0 && (
               <div>
-                <h2 className="neon-label mb-2 font-label text-sm tracking-wide text-accent-teal">{dict.researchDetail.techStack}</h2>
+                <h2 className="neon-label heading-fieldlabel mb-2 font-label tracking-wide text-accent-teal">{dict.researchDetail.techStack}</h2>
                 <div className="flex flex-wrap gap-2">
                   {item.techStack.map((tag) => (
                     <span
@@ -104,7 +104,7 @@ export default async function ResearchDetailPage({
 
           {item.achievements.length > 0 && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.researchDetail.achievements}</h2>
+              <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.researchDetail.achievements}</h2>
               <ul className="list-disc space-y-1 pl-5 text-[15px] leading-relaxed text-ink-soft">
                 {item.achievements.map((achievement) => (
                   <li key={achievement}>{achievement}</li>
@@ -115,7 +115,7 @@ export default async function ResearchDetailPage({
 
           {item.references.length > 0 && (
             <div className="glass-panel rounded-sm p-6">
-              <h2 className="neon-label mb-3 font-label text-sm tracking-wide text-accent-teal">{dict.researchDetail.references}</h2>
+              <h2 className="neon-label heading-fieldlabel mb-3 font-label tracking-wide text-accent-teal">{dict.researchDetail.references}</h2>
               <ul className="list-disc space-y-1 pl-5 text-[15px] leading-relaxed text-ink-soft">
                 {item.references.map((ref) => (
                   <li key={ref}>{ref}</li>
