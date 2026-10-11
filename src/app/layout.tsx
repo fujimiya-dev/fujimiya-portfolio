@@ -8,52 +8,69 @@ import NightSky from "@/components/night-sky/NightSky";
 import { IntroPlayingProvider } from "@/components/IntroPlayingContext";
 import { getLocale } from "@/i18n/server";
 
+// WOFF2 (converted from the original TTFs, still untouched in src/fonts/),
+// subset to the character range defined in scripts/font-charsets/ via
+// `npm run fonts:build` (see scripts/build-fonts.py). Only the weights
+// actually referenced anywhere in the codebase are declared — confirmed by
+// grepping every font-bold/font-semibold/font-black site: font-serif
+// (Zen Old Mincho) is never combined with any weight utility (so only its
+// implicit default, 400, renders), and font-sans (Zen Kaku Gothic New) is
+// only ever combined with font-medium (500) — never font-bold/font-black.
+// Every font-bold site in the codebase pairs with font-label (Hina Mincho)
+// instead, which was already a single weight.
 const zenOldMincho = localFont({
-  src: [
-    { path: "../fonts/zen-old-mincho/ZenOldMincho-Regular.ttf", weight: "400", style: "normal" },
-    { path: "../fonts/zen-old-mincho/ZenOldMincho-Medium.ttf", weight: "500", style: "normal" },
-    { path: "../fonts/zen-old-mincho/ZenOldMincho-SemiBold.ttf", weight: "600", style: "normal" },
-    { path: "../fonts/zen-old-mincho/ZenOldMincho-Bold.ttf", weight: "700", style: "normal" },
-    { path: "../fonts/zen-old-mincho/ZenOldMincho-Black.ttf", weight: "900", style: "normal" },
-  ],
+  src: [{ path: "../fonts/zen-old-mincho/ZenOldMincho-Regular.woff2", weight: "400", style: "normal" }],
   variable: "--font-heading",
   display: "swap",
+  // Only rendered on the Experience page (ExperienceExplorer.tsx's date
+  // labels) and the mobile hamburger menu's overlay nav — never needed for
+  // a page's first paint, so no early fetch.
+  preload: false,
+  fallback: ["Hiragino Mincho ProN", "Yu Mincho", "serif"],
 });
 
 const zenKaku = localFont({
   src: [
-    { path: "../fonts/zen-kaku-gothic-new/ZenKakuGothicNew-Regular.ttf", weight: "400", style: "normal" },
-    { path: "../fonts/zen-kaku-gothic-new/ZenKakuGothicNew-Medium.ttf", weight: "500", style: "normal" },
-    { path: "../fonts/zen-kaku-gothic-new/ZenKakuGothicNew-Bold.ttf", weight: "700", style: "normal" },
-    { path: "../fonts/zen-kaku-gothic-new/ZenKakuGothicNew-Black.ttf", weight: "900", style: "normal" },
+    { path: "../fonts/zen-kaku-gothic-new/ZenKakuGothicNew-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/zen-kaku-gothic-new/ZenKakuGothicNew-Medium.woff2", weight: "500", style: "normal" },
   ],
   variable: "--font-zen-kaku",
   display: "swap",
+  // Body's own default font (every page's ordinary text) — always needed
+  // for first paint.
+  preload: true,
+  fallback: ["Hiragino Sans", "Yu Gothic", "sans-serif"],
 });
 
 // Marcellus/Kaisei Decol were replaced by Hina Mincho for both the display
-// and label roles. The same ttf is loaded twice under two variable names so
-// the existing font-display/font-label call sites (19 files) don't need to
-// change. src/fonts/marcellus/ and src/fonts/kaisei-decol/ are left in place
-// (unused for now) in case this gets reverted.
-const hinaMincho = localFont({
-  src: [{ path: "../fonts/hina-mincho/HinaMincho-Regular.ttf", weight: "400", style: "normal" }],
-  variable: "--font-display",
-  display: "swap",
-});
-
+// and label roles. src/fonts/marcellus/ and src/fonts/kaisei-decol/ are
+// left in place (unused for now) in case this gets reverted.
+//
+// The --font-display declaration that used to sit here (a second copy of
+// this same file, under its own localFont() call) has been removed: the
+// `font-display` Tailwind utility it backed has no call sites anywhere in
+// the codebase (confirmed by grep — only font-label, mapped to
+// hinaMinchoLabel below, is actually used), so it was dead weight with no
+// visual effect either way.
 const hinaMinchoLabel = localFont({
-  src: [{ path: "../fonts/hina-mincho/HinaMincho-Regular.ttf", weight: "400", style: "normal" }],
+  src: [{ path: "../fonts/hina-mincho/HinaMincho-Regular.woff2", weight: "400", style: "normal" }],
   variable: "--font-label",
   display: "swap",
+  // font-label is used for every detail-page field heading, work/research
+  // card titles, etc. — needed immediately on most pages' first paint.
+  preload: true,
 });
 
 const nothingYouCouldDo = localFont({
   src: [
-    { path: "../fonts/nothing-you-could-do/NothingYouCouldDo-Regular.ttf", weight: "400", style: "normal" },
+    { path: "../fonts/nothing-you-could-do/NothingYouCouldDo-Regular.woff2", weight: "400", style: "normal" },
   ],
   variable: "--font-intro",
   display: "swap",
+  // Logo text only ("Fujimiya.dev", see src/lib/siteBranding.ts) — subset
+  // down to ~2KB by scripts/build-fonts.py, so not preloading costs
+  // essentially nothing either way.
+  preload: false,
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -100,7 +117,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${zenOldMincho.variable} ${zenKaku.variable} ${hinaMincho.variable} ${hinaMinchoLabel.variable} ${nothingYouCouldDo.variable}`}
+      className={`${zenOldMincho.variable} ${zenKaku.variable} ${hinaMinchoLabel.variable} ${nothingYouCouldDo.variable}`}
     >
       <body className="grid min-h-screen grid-rows-[1fr_auto] font-sans">
         {/* Covers the screen in the intro's own black (#020308) from the
