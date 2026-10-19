@@ -6,6 +6,7 @@ import TopNav from "@/components/TopNav";
 import Footer from "@/components/Footer";
 import NightSky from "@/components/night-sky/NightSky";
 import { IntroPlayingProvider } from "@/components/IntroPlayingContext";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { getLocale } from "@/i18n/server";
 
 // WOFF2 (converted from the original TTFs, still untouched in src/fonts/),
@@ -192,6 +193,7 @@ export default async function RootLayout({
           <main className="relative z-[2]">{children}</main>
           <Footer />
         </IntroPlayingProvider>
+        <GoogleAnalytics />
       </body>
     </html>
   );
