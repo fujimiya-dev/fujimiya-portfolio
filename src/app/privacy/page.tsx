@@ -60,7 +60,7 @@ function PrivacyJa() {
 
           <Article heading="第3条(アクセス解析ツールについて)">
             <p>
-              当サイトでは、サイトの利用状況を把握するため、Googleが提供するアクセス解析ツール「Googleアナリティクス」を利用する場合があります。Googleアナリティクスは、Cookieを利用して利用者の情報を収集しますが、氏名、メールアドレスなど個人を特定する情報は含まれません。この機能はCookieを無効にすることで収集を拒否することが可能ですので、お使いのブラウザの設定をご確認ください。この規約に関して、詳しくは
+              当サイトでは、サイトの利用状況を把握するため、Googleが提供するアクセス解析ツール「Googleアナリティクス」を利用しています。Googleアナリティクスは、Cookieを利用して利用者の情報を収集しますが、氏名、メールアドレスなど個人を特定する情報は含まれません。この機能はCookieを無効にすることで収集を拒否することが可能ですので、お使いのブラウザの設定をご確認ください。この規約に関して、詳しくは
               {" "}
               <a href="https://marketingplatform.google.com/about/analytics/terms/jp/" target="_blank" rel="noopener noreferrer" className={linkClass}>
                 Googleアナリティクス利用規約
@@ -70,6 +70,13 @@ function PrivacyJa() {
                 Googleのポリシーと規約
               </a>
               をご覧ください。
+            </p>
+            <p>
+              なお、Googleアナリティクスの計測には、_ga および _ga_ から始まる名称のCookieが使用され、収集された情報はGoogleに送信されます。
+              <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" className={linkClass}>
+                Googleアナリティクス オプトアウト アドオン
+              </a>
+              をブラウザにインストールすることでも、収集を拒否することができます。
             </p>
           </Article>
 
@@ -166,7 +173,7 @@ function PrivacyEn() {
 
           <Article heading="Article 3 (Access Analysis Tools)">
             <p>
-              This site may use &quot;Google Analytics,&quot; an access analysis tool provided by Google, to understand
+              This site uses &quot;Google Analytics,&quot; an access analysis tool provided by Google, to understand
               how the site is used. Google Analytics collects information about users through cookies, but does not
               include information that identifies individuals, such as names or email addresses. You can refuse to
               have this information collected by disabling cookies; please check your browser settings. For more
@@ -178,6 +185,15 @@ function PrivacyEn() {
               {" "}and{" "}
               <a href="https://policies.google.com/technologies/ads?hl=ja" target="_blank" rel="noopener noreferrer" className={linkClass}>
                 Google&apos;s Policies and Terms
+              </a>
+              .
+            </p>
+            <p>
+              Google Analytics uses cookies named _ga and those beginning with _ga_, and the collected information is
+              sent to Google. You can also opt out of data collection by installing the
+              {" "}
+              <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" className={linkClass}>
+                Google Analytics Opt-out Browser Add-on
               </a>
               .
             </p>
