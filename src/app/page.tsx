@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { RevealGlow, RevealFade } from "@/components/RevealSection";
@@ -24,6 +25,17 @@ const techStack = [
 ];
 
 export const revalidate = 0;
+
+// `absolute` bypasses the root layout's title template (`%s｜Fujimiya` /
+// `%s | Fujimiya`) so the home page's title is exactly this string, not the
+// template applied to it — otherwise "Fujimiya｜ポートフォリオ" would become
+// "Fujimiya｜ポートフォリオ｜Fujimiya".
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return {
+    title: { absolute: locale === "en" ? "Fujimiya | Portfolio" : "Fujimiya｜ポートフォリオ" },
+  };
+}
 
 export default async function HomePage() {
   const [dict, locale] = await Promise.all([getDictionary(), getLocale()]);

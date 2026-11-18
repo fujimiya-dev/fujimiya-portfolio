@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { cache } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -24,7 +26,11 @@ const FETCH_RETRY_DELAY_MS = 500;
 // Vercel logs to point at *why*. Retries a few times with a short backoff
 // before giving up; every failed attempt is logged with the slug so a
 // recurrence is diagnosable from the logs alone.
-async function fetchWorkBySlug(slug: string) {
+//
+// Wrapped in React's cache() so generateMetadata and the page component
+// (both calling this with the same slug during one request) share a single
+// fetch instead of querying the DB twice.
+const fetchWorkBySlug = cache(async (slug: string) => {
   let lastError: unknown;
   for (let attempt = 1; attempt <= FETCH_RETRY_ATTEMPTS; attempt++) {
     try {
@@ -42,6 +48,18 @@ async function fetchWorkBySlug(slug: string) {
   // situations: the former is a 404, the latter should surface as an error
   // (caught by error.tsx) so it isn't mistaken for the page being deleted.
   throw lastError;
+});
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const [workRaw, dict, locale] = await Promise.all([fetchWorkBySlug(slug), getDictionary(), getLocale()]);
+  if (!workRaw) return { title: dict.nav.works };
+  const work = resolveWork(workRaw, locale);
+  return { title: `${work.title}${locale === "en" ? " | " : "｜"}${dict.nav.works}` };
 }
 
 // Credits text is free-form, admin-entered multiline text that may contain

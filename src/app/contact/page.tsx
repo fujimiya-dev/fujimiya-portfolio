@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { RevealGlow, RevealFade } from "@/components/RevealSection";
 import SectionHeading from "@/components/SectionHeading";
 import { getDictionary } from "@/i18n/server";
 import ContactForm from "@/components/ContactForm";
 
 export const revalidate = 0;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDictionary();
+  return { title: dict.nav.contact };
+}
 
 export default async function ContactPage() {
   const dict = await getDictionary();
