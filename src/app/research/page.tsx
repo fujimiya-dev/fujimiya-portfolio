@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import ResearchExplorer from "@/components/ResearchExplorer";
@@ -8,6 +9,11 @@ import { withLocale } from "@/i18n/path";
 import { resolveResearchItem } from "@/lib/resolveTranslation";
 
 export const revalidate = 0;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDictionary();
+  return { title: dict.nav.research };
+}
 
 export default async function ResearchPage() {
   const [items, dict, locale] = await Promise.all([

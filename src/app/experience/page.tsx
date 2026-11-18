@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import ExperienceExplorer from "@/components/ExperienceExplorer";
@@ -8,6 +9,11 @@ import { withLocale } from "@/i18n/path";
 import { resolveExperience, resolveWork } from "@/lib/resolveTranslation";
 
 export const revalidate = 0;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const dict = await getDictionary();
+  return { title: dict.nav.experience };
+}
 
 export default async function ExperiencePage() {
   // Work is fetched in full (same query /works/page.tsx already runs) in the

@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 // manage their own full layout/container, so this stays a pure metadata
 // boundary and must not reintroduce any shared UI between them.
 export const metadata: Metadata = {
+  title: "管理画面",
   robots: { index: false, follow: false },
 };
 

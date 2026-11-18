@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { cache } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -10,6 +12,25 @@ import { resolveResearchItem } from "@/lib/resolveTranslation";
 
 export const revalidate = 0;
 
+// Wrapped in React's cache() so generateMetadata and the page component
+// (both calling this with the same slug during one request) share a single
+// fetch instead of querying the DB twice.
+const fetchResearchItemBySlug = cache((slug: string) =>
+  prisma.researchItem.findUnique({ where: { slug }, include: { translations: true } })
+);
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const [itemRaw, dict, locale] = await Promise.all([fetchResearchItemBySlug(slug), getDictionary(), getLocale()]);
+  if (!itemRaw) return { title: dict.nav.research };
+  const item = resolveResearchItem(itemRaw, locale);
+  return { title: `${item.title}${locale === "en" ? " | " : "｜"}${dict.nav.research}` };
+}
+
 export default async function ResearchDetailPage({
   params,
 }: {
@@ -17,7 +38,7 @@ export default async function ResearchDetailPage({
 }) {
   const { slug } = await params;
   const [itemRaw, dict, locale] = await Promise.all([
-    prisma.researchItem.findUnique({ where: { slug }, include: { translations: true } }),
+    fetchResearchItemBySlug(slug),
     getDictionary(),
     getLocale(),
   ]);

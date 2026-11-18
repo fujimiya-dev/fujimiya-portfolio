@@ -83,7 +83,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL("https://portfolio.fujimiya.dev"),
-    title: "Fujimiya",
+    title: {
+      default: "Fujimiya",
+      template: locale === "en" ? "%s | Fujimiya" : "%s｜Fujimiya",
+    },
     description,
     alternates: {
       languages: { ja: "/", en: "/en" },
